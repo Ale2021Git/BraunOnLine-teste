@@ -1,22 +1,23 @@
 // ============================================================
-//  Braun OnLine — Service Worker v3.0
+//  Braun OnLine — Service Worker v3.3
 //  ✅ CORRIGIDO: Suporte OFFLINE completo
 //  ✅ Adicionado: Página fallback offline.html
+//  ✅ Adicionado: Aviso de nova versão para os colaboradores
 //  ✅ Melhorado: Cache de navegação e assets externos
 //  ✅ Mantido: Alarmes, notificações e sync
 // ============================================================
 
-const CACHE_NAME = 'braun-v3.0';
+const CACHE_NAME = 'braun-v3.3';
 
 // Assets locais (sempre em cache - ESSENCIAIS PARA OFFLINE)
 const LOCAL_ASSETS = [
   './',
   './index.html',
-  './offline.html',              // ← NOVO: página fallback offline
+  './offline.html',
   './manifest.json',
   './maskable_icon_x192.png',
   './maskable_icon_x512.png',
-  './qr-code.png'                // ← NOVO: QR code agora cacheado
+  './qr-code.png'
 ];
 
 // Assets externos (tentamos cachear, mas não bloqueiam a instalação)
@@ -70,7 +71,19 @@ self.addEventListener('activate', (event) => {
             return caches.delete(name);
           })
       )
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      // 🔔 NOVO: AVISA PARA TODAS AS ABAS QUE O SW FOI ATUALIZADO
+      return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    }).then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'SW_UPDATED',
+          version: CACHE_NAME,
+          timestamp: Date.now()
+        });
+      });
+      console.log('[SW] Aviso de atualização enviado para', clients.length, 'aba(s)');
+    }).then(() => self.clients.claim())
   );
 });
 

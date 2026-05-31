@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head><script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#00A97A">
@@ -446,7 +454,7 @@
         }
         #copaPanel.open { right: 0; }
         .copa-panel-header {
-            background: linear-gradient(135deg, #005c2b, #003d1c);
+            background: linear-gradient(135deg, #7030A0, #7030A0);
             padding: 48px 16px 14px 16px; flex-shrink: 0; color: white;
         }
         .copa-panel-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -693,7 +701,7 @@
         </div>
         <div>
             <div class="drawer-brand-text">Braun OnLine</div>
-            <div class="drawer-brand-sub">v3.1 · 2026/2027</div>
+            <div class="drawer-brand-sub">v3.3· 2026/2027</div>
         </div>
         <button class="drawer-close-btn" onclick="closeHamburger()" aria-label="Fechar menu">
             <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -1024,6 +1032,15 @@
                 .catch(err => console.log('Erro SW:', err));
         });
     }
+// Listener para receber a mensagem de atualização do sw.js
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SW_UPDATED') {
+      console.log('Nova versão detectada. Atualizando...');
+      window.location.reload();
+    }
+  });
+}
 
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
