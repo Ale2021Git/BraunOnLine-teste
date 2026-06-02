@@ -248,13 +248,14 @@
         .brand-logo-svg { height: 35px; width: auto; }
         .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
         .status-panel {
-            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 10px 15px 20px 15px;
-            border: 1px solid var(--border); text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 0px 15px 0px 15px;
+            border: 1px solid var(--border); text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.05);
             position: sticky; top: 85px; z-index: 95;
         }
         .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
         .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
-        .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; }
+        .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; padding-top: 0px; }
+        #calendario-box > .mes-container:first-child { margin-top: 0px; }
         .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
         .mes-inner.flipped { transform: rotateY(180deg); }
         .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
@@ -724,6 +725,26 @@
             </div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
+
+        <div class="drawer-section-label">Perfil</div>
+        <button class="drawer-item" onclick="openMeuPerfil()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">👤</div>
+            <div>
+                <div class="drawer-item-label">Meu Perfil</div>
+                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Contatos</div>
+        <button class="drawer-item" onclick="closeHamburger(); openRamais();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📞</div>
+            <div>
+                <div class="drawer-item-label">Ramais Úteis</div>
+                <div class="drawer-item-sub">Contatos internos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
         
         <div class="drawer-section-label">Colaborador</div>
         <button class="drawer-item" onclick="openColaboradorDoMes()">
@@ -744,25 +765,7 @@
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
 
-        <div class="drawer-section-label">Perfil</div>
-        <button class="drawer-item" onclick="openMeuPerfil()">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">👤</div>
-            <div>
-                <div class="drawer-item-label">Meu Perfil</div>
-                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano</div>
-            </div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        
         <div class="drawer-section-label">Ferramentas</div>
-        <button class="drawer-item" onclick="closeHamburger(); openRamais();">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📞</div>
-            <div>
-                <div class="drawer-item-label">Ramais Úteis</div>
-                <div class="drawer-item-sub">Contatos internos</div>
-            </div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
         <button class="drawer-item" onclick="closeHamburger(); openConfig();">
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚙️</div>
             <div>
@@ -951,18 +954,10 @@
     <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">ENTENDI</button>
 </div>
 
-<!-- ==================== NOVO MODAL MEU PERFIL ==================== -->
+<!-- ==================== MODAL MEU PERFIL ==================== -->
 <div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
     <div style="display:flex;flex-direction:column;gap:15px;">
-        <!-- ANO -->
-        <div>
-            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
-            <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-            </select>
-        </div>
         <!-- NOME COMPLETO -->
         <div>
             <label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label>
@@ -983,11 +978,19 @@
                 <option value="D">Turma D</option>
             </select>
         </div>
+        <!-- ANO -->
+        <div>
+            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
+            <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
     </div>
     <button onclick="salvarDadosPerfil(); closeAllModals();" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">SALVAR E FECHAR</button>
 </div>
 
-<!-- ==================== NOVO MODAL COLABORADOR DO MÊS ==================== -->
+<!-- ==================== MODAL COLABORADOR DO MÊS ==================== -->
 <div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
     <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
@@ -1005,21 +1008,41 @@
     <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
 </div>
 
-<!-- ==================== NOVO MODAL MEUS PEDIDOS ==================== -->
+<!-- ==================== MODAL MEUS PEDIDOS ==================== -->
 <div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
+    
+    <!-- Dados do perfil já preenchidos -->
     <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-        <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;flex-direction:column;gap:5px;">
             <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
             <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="pedidoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Turma:</span> <span id="pedidoTurma" style="font-weight:800;">---</span></div>
             <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="pedidoAno" style="font-weight:800;">---</span></div>
         </div>
     </div>
-    <p style="font-size:0.9em;opacity:0.7;margin-bottom:15px;">Seus dados já estão pré-preenchidos. Clique abaixo para solicitar.</p>
-    <button onclick="abrirFormularioPedidos()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);">
-        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">assignment</span>
-        SOLICITAR UNIFORME
+
+    <!-- Campos para preenchimento -->
+    <div style="margin-bottom:15px;">
+        <label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label>
+        <input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoTamanho" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Tamanho</label>
+        <input type="text" id="pedidoTamanho" placeholder="Ex: M, G, GG..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Observações</label>
+        <textarea id="pedidoObs" placeholder="Digite qualquer observação..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <button onclick="enviarPedidoEmail()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span>
+        ENVIAR POR E-MAIL
     </button>
+
     <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
 </div>
 
@@ -1220,45 +1243,216 @@
     let currentAno = getStorageValue('braun_ano') || '2026';
     let currentTurma = getStorageValue(`braun_turma_${currentRegion}`) || 'AC';
 
+    // ==================== FUNÇÃO DE SAUDAÇÃO PERSONALIZADA ====================
     function goToGreeting() {
-        const welcome  = document.getElementById('welcomeScreen');
+        const welcome = document.getElementById('welcomeScreen');
         const greeting = document.getElementById('greetingScreen');
         const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
-        const now  = new Date();
+        const now = new Date();
         const hour = now.getHours();
 
-        let saudacao = 'Bom dia!';
-        if (hour >= 12 && hour < 18) saudacao = 'Boa tarde!';
-        else if (hour >= 18 || hour < 5) saudacao = 'Boa noite!';
+        // Pega o nome do perfil e detecta gênero
+        const nomeCompleto = getStorageValue('braun_nome_completo') || '';
+        const nome = nomeCompleto.split(' ')[0]; // Primeiro nome
+        const genero = detectarGenero(nome); // 'masculino', 'feminino' ou 'neutro'
 
-        const statusEl = document.getElementById('greet-status');
-        const iconEl   = document.getElementById('greet-icon');
+        // Verifica se hoje é feriado
+        const ano = now.getFullYear();
+        const mes = String(now.getMonth() + 1).padStart(2, '0');
+        const dia = String(now.getDate()).padStart(2, '0');
+        const isoS = `${mes}-${dia}`;
+        const feriados = getFeriados(ano);
+        const isFeriado = feriados[isoS] !== undefined;
+
+        // Saudação base
+        let saudacao = 'Bom dia';
+        if (hour >= 12 && hour < 18) saudacao = 'Boa tarde';
+        else if (hour >= 18 || hour < 5) saudacao = 'Boa noite';
+
+        // Monta a saudação inicial
+        let saudacaoCompleta = nome ? `${saudacao}, ${nome}!` : `${saudacao}!`;
+
+        // Listas de mensagens avançadas
+        const mensagens = {
+            trabalho: {
+                feriado: {
+                    masculino: [
+                        'Bora trabalhar, guerreiro! É feriado, mas temos missão! 💪',
+                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
+                        'Mesmo no feriado, você não para! Que garra! ⚡',
+                        'Bora vencer, guerreiro! O trabalho não espera! 🚀',
+                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
+                    ],
+                    feminino: [
+                        'Bora trabalhar, guerreira! É feriado, mas temos missão! 💪',
+                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
+                        'Mesmo no feriado, você não para! Que garra! ⚡',
+                        'Bora vencer, guerreira! O trabalho não espera! 🚀',
+                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
+                    ],
+                    neutro: [
+                        'Bora trabalhar! É feriado, mas temos missão! 💪',
+                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
+                        'Mesmo no feriado, você não para! Que garra! ⚡',
+                        'Bora vencer! O trabalho não espera! 🚀',
+                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
+                    ]
+                },
+                normal: {
+                    masculino: [
+                        'Bora trabalhar, guerreiro! Vamos vencer hoje! 💪',
+                        'Mais um dia de luta, você consegue! 🔥',
+                        'Que a força esteja com você! Vamos nessa! ⚡',
+                        'Foco e determinação, guerreiro! 🚀',
+                        'O sucesso começa com a sua atitude! 🌟'
+                    ],
+                    feminino: [
+                        'Bora trabalhar, guerreira! Vamos vencer hoje! 💪',
+                        'Mais um dia de luta, você consegue! 🔥',
+                        'Que a força esteja com você! Vamos nessa! ⚡',
+                        'Foco e determinação, guerreira! 🚀',
+                        'O sucesso começa com a sua atitude! 🌟'
+                    ],
+                    neutro: [
+                        'Bora trabalhar! Vamos vencer hoje! 💪',
+                        'Mais um dia de luta, você consegue! 🔥',
+                        'Que a força esteja com você! Vamos nessa! ⚡',
+                        'Foco e determinação! 🚀',
+                        'O sucesso começa com a sua atitude! 🌟'
+                    ]
+                }
+            },
+            folga: {
+                feriado: {
+                    masculino: [
+                        'Excelente dia de feriado, guerreiro! Aproveite! 🎉',
+                        'Feriado é sagrado! Curta cada momento! 🌴',
+                        'O melhor do feriado é você descansar! Aproveite! ✨',
+                        'Feriado merecido! Seja feliz e descanse! 😊',
+                        'Hoje é seu dia! Aproveite o feriado! 🌟'
+                    ],
+                    feminino: [
+                        'Excelente dia de feriado, guerreira! Aproveite! 🎉',
+                        'Feriado é sagrado! Curta cada momento! 🌴',
+                        'O melhor do feriado é você descansar! Aproveite! ✨',
+                        'Feriado merecido! Seja feliz e descanse! 😊',
+                        'Hoje é seu dia! Aproveite o feriado! 🌟'
+                    ],
+                    neutro: [
+                        'Excelente dia de feriado! Aproveite! 🎉',
+                        'Feriado é sagrado! Curta cada momento! 🌴',
+                        'O melhor do feriado é você descansar! Aproveite! ✨',
+                        'Feriado merecido! Seja feliz e descanse! 😊',
+                        'Hoje é seu dia! Aproveite o feriado! 🌟'
+                    ]
+                },
+                normal: {
+                    masculino: [
+                        'Descanse, guerreiro! Você merece! 😌',
+                        'A vida é boa quando a gente descansa! 😊',
+                        'Hoje é seu dia, faça o que quiser! ✨',
+                        'Curta sua folga, você trabalhou duro! 🌴',
+                        'Renove as energias, você merece descanso! 🔋'
+                    ],
+                    feminino: [
+                        'Descanse, guerreira! Você merece! 😌',
+                        'A vida é boa quando a gente descansa! 😊',
+                        'Hoje é seu dia, faça o que quiser! ✨',
+                        'Curta sua folga, você trabalhou duro! 🌴',
+                        'Renove as energias, você merece descanso! 🔋'
+                    ],
+                    neutro: [
+                        'Descanse! Você merece! 😌',
+                        'A vida é boa quando a gente descansa! 😊',
+                        'Hoje é seu dia, faça o que quiser! ✨',
+                        'Curta sua folga, você trabalhou duro! 🌴',
+                        'Renove as energias, você merece descanso! 🔋'
+                    ]
+                }
+            },
+            ferias: {
+                mensagens: {
+                    masculino: [
+                        'Aproveite suas férias, guerreiro! O mundo espera por você! ✈️',
+                        'Descanse, viaje e seja feliz! 🌴',
+                        'Férias merecidas, curta muito! 🎉',
+                        'Desconecte-se e renove as energias! 🔋',
+                        'Você trabalhou duro, agora é hora de curtir! 🌍'
+                    ],
+                    feminino: [
+                        'Aproveite suas férias, guerreira! O mundo espera por você! ✈️',
+                        'Descanse, viaje e seja feliz! 🌴',
+                        'Férias merecidas, curta muito! 🎉',
+                        'Desconecte-se e renove as energias! 🔋',
+                        'Você trabalhou duro, agora é hora de curtir! 🌍'
+                    ],
+                    neutro: [
+                        'Aproveite suas férias! O mundo espera por você! ✈️',
+                        'Descanse, viaje e seja feliz! 🌴',
+                        'Férias merecidas, curta muito! 🎉',
+                        'Desconecte-se e renove as energias! 🔋',
+                        'Você trabalhou duro, agora é hora de curtir! 🌍'
+                    ]
+                }
+            },
+            minimal: {
+                mensagens: [
+                    'Você já está no app, isso é o que importa! 😊',
+                    'Sorria, você está aqui! 🌟',
+                    'Que bom te ver por aqui! 👋',
+                    'O app está feliz com a sua presença! 🎉',
+                    'Você é bem-vindo sempre! ❤️'
+                ]
+            }
+        };
+
+        // Função para escolher mensagem aleatória
+        function escolherMensagem(lista, genero) {
+            const listaGenero = lista[genero] || lista['neutro'];
+            const index = Math.floor(Math.random() * listaGenero.length);
+            return listaGenero[index];
+        }
+
+        // Escolhe a mensagem baseada na situação
+        let mensagemStatus = '';
+        let icon = '';
         greeting.classList.remove('work', 'off', 'holiday');
 
         if (isFerias(now)) {
             greeting.classList.add('holiday');
-            document.getElementById('greet-main').innerText = 'Boas férias!';
-            statusEl.innerHTML = 'APROVEITE SEU<br>DESCANSO';
-            iconEl.innerText   = 'flight';
+            mensagemStatus = escolherMensagem(mensagens.ferias.mensagens, genero);
+            icon = 'flight';
         } else if (minimalMode) {
-            document.getElementById('greet-main').innerText = saudacao;
             greeting.classList.add('off');
-            statusEl.innerHTML = 'BEM-VINDO<br>DE VOLTA';
-            iconEl.innerText   = 'mood';
+            mensagemStatus = mensagens.minimal.mensagens[Math.floor(Math.random() * mensagens.minimal.mensagens.length)];
+            icon = 'mood';
         } else {
-            document.getElementById('greet-main').innerText = saudacao;
             const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
             if (isTrab) {
                 greeting.classList.add('work');
-                statusEl.innerHTML = 'HOJE VOCÊ<br>TRABALHA';
-                iconEl.innerText   = (currentRegion === 'BR') ? 'factory' : 'engineering';
+                if (isFeriado) {
+                    mensagemStatus = escolherMensagem(mensagens.trabalho.feriado, genero);
+                } else {
+                    mensagemStatus = escolherMensagem(mensagens.trabalho.normal, genero);
+                }
+                icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
             } else {
                 greeting.classList.add('off');
-                statusEl.innerHTML = (currentRegion === 'BR') ? 'HOJE É<br>SUA FOLGA' : 'FOLGA<br>MERECIDA';
-                iconEl.innerText   = (currentRegion === 'BR') ? 'home' : 'chair';
+                if (isFeriado) {
+                    mensagemStatus = escolherMensagem(mensagens.folga.feriado, genero);
+                } else {
+                    mensagemStatus = escolherMensagem(mensagens.folga.normal, genero);
+                }
+                icon = (currentRegion === 'BR') ? 'home' : 'chair';
             }
         }
 
+        // Atualiza a interface
+        document.getElementById('greet-main').innerText = saudacaoCompleta;
+        document.getElementById('greet-status').innerHTML = mensagemStatus;
+        document.getElementById('greet-icon').innerText = icon;
+
+        // Transição
         welcome.classList.add('hide');
         setTimeout(() => {
             welcome.style.display = 'none';
@@ -1274,6 +1468,34 @@
         }, 500);
     }
 
+    // ==================== FUNÇÃO PARA DETECTAR GÊNERO ====================
+    function detectarGenero(nome) {
+        if (!nome) return 'neutro';
+
+        const terminaisFemininos = ['a', 'ia', 'na', 'ra', 'la', 'sa', 'ta'];
+        const terminaisMasculinos = ['o', 'io', 'no', 'ro', 'lo', 'so', 'to'];
+
+        const ultimaLetra = nome.toLowerCase().slice(-1);
+        const duasUltimas = nome.toLowerCase().slice(-2);
+
+        const femininosEspeciais = ['Daniele', 'Gabriele', 'Rafaele', 'Simone', 'Michele', 'Dany'];
+        const masculinosEspeciais = ['Lucas', 'André', 'Andrey', 'Matheus', 'Pedro', 'Junior'];
+
+        if (femininosEspeciais.some(n => nome.toLowerCase() === n.toLowerCase())) return 'feminino';
+        if (masculinosEspeciais.some(n => nome.toLowerCase() === n.toLowerCase())) return 'masculino';
+
+        if (terminaisFemininos.includes(ultimaLetra)) return 'feminino';
+        if (terminaisMasculinos.includes(ultimaLetra)) return 'masculino';
+        if (ultimaLetra === 'e') {
+            if (duasUltimas === 'le' || duasUltimas === 'ne') return 'feminino';
+            if (duasUltimas === 're' || duasUltimas === 'se') return 'masculino';
+        }
+
+        return 'neutro';
+    }
+
+    // ==================== DEMAIS FUNÇÕES DO APP ====================
+    
     function setRegion(r) {
         currentRegion = r;
         setStorageValue('braun_last_region', r);
@@ -1347,14 +1569,22 @@
             const container = document.createElement('div');
             container.className = 'mes-container';
 
+            // 🔹 ANO NA EXTREMIDADE DIREITA 🔹
             let hF = `<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')">
-                        <div style="color:var(--primary);font-weight:800;text-transform:capitalize;margin:5px 0 0 10px;font-size:1.1em;">${nomeM}</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="color:var(--primary);font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
                         <div class="grid">
                           <div class="dia-label">W</div>
                           ${lang.days.map(s => `<div class="dia-label">${s}</div>`).join('')}`;
 
             let hB = `<div class="mes-face mes-back" onclick="this.parentElement.classList.toggle('flipped')">
-                        <div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;text-transform:capitalize;">${nomeM}</div>`;
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>`;
 
             let hasEv = false;
             const diasNoMes = new Date(ano, m + 1, 0).getDate();
@@ -1929,25 +2159,25 @@
         const matricula = getStorageValue('braun_matricula') || '';
         const turma = getStorageValue('braun_turma_perfil') || 'A';
         
-        document.getElementById('anoPerfil').value = ano;
         document.getElementById('nomePerfil').value = nome;
         document.getElementById('matriculaPerfil').value = matricula;
         document.getElementById('turmaPerfil').value = turma;
+        document.getElementById('anoPerfil').value = ano;
         
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meuPerfilCard').classList.add('show');
     }
 
     function salvarDadosPerfil() {
-        const ano = document.getElementById('anoPerfil').value;
         const nome = document.getElementById('nomePerfil').value.trim();
         const matricula = document.getElementById('matriculaPerfil').value.trim();
         const turma = document.getElementById('turmaPerfil').value;
+        const ano = document.getElementById('anoPerfil').value;
         
-        setStorageValue('braun_ano_perfil', ano);
         setStorageValue('braun_nome_completo', nome);
         setStorageValue('braun_matricula', matricula);
         setStorageValue('braun_turma_perfil', turma);
+        setStorageValue('braun_ano_perfil', ano);
         
         // Atualizar também o ano da escala (já existe)
         if (ano !== currentAno) {
@@ -1987,6 +2217,7 @@
         const dados = getDadosPerfil();
         document.getElementById('pedidoNome').textContent = dados.nome;
         document.getElementById('pedidoMatricula').textContent = dados.matricula;
+        document.getElementById('pedidoTurma').textContent = dados.turma;
         document.getElementById('pedidoAno').textContent = dados.ano;
     }
 
@@ -2007,16 +2238,38 @@
     function abrirFormularioVotacao() {
         const dados = getDadosPerfil();
         // URL do formulário de votação com parâmetros pré-preenchidos
-        const url = `https://forms.gle/KfS9XFv9UseZYqnS7?entry.1234567890=${encodeURIComponent(dados.nome)}&entry.0987654321=${encodeURIComponent(dados.matricula)}`;
+        const url = `https://docs.google.com/forms/d/e/1FAIpQLSdwSSfo4S1yP0yF1raqpWigpLKJV__DPBlb_9QGBrWoqmezxA/viewform?usp=dialog`;
         window.open(url, '_blank');
         closeAllModals();
     }
 
-    function abrirFormularioPedidos() {
+    function enviarPedidoEmail() {
         const dados = getDadosPerfil();
-        // URL do formulário de pedidos com parâmetros pré-preenchidos
-        const url = `https://forms.gle/SEU_FORMULARIO_AQUI?entry.1234567890=${encodeURIComponent(dados.nome)}&entry.0987654321=${encodeURIComponent(dados.matricula)}`;
-        window.open(url, '_blank');
+        const item = document.getElementById('pedidoItem').value.trim();
+        const tamanho = document.getElementById('pedidoTamanho').value.trim();
+        const obs = document.getElementById('pedidoObs').value.trim();
+
+        // Validação
+        if (!dados.nome || dados.nome === 'Colaborador') {
+            alert('Por favor, preencha seu nome no Meu Perfil primeiro.');
+            closeAllModals();
+            openMeuPerfil();
+            return;
+        }
+
+        if (!item) {
+            alert('Por favor, digite o item desejado.');
+            return;
+        }
+
+        // Monta a mensagem
+        const mensagem = `📦 NOVO PEDIDO\n\n👤 Nome: ${dados.nome}\n🔢 Matrícula: ${dados.matricula}\n📚 Turma: ${dados.turma}\n📅 Ano: ${dados.ano}\n\n📦 Item: ${item}\n📏 Tamanho: ${tamanho || 'Não informado'}\n📝 Observações: ${obs || 'Nenhuma'}`;
+
+        // Envia por e-mail
+        const emailDestino = 'pedidos@braun.com.br'; // Substitua pelo e-mail correto
+        const urlEmail = `mailto:${emailDestino}?subject=${encodeURIComponent('Novo Pedido - ' + dados.nome)}&body=${encodeURIComponent(mensagem)}`;
+        
+        window.open(urlEmail, '_blank');
         closeAllModals();
     }
 
@@ -2034,25 +2287,19 @@
             if (!h) return;
             const mes = h.closest('.mes-container');
             if (!mes) return;
-            const y = mes.getBoundingClientRect().top + window.pageYOffset - 120;
+            
+            // Calcula a posição do topo do mês, considerando o cabeçalho fixo
+            const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+            const statusHeight = document.querySelector('.status-panel')?.offsetHeight || 80;
+            const y = mes.getBoundingClientRect().top + window.pageYOffset - (headerHeight + statusHeight + 20);
             
             try {
-                window.scrollTo({ top: y, behavior: 'smooth' });
+                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
             } catch (e) {
-                window.scrollTo(0, y);
+                window.scrollTo(0, Math.max(0, y));
             }
-        }, 400);
+        }, 500);
     }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeAllModals();
-            closeCopaPanel();
-            if (document.getElementById('hamburgerDrawer').classList.contains('open')) {
-                closeHamburger();
-            }
-        }
-    });
 
     window.onload = () => {
         if (getStorageValue('braun_dark') === 'true') document.body.classList.add('dark-mode');
