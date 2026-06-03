@@ -1,5 +1,5 @@
- ============================================================
-//  Braun OnLine — Service Worker v3.4
+// ============================================================
+//  Braun OnLine — Service Worker v3.1
 //  ✅ CORRIGIDO: Suporte OFFLINE completo
 //  ✅ Adicionado: Página fallback offline.html
 //  ✅ Adicionado: Aviso de nova versão para os colaboradores
@@ -7,7 +7,7 @@
 //  ✅ Mantido: Alarmes, notificações e sync
 // ============================================================
 
-const CACHE_NAME = 'braun-v3.4';
+const CACHE_NAME = 'braun-v3.1';
 
 // Assets locais (sempre em cache - ESSENCIAIS PARA OFFLINE)
 const LOCAL_ASSETS = [
