@@ -1,9 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <script>
   // ========== CORREÇÃO CRÍTICA PARA IPHONE ==========
-  // Desativa Service Worker no iOS para evitar travamento
   if ('serviceWorker' in navigator) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (!isIOS) {
@@ -248,14 +248,28 @@
         .brand-logo-svg { height: 35px; width: auto; }
         .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
         .status-panel {
-            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 0px 15px 0px 15px;
+            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 0px 15px 0px 15px; /* CORRIGIDO: margem inferior 0 */
             border: 1px solid var(--border); text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.05);
             position: sticky; top: 85px; z-index: 95;
         }
         .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
         .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
-        .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; padding-top: 0px; }
+        
+        /* ========== CORREÇÃO DE ESPAÇAMENTO ========== */
+        #calendario-box {
+            margin-top: 0px;
+            padding-top: 0px;
+        }
+        .mes-container { 
+            perspective: 1000px; 
+            margin: 0 10px 25px 10px; /* A margem superior agora é 0 */
+            min-height: 400px; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 0px; 
+        }
         #calendario-box > .mes-container:first-child { margin-top: 0px; }
+        
         .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
         .mes-inner.flipped { transform: rotateY(180deg); }
         .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
@@ -272,7 +286,7 @@
         .dia { 
             aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
             border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent; 
-            transition: 0.2s; position: relative; cursor: pointer;
+            transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
         }
         .AMARELO  { background: var(--amarelo) !important; color: #1a1a1a !important; }
         .VERDE    { background: var(--verde)   !important; color: #fff     !important; }
@@ -731,7 +745,7 @@
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">👤</div>
             <div>
                 <div class="drawer-item-label">Meu Perfil</div>
-                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano</div>
+                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div>
             </div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
@@ -770,7 +784,7 @@
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚙️</div>
             <div>
                 <div class="drawer-item-label">Configurações</div>
-                <div class="drawer-item-sub">Férias · Tema · Estatísticas</div>
+                <div class="drawer-item-sub">Férias · Tema · Estatísticas · Splash</div>
             </div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
@@ -873,6 +887,13 @@
             <span class="slider" aria-hidden="true"></span>
         </label>
     </div>
+    <div class="config-item">
+        <span class="config-label">Exibir Splash de Saudação?<br><small style="font-weight:400;opacity:0.7;">Mostra "Bom dia..." ao entrar.</small></span>
+        <label class="switch">
+            <input type="checkbox" id="splashGreetingToggle" onchange="toggleSplashGreeting()" aria-label="Ativar/Desativar Splash de Saudação">
+            <span class="slider" aria-hidden="true"></span>
+        </label>
+    </div>
     <button onclick="openFerias()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
         <span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS
     </button>
@@ -972,10 +993,14 @@
         <div>
             <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
             <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
-                <option value="A">Turma A</option>
-                <option value="B">Turma B</option>
-                <option value="C">Turma C</option>
-                <option value="D">Turma D</option>
+                <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                <option value="C">Turma C (Noite - ECOFLAC)</option>
+                <option value="D">Turma D (Noite - ECOFLAC)</option>
+                <option value="E">Turma E (Manhã - Manutenção)</option>
+                <option value="F">Turma F (Manhã - Manutenção)</option>
+                <option value="G">Turma G (Noite - Manutenção)</option>
+                <option value="H">Turma H (Noite - Manutenção)</option>
             </select>
         </div>
         <!-- ANO -->
@@ -985,6 +1010,11 @@
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
             </select>
+        </div>
+        <!-- SETOR (TEXTO LIVRE) -->
+        <div>
+            <label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label>
+            <input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
         </div>
     </div>
     <button onclick="salvarDadosPerfil(); closeAllModals();" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">SALVAR E FECHAR</button>
@@ -1224,6 +1254,7 @@
         }
     }
 
+    // ==================== INICIALIZAÇÃO CORRETA DA TURMA ====================
     let currentRegion = getStorageValue('braun_last_region') || 'BR';
     let dataAtiva = '';
     const _escalaCache = new Map();
@@ -1243,11 +1274,58 @@
     let currentAno = getStorageValue('braun_ano') || '2026';
     let currentTurma = getStorageValue(`braun_turma_${currentRegion}`) || 'AC';
 
+    // ============ INICIALIZAÇÃO CORRETA DA TURMA ============
+    (function init() {
+        const savedTurma = getStorageValue('braun_turma_perfil');
+        if (savedTurma) {
+            // Mapeia a turma individual para grupo e região
+            let region, grupo;
+            if (['A','B','C','D'].includes(savedTurma)) {
+                region = 'BR';
+                grupo = (savedTurma === 'A' || savedTurma === 'C') ? 'AC' : 'BD';
+            } else {
+                region = 'MNT';
+                grupo = (savedTurma === 'E' || savedTurma === 'G') ? 'EG' : 'FH';
+            }
+            currentRegion = region;
+            currentTurma = grupo;
+            setStorageValue('braun_last_region', region);
+            setStorageValue(`braun_turma_${region}`, grupo);
+        } else {
+            // Fallback: se não tiver perfil, usa padrão
+            const savedRegion = getStorageValue('braun_last_region') || 'BR';
+            currentRegion = savedRegion;
+            currentTurma = getStorageValue(`braun_turma_${savedRegion}`) || (savedRegion === 'BR' ? 'AC' : 'EG');
+        }
+        
+        // Atualizar aba ativa
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${currentRegion}`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.setAttribute('aria-selected', 'true');
+        }
+    })();
+
     // ==================== FUNÇÃO DE SAUDAÇÃO PERSONALIZADA ====================
     function goToGreeting() {
         const welcome = document.getElementById('welcomeScreen');
         const greeting = document.getElementById('greetingScreen');
         const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
+        const noSplashGreeting = getStorageValue('braun_no_splash_greeting') === 'true';
+        
+        // Se a splash de saudação estiver desativada, pula para o calendário
+        if (noSplashGreeting) {
+            welcome.classList.add('hide');
+            setTimeout(() => {
+                welcome.style.display = 'none';
+                greeting.style.display = 'none';
+                setStorageValue('braun_visited', 'true');
+                scrollToToday();
+            }, 200);
+            return;
+        }
+
         const now = new Date();
         const hour = now.getHours();
 
@@ -1327,21 +1405,21 @@
                     masculino: [
                         'Excelente dia de feriado, guerreiro! Aproveite! 🎉',
                         'Feriado é sagrado! Curta cada momento! 🌴',
-                        'O melhor do feriado é você descansar! Aproveite! ✨',
+                        'O melhor do feriado é você descansar! Aproveite! 🏀',
                         'Feriado merecido! Seja feliz e descanse! 😊',
                         'Hoje é seu dia! Aproveite o feriado! 🌟'
                     ],
                     feminino: [
                         'Excelente dia de feriado, guerreira! Aproveite! 🎉',
                         'Feriado é sagrado! Curta cada momento! 🌴',
-                        'O melhor do feriado é você descansar! Aproveite! ✨',
+                        'O melhor do feriado é você descansar! Aproveite! ⚾️' ,
                         'Feriado merecido! Seja feliz e descanse! 😊',
                         'Hoje é seu dia! Aproveite o feriado! 🌟'
                     ],
                     neutro: [
                         'Excelente dia de feriado! Aproveite! 🎉',
                         'Feriado é sagrado! Curta cada momento! 🌴',
-                        'O melhor do feriado é você descansar! Aproveite! ✨',
+                        'O melhor do feriado é você descansar! Aproveite! ⚽️',
                         'Feriado merecido! Seja feliz e descanse! 😊',
                         'Hoje é seu dia! Aproveite o feriado! 🌟'
                     ]
@@ -1350,21 +1428,21 @@
                     masculino: [
                         'Descanse, guerreiro! Você merece! 😌',
                         'A vida é boa quando a gente descansa! 😊',
-                        'Hoje é seu dia, faça o que quiser! ✨',
+                        'Hoje é seu dia, faça o que quiser! ⚽️',
                         'Curta sua folga, você trabalhou duro! 🌴',
                         'Renove as energias, você merece descanso! 🔋'
                     ],
                     feminino: [
                         'Descanse, guerreira! Você merece! 😌',
                         'A vida é boa quando a gente descansa! 😊',
-                        'Hoje é seu dia, faça o que quiser! ✨',
+                        'Hoje é seu dia, faça o que quiser! ,⚽️',
                         'Curta sua folga, você trabalhou duro! 🌴',
                         'Renove as energias, você merece descanso! 🔋'
                     ],
                     neutro: [
                         'Descanse! Você merece! 😌',
-                        'A vida é boa quando a gente descansa! 😊',
-                        'Hoje é seu dia, faça o que quiser! ✨',
+                        'A vida é boa quando a gente descanso! 😊',
+                        'Hoje é seu dia, faça o que quiser! ⚽️',
                         'Curta sua folga, você trabalhou duro! 🌴',
                         'Renove as energias, você merece descanso! 🔋'
                     ]
@@ -1425,7 +1503,7 @@
         } else if (minimalMode) {
             greeting.classList.add('off');
             mensagemStatus = mensagens.minimal.mensagens[Math.floor(Math.random() * mensagens.minimal.mensagens.length)];
-            icon = 'mood';
+            icon = 'Sorria';
         } else {
             const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
             if (isTrab) {
@@ -1435,7 +1513,7 @@
                 } else {
                     mensagemStatus = escolherMensagem(mensagens.trabalho.normal, genero);
                 }
-                icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
+                icon = (currentRegion === 'BR') ? 'Trabalho': 'No Trampo';
             } else {
                 greeting.classList.add('off');
                 if (isFeriado) {
@@ -1443,7 +1521,7 @@
                 } else {
                     mensagemStatus = escolherMensagem(mensagens.folga.normal, genero);
                 }
-                icon = (currentRegion === 'BR') ? 'home' : 'chair';
+                icon = (currentRegion === 'BR') ? 'Folga' : '';
             }
         }
 
@@ -1563,6 +1641,9 @@
         const lang = translations[currentRegion];
         const hojeStr = new Date().toDateString();
 
+        // Identifica a turma individual para exibir turno
+        const turmaIndividual = getStorageValue('braun_turma_perfil') || 'A';
+
         for (let m = 0; m < 12; m++) {
             const dtM   = new Date(ano, m, 1);
             const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
@@ -1620,6 +1701,14 @@
                     cls += (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
                 }
 
+                // Adiciona indicador de turno (M/N) baseado na turma individual
+                let turnoLabel = '';
+                if (currentRegion === 'BR') {
+                    turnoLabel = (turmaIndividual === 'C' || turmaIndividual === 'D') ? ' (N)' : ' (M)';
+                } else {
+                    turnoLabel = (turmaIndividual === 'G' || turmaIndividual === 'H') ? ' (N)' : ' (M)';
+                }
+
                 const isBrazilGame = (ano === 2026 && BRAZIL_GAMES_2026.includes(isoF));
                 if (isBrazilGame) {
                     const trabGameStatus = (currentRegion === 'BR') ? checkBR(at, t).trab : checkMnt(at, t).trab;
@@ -1642,7 +1731,7 @@
                     hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`;
                 }
 
-                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')"${titleAttr}>${d}</div>`;
+                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')"${titleAttr}>${d}<span style="font-size:0.5em;opacity:0.5;display:block;">${turnoLabel}</span></div>`;
                 colAtual++;
             }
 
@@ -2049,7 +2138,11 @@
         renderCopaGroup(copaGrupoAtivo);
     }
 
-    function openRamais()  { document.getElementById('overlay').style.display = 'block'; document.getElementById('ramaisCard').classList.add('show'); }
+    function openRamais() {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('ramaisCard').classList.add('show');
+    }
+
     function openPrivacy() { document.getElementById('overlay').style.display = 'block'; document.getElementById('privacyCard').classList.add('show'); }
 
     function openFerias() {
@@ -2080,12 +2173,17 @@
 
     function openConfig() {
         document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
+        document.getElementById('splashGreetingToggle').checked = (getStorageValue('braun_no_splash_greeting') === 'true');
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('configCard').classList.add('show');
     }
 
     function toggleMinimalGreeting() {
         setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked);
+    }
+
+    function toggleSplashGreeting() {
+        setStorageValue('braun_no_splash_greeting', document.getElementById('splashGreetingToggle').checked);
     }
 
     function openStats() {
@@ -2154,15 +2252,22 @@
     function openMeuPerfil() {
         closeHamburger();
         // Carregar dados salvos
-        const ano = getStorageValue('braun_ano_perfil') || '2026';
         const nome = getStorageValue('braun_nome_completo') || '';
         const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || 'A';
+        const turma = getStorageValue('braun_turma_perfil') || '';
+        const ano = getStorageValue('braun_ano_perfil') || '';
+        const setor = getStorageValue('braun_setor') || '';
         
         document.getElementById('nomePerfil').value = nome;
         document.getElementById('matriculaPerfil').value = matricula;
-        document.getElementById('turmaPerfil').value = turma;
-        document.getElementById('anoPerfil').value = ano;
+        if (turma) {
+            const select = document.getElementById('turmaPerfil');
+            select.value = turma;
+        }
+        if (ano) {
+            document.getElementById('anoPerfil').value = ano;
+        }
+        document.getElementById('setorPerfil').value = setor;
         
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meuPerfilCard').classList.add('show');
@@ -2173,148 +2278,139 @@
         const matricula = document.getElementById('matriculaPerfil').value.trim();
         const turma = document.getElementById('turmaPerfil').value;
         const ano = document.getElementById('anoPerfil').value;
+        const setor = document.getElementById('setorPerfil').value.trim();
+
+        if (nome) setStorageValue('braun_nome_completo', nome);
+        if (matricula) setStorageValue('braun_matricula', matricula);
+        if (turma) setStorageValue('braun_turma_perfil', turma);
+        if (ano) setStorageValue('braun_ano_perfil', ano);
+        if (setor) setStorageValue('braun_setor', setor);
         
-        setStorageValue('braun_nome_completo', nome);
-        setStorageValue('braun_matricula', matricula);
-        setStorageValue('braun_turma_perfil', turma);
-        setStorageValue('braun_ano_perfil', ano);
-        
-        // Atualizar também o ano da escala (já existe)
-        if (ano !== currentAno) {
-            currentAno = ano;
-            setStorageValue('braun_ano', currentAno);
-            _escalaCache.clear();
-            gerarCalendario();
-            tick();
+        // Atualizar a turma atual
+        if (turma) {
+            let region, grupo;
+            if (['A','B','C','D'].includes(turma)) {
+                region = 'BR';
+                grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+            } else {
+                region = 'MNT';
+                grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
+            }
+            currentRegion = region;
+            currentTurma = grupo;
+            setStorageValue('braun_last_region', region);
+            setStorageValue(`braun_turma_${region}`, grupo);
         }
+        if (ano) setStorageValue('braun_ano', ano);
         
-        // Feedback visual
-        const btn = document.querySelector('#meuPerfilCard button[onclick*="salvarDadosPerfil"]');
-        if (btn) {
-            const originalText = btn.textContent;
-            btn.textContent = '✓ SALVO!';
-            setTimeout(() => { btn.textContent = originalText; }, 1500);
-        }
-    }
-
-    function getDadosPerfil() {
-        return {
-            ano: getStorageValue('braun_ano_perfil') || '2026',
-            nome: getStorageValue('braun_nome_completo') || 'Colaborador',
-            matricula: getStorageValue('braun_matricula') || '000000',
-            turma: getStorageValue('braun_turma_perfil') || 'A'
-        };
-    }
-
-    function preencherDadosVotacao() {
-        const dados = getDadosPerfil();
-        document.getElementById('votacaoNome').textContent = dados.nome;
-        document.getElementById('votacaoMatricula').textContent = dados.matricula;
-        document.getElementById('votacaoAno').textContent = dados.ano;
-    }
-
-    function preencherDadosPedidos() {
-        const dados = getDadosPerfil();
-        document.getElementById('pedidoNome').textContent = dados.nome;
-        document.getElementById('pedidoMatricula').textContent = dados.matricula;
-        document.getElementById('pedidoTurma').textContent = dados.turma;
-        document.getElementById('pedidoAno').textContent = dados.ano;
+        gerarCalendario();
+        tick();
+        closeAllModals();
     }
 
     function openColaboradorDoMes() {
         closeHamburger();
-        preencherDadosVotacao();
+        const nome = getStorageValue('braun_nome_completo') || '';
+        const matricula = getStorageValue('braun_matricula') || '';
+        const ano = getStorageValue('braun_ano_perfil') || '';
+        
+        document.getElementById('votacaoNome').innerText = nome || 'Não preenchido';
+        document.getElementById('votacaoMatricula').innerText = matricula || 'Não preenchido';
+        document.getElementById('votacaoAno').innerText = ano || 'Não preenchido';
+        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('colaboradorDoMesCard').classList.add('show');
     }
 
+    function abrirFormularioVotacao() {
+        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
+        closeAllModals();
+    }
+
     function openMeusPedidos() {
         closeHamburger();
-        preencherDadosPedidos();
+        const nome = getStorageValue('braun_nome_completo') || '';
+        const matricula = getStorageValue('braun_matricula') || '';
+        const turma = getStorageValue('braun_turma_perfil') || '';
+        const ano = getStorageValue('braun_ano_perfil') || '';
+        
+        document.getElementById('pedidoNome').innerText = nome || 'Não preenchido';
+        document.getElementById('pedidoMatricula').innerText = matricula || 'Não preenchido';
+        document.getElementById('pedidoTurma').innerText = turma || 'Não preenchido';
+        document.getElementById('pedidoAno').innerText = ano || 'Não preenchido';
+        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meusPedidosCard').classList.add('show');
     }
 
-    function abrirFormularioVotacao() {
-        const dados = getDadosPerfil();
-        // URL do formulário de votação com parâmetros pré-preenchidos
-        const url = `https://docs.google.com/forms/d/e/1FAIpQLSdwSSfo4S1yP0yF1raqpWigpLKJV__DPBlb_9QGBrWoqmezxA/viewform?usp=dialog`;
-        window.open(url, '_blank');
-        closeAllModals();
-    }
-
     function enviarPedidoEmail() {
-        const dados = getDadosPerfil();
+        const nome = getStorageValue('braun_nome_completo') || '';
+        const matricula = getStorageValue('braun_matricula') || '';
+        const turma = getStorageValue('braun_turma_perfil') || '';
+        const ano = getStorageValue('braun_ano_perfil') || '';
         const item = document.getElementById('pedidoItem').value.trim();
         const tamanho = document.getElementById('pedidoTamanho').value.trim();
         const obs = document.getElementById('pedidoObs').value.trim();
-
-        // Validação
-        if (!dados.nome || dados.nome === 'Colaborador') {
-            alert('Por favor, preencha seu nome no Meu Perfil primeiro.');
-            closeAllModals();
-            openMeuPerfil();
-            return;
-        }
-
-        if (!item) {
-            alert('Por favor, digite o item desejado.');
-            return;
-        }
-
-        // Monta a mensagem
-        const mensagem = `📦 NOVO PEDIDO\n\n👤 Nome: ${dados.nome}\n🔢 Matrícula: ${dados.matricula}\n📚 Turma: ${dados.turma}\n📅 Ano: ${dados.ano}\n\n📦 Item: ${item}\n📏 Tamanho: ${tamanho || 'Não informado'}\n📝 Observações: ${obs || 'Nenhuma'}`;
-
-        // Envia por e-mail
-        const emailDestino = 'pedidos@braun.com.br'; // Substitua pelo e-mail correto
-        const urlEmail = `mailto:${emailDestino}?subject=${encodeURIComponent('Novo Pedido - ' + dados.nome)}&body=${encodeURIComponent(mensagem)}`;
         
-        window.open(urlEmail, '_blank');
+        if (!item || !tamanho) {
+            alert('Por favor, preencha o Item desejado e o Tamanho.');
+            return;
+        }
+        
+        const corpo = `Pedido de Uniforme:\n\nNome: ${nome}\nMatrícula: ${matricula}\nTurma: ${turma}\nAno: ${ano}\n\nItem desejado: ${item}\nTamanho: ${tamanho}\nObservações: ${obs}\n\nEnviado via Braun OnLine.`;
+        const mailto = `mailto:uniformes@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
+        window.open(mailto, '_blank');
         closeAllModals();
     }
 
-    // ==================== FIM DAS NOVAS FUNÇÕES ====================
-
-    function toggleDarkMode() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        setStorageValue('braun_dark', isDark);
-        closeHamburger();
+    // ==================== SCROLL PERFEITO - CORREÇÃO DE ESPAÇAMENTO ====================
+    function setupScrollPadding() {
+        const header = document.querySelector('header');
+        const statusPanel = document.querySelector('.status-panel');
+        if (header && statusPanel) {
+            const headerHeight = header.offsetHeight;
+            const statusHeight = statusPanel.offsetHeight;
+            const totalOffset = headerHeight + statusHeight;
+            document.documentElement.style.scrollPaddingTop = totalOffset + 'px';
+        }
     }
 
     function scrollToToday() {
-        setTimeout(() => {
-            const h = document.querySelector('.hoje');
-            if (!h) return;
-            const mes = h.closest('.mes-container');
-            if (!mes) return;
-            
-            // Calcula a posição do topo do mês, considerando o cabeçalho fixo
-            const headerHeight = document.querySelector('header')?.offsetHeight || 80;
-            const statusHeight = document.querySelector('.status-panel')?.offsetHeight || 80;
-            const y = mes.getBoundingClientRect().top + window.pageYOffset - (headerHeight + statusHeight + 20);
-            
-            try {
-                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-            } catch (e) {
-                window.scrollTo(0, Math.max(0, y));
+        const hoje = document.querySelector('.hoje');
+        if (hoje) {
+            const mesContainer = hoje.closest('.mes-container');
+            if (mesContainer) {
+                mesContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start'  // Isso alinha o topo do mês com o bottom do painel de status
+                });
             }
-        }, 500);
+        }
     }
 
-    window.onload = () => {
-        if (getStorageValue('braun_dark') === 'true') document.body.classList.add('dark-mode');
-        const sA = getStorageValue('braun_ano');
-        if (sA) currentAno = sA;
-        setRegion(currentRegion);
-        if (!getStorageValue('braun_visited')) {
-            document.getElementById('welcomeScreen').style.display = 'flex';
-        } else {
-            scrollToToday();
-        }
-        gerenciarBotaoVotacao();
+    // ==================== DARK MODE ====================
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // ==================== INICIALIZAÇÃO FINAL ====================
+    document.addEventListener('DOMContentLoaded', function() {
         startClock();
         tick();
-    };
+        gerarCalendario();
+        gerenciarBotaoVotacao();
+        setupScrollPadding(); // Aplica o espaçamento perfeito
+        setTimeout(() => {
+            const visited = getStorageValue('braun_visited');
+            if (visited === 'true') {
+                document.getElementById('welcomeScreen').style.display = 'none';
+                // Rola para o dia atual se já visitou
+                scrollToToday();
+            } else {
+                document.getElementById('welcomeScreen').style.display = 'flex';
+            }
+        }, 100);
+    });
 </script>
 </body>
 </html>
