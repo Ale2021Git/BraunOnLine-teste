@@ -1,4 +1,4 @@
-// ============================================================
+ ============================================================
 //  Braun OnLine — Service Worker v3.4
 //  ✅ CORRIGIDO: Suporte OFFLINE completo
 //  ✅ Adicionado: Página fallback offline.html
