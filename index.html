@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#00A97A">
+    <title>Braun OnLine 2026/2027</title>
+   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="maskable_icon_x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Braun On Line">
+   
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQXB043RE1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LQXB043RE1');
+    </script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+       
+        :root {
+            --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+            --accent: #A800C4; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
+            --semana-w: #00A97A; --azul-mnt: #2196F3;
+        }
+
+        body.dark-mode {
+            --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
+            --primary: #00C48D; --semana-w: #00C48D;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+            margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; user-select: none; scroll-behavior: smooth;
+        }
+
+        #install-button {
+            display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
+            font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+        .hoje {
+            background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
+            border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
+            animation: hoje-pulsar 1.5s infinite ease-in-out;
+        }
+       
+        body.dark-mode .hoje { border-color: #1E1E1E !important; }
+
+        @keyframes hoje-pulsar {
+            0% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+            50% { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
+            100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+        }
+
+        .welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); color: white; z-index: 3000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
+        }
+        .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
+        .welcome-logo { width: 120px; margin-bottom: 25px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+        .btn-comecar {
+            background: white; color: var(--primary); border: none; padding: 15px 40px;
+            border-radius: 30px; font-weight: 800; font-size: 1.1em; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-top: 20px;
+        }
+
+        header {
+            background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
+            justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+       
+        .brand-logo-svg { height: 35px; width: auto; }
+        .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
+
+        .status-panel {
+            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 20px 15px;
+            border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
+        .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
+
+        .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; }
+        .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+        .mes-inner.flipped { transform: rotateY(180deg); }
+        .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .mes-front { background: var(--card); }
+        .mes-back { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
+       
+        .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
+        .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
+       
+        .dia-label-w {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75em;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--semana-w), #007d5a);
+            color: #FFFFFF;
+            border-radius: 8px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+       
+        .dia { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent; transition: 0.2s; position: relative; }
+
+        .AMARELO { background: var(--amarelo) !important; color: #1a1a1a !important; }
+        .VERDE { background: var(--verde) !important; color: #fff !important; }
+        .AZUL { background: var(--azul-mnt) !important; color: #fff !important; }
+        .TRABALHO { border-color: rgba(168, 0, 196, 0.4) !important; }
+       
+        .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
+
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; height: 75px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.75em; font-weight: 700; }
+        .tab.active { color: #FFFFFF; }
+
+        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
+        .bottom-modal { position: fixed; bottom: -110%; left: 0; right: 0; background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px; z-index: 2000; transition: 0.5s; max-height: 85vh; overflow-y: auto; }
+        .bottom-modal.show { bottom: 0; }
+
+        .select-group { display: flex; gap: 12px; padding: 0 15px 20px 15px; }
+        select { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; }
+        #anoSelect { width: 95px; flex-shrink: 0; }
+        #turmaSelect { flex-grow: 1; }
+
+        .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; }
+        .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
+        .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .ramal-badge {
+            background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; padding: 6px 10px; border-radius: 10px; border: 1.5px solid var(--primary);
+            text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap;
+        }
+        .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
+        .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
+       
+        /* Estilos para Estatísticas */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .stat-card-big {
+            background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .stat-card-big.purple { border-color: var(--accent); }
+        .stat-card-big.teal { border-color: var(--verde); }
+        .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        .stat-val-big.purple { color: var(--accent); }
+        .stat-val-big.teal { color: var(--verde); }
+        .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Estilo do Gerador de Lote */
+        .lote-box {
+            background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px;
+            padding: 12px; margin-bottom: 15px; text-align: center; position: relative;
+        }
+        .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block;}
+        .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+        .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; }
+
+        /* Rodapé de Segurança Google */
+        footer { text-align: center; padding: 40px 20px; font-size: 12px; color: var(--text); opacity: 0.6; }
+        .privacy-link { color: var(--primary); font-weight: 800; text-decoration: none; display: block; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="welcomeScreen" class="welcome-screen">
+    <img src="maskable_icon_x512.png" class="welcome-logo" alt="Braun Logo">
+    <h1>Braun OnLine</h1>
+    <p>Sua escala na palma da mão.</p>
+    
+    <button class="btn-comecar" onclick="closeWelcome()">
+        ENTRAR NO APP
+    </button>
+    
+    <div style="position: absolute; bottom: 40px; font-size: 0.75em; opacity: 0.7; font-weight: 600; letter-spacing: 1px;">
+        VERSÃO 2026 / 2027
+    </div>
+</div>
+
+<button id="install-button" onclick="installPWA()">
+    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+</button>
+
+<header>
+    <div class="brand-container">
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg">
+            <g><path class="st-logo-path" d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/><path class="st-logo-path" d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/><path class="st-logo-path" d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/><path class="st-logo-path" d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/><path class="st-logo-path" d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/><path class="st-logo-path" d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/><rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/></g>
+            <g><path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/><polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/><path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/><path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/><rect x="72.1" y="31.6" class="st-logo-path" width="1.2" height="10.2"/><polygon class="st-logo-path" points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/><path class="st-logo-path" d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/><polygon class="st-logo-path" points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/><polygon class="st-logo-path" points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/><path class="st-logo-path" d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-3.2-2.8h-2.4V41.8z"/><polygon class="st-logo-path" points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/><path class="st-logo-path" d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6H137V41.8z"/><polygon class="st-logo-path" points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/><rect x="153.5" y="31.6" class="st-logo-path" width="1.2" height="10.2"/><path class="st-logo-path" d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/><polygon class="st-logo-path" points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/></g>
+        </svg>
+    </div>
+    <div style="display:flex; gap:12px;">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1" onclick="openRamais()">call</span>
+        <span class="material-symbols-outlined" onclick="openStats()">analytics</span>
+        <span class="material-symbols-outlined" onclick="toggleDarkMode()">brightness_4</span>
+    </div>
+</header>
+
+<div class="status-panel">
+    <div id="big-clock" class="clock">00:00:00</div>
+    <div id="status-msg" class="status-msg">---</div>
+</div>
+
+<div class="select-group">
+    <select id="anoSelect" onchange="salvarAno()">
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+    </select>
+    <select id="turmaSelect" onchange="salvarTurma()"></select>
+</div>
+
+<div id="calendario-box"></div>
+
+<footer>
+    <p>© 2026 Braun OnLine - Todos os direitos reservados</p>
+    <span class="privacy-link" onclick="openPrivacy()">Política de Privacidade</span>
+</footer>
+
+<div class="tab-bar">
+    <div class="tab" onclick="setRegion('BR')" id="tab-BR"><span class="material-symbols-outlined">factory</span>ECOFLAC</div>
+    <div class="tab" onclick="setRegion('MNT')" id="tab-MNT"><span class="material-symbols-outlined">engineering</span>MANUTENÇÃO</div>
+</div>
+
+<div id="overlay" onclick="closeAllModals()"></div>
+
+<div id="infoCard" class="bottom-modal">
+    <div id="card-data" style="font-weight: 800; color: var(--primary); font-size: 1.3em; margin-bottom: 10px;"></div>
+    
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <span class="material-symbols-outlined lote-copy" onclick="copyLote()">content_copy</span>
+    </div>
+
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%; border-radius:20px; padding:18px; box-sizing:border-box; border: 2.5px solid var(--border); font-family: inherit; background: var(--bg); color: var(--text); outline: none;"></textarea>
+    <button onclick="saveNota()" style="background:var(--primary); color:white; border:none; padding:18px; border-radius:18px; font-weight:800; width:100%; margin-top:15px;">SALVAR</button>
+</div>
+
+<div id="statsCard" class="bottom-modal">
+    <h2 style="font-weight: 800; color: var(--primary); margin-top: 0; margin-bottom: 20px;">Estatísticas Detalhadas</h2>
+    <div id="stats-content"></div>
+    <button onclick="closeAllModals()" style="background:var(--primary); color:white; border:none; padding:18px; border-radius:22px; font-weight:800; width:100%; margin-top:25px; font-size: 1.1em;">FECHAR</button>
+</div>
+
+<div id="ramaisCard" class="bottom-modal">
+    <h2 style="font-weight: 800; color: var(--primary); margin-top: 0; margin-bottom: 10px;">Ramais Úteis</h2>
+   
+    <div class="ramal-secao">URGÊNCIAS & SERVIÇOS</div>
+    <div class="ramal-item"><span class="ramal-nome">Portaria</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
+
+    <div class="ramal-secao">ECOFLAC - ADMINISTRAÇÃO</div>
+    <div class="ramal-item"><span class="ramal-nome">Administração - Rosimar</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. - Rubens</span><div class="ramal-numeros-container"><a href="tel:26023269" class="ramal-badge">3269</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. - Adriana/Rafael</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle Biológico</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle Físico</span><div class="ramal-numeros-container"><a href="tel:26023343" class="ramal-badge">3343</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle Químico</span><div class="ramal-numeros-container"><a href="tel:26023429" class="ramal-badge">3429</a></div></div>
+    
+    <div class="ramal-secao">PRODUÇÃO & ENGENHARIA</div>
+    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Utilidades</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Manutenção</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Davis</span><div class="ramal-numeros-container"><a href="tel:26023478" class="ramal-badge">3478</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Osmose</span><div class="ramal-numeros-container"><a href="tel:26023529" class="ramal-badge">3529</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Moinho</span><div class="ramal-numeros-container"><a href="tel:26023433" class="ramal-badge">3433</a> <a href="tel:26023506" class="ramal-badge">3506</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Preparo</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a></div></div>
+
+    <div class="ramal-secao">ENVASAMENTO & APOIO</div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 (250/500ml)</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 2 (100ml)</span><div class="ramal-numeros-container"><a href="tel:26023422" class="ramal-badge">3422</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 3 (1000ml)</span><div class="ramal-numeros-container"><a href="tel:26023434" class="ramal-badge">3434</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 4 (500ml)</span><div class="ramal-numeros-container"><a href="tel:26023561" class="ramal-badge">3561</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 5 (100ml)</span><div class="ramal-numeros-container"><a href="tel:26023713" class="ramal-badge">3713</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Esterilização</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Rotulagem</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023408" class="ramal-badge">3408</a></div></div>
+   
+    <button onclick="closeAllModals()" style="background:var(--border); color:var(--text); border:none; padding:15px; border-radius:18px; font-weight:800; width:100%; margin-top:20px;">FECHAR</button>
+</div>
+
+<div id="privacyCard" class="bottom-modal">
+    <h2 style="font-weight: 800; color: var(--primary); margin-top: 0;">Política de Privacidade</h2>
+    <p style="font-size: 0.9em; line-height: 1.6; opacity: 0.8;">
+        Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.
+        <br><br>
+        <b>Coleta de Dados:</b> Não coletamos, não transmitimos e não compartilhamos nenhum dado pessoal ou sensível. 
+        <br><br>
+        <b>Armazenamento:</b> Todas as suas configurações (escolha de turma, modo escuro) e anotações pessoais são salvas exclusivamente no seu dispositivo através do recurso <i>localStorage</i> do navegador. Se você limpar o cache do navegador, os dados serão excluídos.
+        <br><br>
+        <b>Segurança:</b> O app funciona sob protocolo HTTPS e utiliza tecnologias padrão de Progressive Web App (PWA).
+    </p>
+    <button onclick="closeAllModals()" style="background:var(--primary); color:white; border:none; padding:15px; border-radius:18px; font-weight:800; width:100%; margin-top:20px;">ENTENDI</button>
+</div>
+
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-button');
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Nova versão pronta.');
+              }
+            };
+          };
+        }).catch(err => console.log('Erro SW:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'flex'; });
+
+    async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; installBtn.style.display = 'none'; } }
+
+    let currentRegion = localStorage.getItem('braun_last_region') || 'BR';
+    let dataAtiva = "";
+
+    const translations = {
+        BR: { statusTrab: "TRABALHANDO", statusFolga: "DE FOLGA", days: ['S','T','Q','Q','S','S','D'] },
+        MNT: { statusTrab: "MANUTENÇÃO", statusFolga: "FOLGA MNT", days: ['S','T','Q','Q','S','S','D'] }
+    };
+
+    function closeWelcome() { localStorage.setItem('braun_visited', 'true'); document.getElementById('welcomeScreen').classList.add('hide'); setTimeout(() => document.getElementById('welcomeScreen').style.display = 'none', 500); }
+
+    function setRegion(r) {
+        currentRegion = r;
+        localStorage.setItem('braun_last_region', r);
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(`tab-${r}`).classList.add('active');
+       
+        const s = document.getElementById('turmaSelect');
+        s.innerHTML = r === 'BR' ?
+            '<option value="AC">TURMA A/C (AMARELO)</option><option value="BD">TURMA B/D (VERDE)</option>' :
+            '<option value="EG">TURMA E/G (AZUL)</option><option value="FH">TURMA F/H (VERDE)</option>';
+       
+        const savedTurma = localStorage.getItem(`braun_turma_${r}`);
+        if (savedTurma) s.value = savedTurma;
+
+        gerarCalendario(); tick(); scrollToToday();
+    }
+
+    function getFeriados(ano) {
+        const f = {
+            "01-01":"Ano Novo", 
+            "01-10":"Padroeiro SG", 
+            "04-21":"Tiradentes", 
+            "04-23":"São Jorge", 
+            "05-01":"Trabalho", 
+            "09-07":"Independência", 
+            "09-22":"Aniv. SG", 
+            "10-12":"Aparecida", 
+            "11-02":"Finados", 
+            "11-15":"República", 
+            "11-20":"Zumbi", 
+            "12-25":"Natal"
+        };
+        if (ano === 2026) { 
+            f["02-17"] = "Carnaval"; 
+            f["04-03"] = "Sexta Santa"; 
+        } else if (ano === 2027) { 
+            f["02-09"] = "Carnaval"; 
+            f["03-26"] = "Sexta Santa"; 
+        }
+        return f;
+    }
+
+    function checkBR(dt, t) {
+        const baseDate = new Date(2026, 0, 18);
+        const diff = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const isA = (((diff % 4) + 4) % 4) < 2;
+        return { isA, trab: (t === "AC" && isA) || (t === "BD" && !isA) };
+    }
+
+    function checkMnt(dt, t) {
+        const baseDate = new Date(2026, 2, 6);
+        const diff = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const ciclo = ((diff % 4) + 4) % 4;
+        const isEG = ciclo < 2;
+        return { isEG, trab: (t === "EG" ? isEG : !isEG) };
+    }
+
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function gerarCalendario() {
+        const box=document.getElementById('calendario-box'); box.innerHTML="";
+        const logs=JSON.parse(localStorage.getItem('logs_v26')||'{}'), ano=parseInt(document.getElementById('anoSelect').value), t=document.getElementById('turmaSelect').value, fer=getFeriados(ano), lang=translations[currentRegion];
+        for(let m=0; m<12; m++) {
+            const dtM=new Date(ano,m,1);
+            const nomeM=new Intl.DateTimeFormat('pt-BR',{month:'long'}).format(dtM);
+            const container=document.createElement('div'); container.className='mes-container';
+            let hF=`<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')"><div style="color:var(--primary); font-weight:800; text-transform:capitalize; margin: 5px 0 0 10px; font-size: 1.1em;">${nomeM}</div><div class="grid"><div class="dia-label">W</div>${lang.days.map(s=>`<div class="dia-label">${s}</div>`).join('')}`;
+            let hB=`<div class="mes-face mes-back" onclick="this.parentElement.classList.toggle('flipped')"><div style="font-weight:800; border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:5px; margin-bottom:10px; text-transform:capitalize;">${nomeM}</div>`;
+            let hasEv=false, diaSemanaInicial = dtM.getDay(), esp = (diaSemanaInicial === 0) ? 6 : diaSemanaInicial - 1;
+            hF += `<div class="dia-label-w">${getWeekNumber(dtM)}</div>`;
+            for(let i=0; i<esp; i++) hF += `<div></div>`;
+            for(let d=1; d<=new Date(ano, m + 1, 0).getDate(); d++) {
+                const at=new Date(ano,m,d), isoS=`${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`, isoF=`${ano}-${isoS}`, f=fer[isoS], nt=logs[isoF];
+                if(at.getDay() === 1 && d !== 1) hF += `<div class="dia-label-w">${getWeekNumber(at)}</div>`;
+                let cls="dia ";
+                if(currentRegion==='BR') { const r=checkBR(at,t); cls+=(r.isA?"AMARELO ":"VERDE "); cls+=(r.trab ? "TRABALHO " : "FOLGA "); }
+                else { const mnt=checkMnt(at,t); cls+=(mnt.isEG?"AZUL ":"VERDE "); cls+=(mnt.trab ? "TRABALHO " : "FOLGA "); }
+                if(new Date().toDateString()===at.toDateString()) cls+="hoje ";
+                if(nt) cls+="HAS_NOTE ";
+                if(f||nt) { hasEv=true; hB+=`<div style="font-size:0.9em; margin-bottom:8px;"><b>${d}:</b> ${f||''} ${nt||''}</div>`; }
+                hF+=`<div class="${cls}" onclick="event.stopPropagation(); openCard('${isoF}')">${d}</div>`;
+            }
+            container.innerHTML=`<div class="mes-inner">${hF}</div></div>${hB}${!hasEv?'<div style="opacity:0.6; font-size:0.9em;">Sem registros.</div>':''}</div></div></div>`;
+            box.appendChild(container);
+        }
+    }
+
+    function tick() {
+        const now = new Date();
+        const bigClock = document.getElementById('big-clock');
+        if (bigClock) bigClock.innerText = now.toLocaleTimeString('pt-BR');
+        
+        const t = document.getElementById('turmaSelect').value;
+        const msg = document.getElementById('status-msg');
+        if (t && msg) {
+            const res = (currentRegion === 'BR') ? checkBR(now, t).trab : checkMnt(now, t).trab;
+            msg.innerText = res ? translations[currentRegion].statusTrab : translations[currentRegion].statusFolga;
+            msg.style.color = res ? "var(--accent)" : "var(--primary)";
+        }
+    }
+
+    function openCard(iso) { 
+        dataAtiva = iso; 
+        const logs = JSON.parse(localStorage.getItem('logs_v26') || '{}'), d = iso.split('-'); 
+        document.getElementById('card-data').innerText = `${d[2]}/${d[1]}/${d[0]}`; 
+        document.getElementById('noteInput').value = logs[iso] || ""; 
+        const dtSel = new Date(d[0], d[1]-1, d[2]);
+        const yy = dtSel.getFullYear().toString().slice(-2);
+        const ww = String(getWeekNumber(dtSel)).padStart(2, '0');
+        let diaSem = dtSel.getDay(); diaSem = (diaSem === 0) ? 7 : diaSem;
+        document.getElementById('lote-display').innerText = `${yy}${ww}${diaSem}`;
+        document.getElementById('overlay').style.display = 'block'; 
+        document.getElementById('infoCard').classList.add('show'); 
+    }
+
+    function copyLote() {
+        const lote = document.getElementById('lote-display').innerText;
+        navigator.clipboard.writeText(lote);
+        const disp = document.getElementById('lote-display');
+        const originalText = disp.innerText;
+        disp.innerText = "COPIADO!"; setTimeout(() => disp.innerText = originalText, 1000);
+    }
+
+    function openRamais() { document.getElementById('overlay').style.display = 'block'; document.getElementById('ramaisCard').classList.add('show'); }
+    function openPrivacy() { document.getElementById('overlay').style.display = 'block'; document.getElementById('privacyCard').classList.add('show'); }
+   
+    function openStats() {
+        const ano = parseInt(document.getElementById('anoSelect').value);
+        const turma = document.getElementById('turmaSelect').value;
+        const feriados = getFeriados(ano);
+        const content = document.getElementById('stats-content');
+        
+        let diasTrabalho = 0, diasFolga = 0, feriadosTrab = 0, feriadosFolga = 0;
+        let listaFeriadosHTML = "";
+
+        for (let m = 0; m < 12; m++) {
+            for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {
+                const dataTeste = new Date(ano, m, d);
+                const isoS = `${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const res = (currentRegion === 'BR') ? checkBR(dataTeste, turma).trab : checkMnt(dataTeste, turma).trab;
+                
+                if (res) diasTrabalho++; else diasFolga++;
+
+                if (feriados[isoS]) {
+                    const statusText = res ? "TRAB" : "FOLGA";
+                    const corTexto = res ? "#A800C4" : "#00A97A";
+                    if (res) feriadosTrab++; else feriadosFolga++;
+
+                    listaFeriadosHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--border); font-size: 0.9em;">
+                            <span style="font-weight: 600;">${d.toString().padStart(2,'0')}/${(m+1).toString().padStart(2,'0')} - ${feriados[isoS]}</span>
+                            <span style="font-weight: 900; color: ${corTexto};">${statusText}</span>
+                        </div>`;
+                }
+            }
+        }
+
+        content.innerHTML = `
+            <div class="stat-grid">
+                <div class="stat-card-big"><div class="stat-val-big">${diasTrabalho}d</div><div class="stat-lab-big">Trabalho</div></div>
+                <div class="stat-card-big"><div class="stat-val-big">${diasFolga}d</div><div class="stat-lab-big">Folgas</div></div>
+                <div class="stat-card-big purple"><div class="stat-val-big purple">${feriadosTrab}</div><div class="stat-lab-big">Feriado c/ Trab</div></div>
+                <div class="stat-card-big teal"><div class="stat-val-big teal">${feriadosFolga}</div><div class="stat-lab-big">Feriado de Folga</div></div>
+            </div>
+            
+            <h3 style="font-size: 1.1em; color: var(--primary); margin: 25px 0 10px 0; font-weight: 800; text-align: left;">Cruzamento de Feriados</h3>
+            <div style="background: var(--bg); border-radius: 20px; padding: 10px; border: 1px solid var(--border); text-align: left;">
+                ${listaFeriadosHTML || '<div style="text-align:center; opacity:0.5; padding:10px;">Nenhum feriado encontrado.</div>'}
+            </div>
+        `;
+        
+        document.getElementById('overlay').style.display = 'block'; 
+        document.getElementById('statsCard').classList.add('show');
+    }
+
+    function saveNota() { const msg = document.getElementById('noteInput').value.trim(), logs = JSON.parse(localStorage.getItem('logs_v26') || '{}'); if (msg) logs[dataAtiva] = msg; else delete logs[dataAtiva]; localStorage.setItem('logs_v26', JSON.stringify(logs)); closeAllModals(); gerarCalendario(); }
+    function closeAllModals() { document.querySelectorAll('.bottom-modal').forEach(m => m.classList.remove('show')); document.getElementById('overlay').style.display = 'none'; }
+    function salvarTurma() { localStorage.setItem(`braun_turma_${currentRegion}`, document.getElementById('turmaSelect').value); gerarCalendario(); tick(); }
+    function salvarAno() { localStorage.setItem('braun_ano', document.getElementById('anoSelect').value); gerarCalendario(); }
+    function toggleDarkMode() { const isDark = document.body.classList.toggle('dark-mode'); localStorage.setItem('braun_dark', isDark); }
+    function scrollToToday() { setTimeout(() => { const h = document.querySelector('.hoje'); if (h) { const y = h.closest('.mes-container').getBoundingClientRect().top + window.pageYOffset - 120; window.scrollTo({top: y, behavior: 'smooth'}); } }, 500); }
+
+    window.onload = () => {
+        if (localStorage.getItem('braun_dark') === 'true') document.body.classList.add('dark-mode');
+        const sA = localStorage.getItem('braun_ano'); if (sA) document.getElementById('anoSelect').value = sA;
+        setRegion(currentRegion);
+        if (!localStorage.getItem('braun_visited')) document.getElementById('welcomeScreen').style.display = 'flex';
+        setInterval(tick, 1000);
+    };
+</script>
+</body>
+</html>
