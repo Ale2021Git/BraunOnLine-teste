@@ -3,7 +3,6 @@
 <head>
 <script>
   // ========== CORREÇÃO CRÍTICA PARA IPHONE ==========
-  // Desativa Service Worker no iOS para evitar travamento
   if ('serviceWorker' in navigator) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (!isIOS) {
@@ -136,13 +135,23 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-top: 20px;
         }
         #install-button {
-            display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
-            font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
-            animation: slideIn 0.5s ease;
+            display: none; /* controlado pelo evento beforeinstallprompt */
+            margin: 20px auto 10px auto;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 0.9em;
+            border: 2px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: fit-content;
+            cursor: pointer;
         }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .hoje {
             background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
             border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
@@ -254,7 +263,14 @@
         }
         .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
         .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
-        .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; padding-top: 0px; }
+        .mes-container { 
+            perspective: 1000px; 
+            margin: 0 5px 8px 5px; 
+            min-height: 320px; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 0px; 
+        }
         #calendario-box > .mes-container:first-child { margin-top: 0px; }
         .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
         .mes-inner.flipped { transform: rotateY(180deg); }
@@ -272,7 +288,7 @@
         .dia { 
             aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
             border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent; 
-            transition: 0.2s; position: relative; cursor: pointer;
+            transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
         }
         .AMARELO  { background: var(--amarelo) !important; color: #1a1a1a !important; }
         .VERDE    { background: var(--verde)   !important; color: #fff     !important; }
@@ -321,19 +337,6 @@
         .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
         .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
         .privacy-link { color: var(--primary); font-weight: 800; text-decoration: none; display: block; margin-top: 10px; cursor: pointer; background: none; border: none; font-size: inherit; }
-        #btn-flutuante-votar {
-            position: fixed; bottom: 95px; right: 20px;
-            background: linear-gradient(135deg, #FFD700, #EBC13D); color: #1A1A1A;
-            border: none; border-radius: 50px; padding: 12px 22px; font-weight: 800;
-            font-size: 0.85em; display: none; align-items: center; gap: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
-            animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
-            text-decoration: none; cursor: pointer; border: 2px solid white;
-        }
-        @keyframes bounceIn {
-            from { opacity: 0; transform: scale(0.5) translateY(20px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
         .hamburger-btn {
             background: none; border: none; color: white; cursor: pointer;
             display: flex; flex-direction: column; gap: 5px; padding: 8px;
@@ -618,7 +621,11 @@
 <body>
 
 <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
-
+<div id="greetingScreen" class="greeting-screen">
+    <div id="greet-icon" class="greeting-icon">🏭</div>
+    <div class="greeting-text-main" id="greet-main">Bom dia!</div>
+    <div class="greeting-text-status" id="greet-status"></div>
+</div>
 <div id="welcomeScreen" class="welcome-screen">
     <img src="maskable_icon_x512.png" class="welcome-logo" alt="Logo Braun OnLine">
     <h1>Braun OnLine</h1>
@@ -667,10 +674,6 @@
     </div>
 </div>
 
-<button id="install-button" onclick="installPWA()">
-    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
-</button>
-
 <header>
     <div class="brand-container">
         <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="Braun Logo">
@@ -692,7 +695,13 @@
     <div id="status-msg" class="status-msg">---</div>
 </div>
 
-<div id="calendario-box"></div>
+<div id="calendario-box">
+    <!-- Os meses serão inseridos aqui pelo JavaScript -->
+    <!-- Botão de instalar agora aparece dentro da área branca -->
+    <button id="install-button" onclick="installPWA()">
+        <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+    </button>
+</div>
 </main>
 
 <div class="tab-bar" role="tablist" aria-label="Selecionar região">
@@ -846,11 +855,6 @@
 
 <div id="overlay" onclick="closeAllModals()" aria-hidden="true"></div>
 
-<button id="btn-flutuante-votar" onclick="registrarVoto()" aria-label="Votar na pesquisa">
-    <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">award_star</span>
-    VOTE AQUI
-</button>
-
 <div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
     <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
     <div id="game-brasil-container" style="margin-bottom:15px;"></div>
@@ -972,10 +976,14 @@
         <div>
             <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
             <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
-                <option value="A">Turma A</option>
-                <option value="B">Turma B</option>
-                <option value="C">Turma C</option>
-                <option value="D">Turma D</option>
+                <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                <option value="C">Turma C (Noite - ECOFLAC)</option>
+                <option value="D">Turma D (Noite - ECOFLAC)</option>
+                <option value="E">Turma E (Manhã - Manutenção)</option>
+                <option value="F">Turma F (Manhã - Manutenção)</option>
+                <option value="G">Turma G (Noite - Manutenção)</option>
+                <option value="H">Turma H (Noite - Manutenção)</option>
             </select>
         </div>
         <!-- ANO -->
@@ -1008,7 +1016,7 @@
     <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
 </div>
 
-<!-- ==================== MODAL MEUS PEDIDOS ==================== -->
+<!-- ==================== MODAL MEUS PEDIDOS (SEM E-MAIL) ==================== -->
 <div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
     
@@ -1040,7 +1048,7 @@
 
     <button onclick="enviarPedidoEmail()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span>
-        ENVIAR POR E-MAIL
+        ENVIAR (EM BREVE)
     </button>
 
     <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
@@ -1210,11 +1218,23 @@
       });
     }
 
-    window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.style.display = 'flex';
-    });
+    window.addEventListener('DOMContentLoaded', function() {
+    startClock();
+    tick();
+    gerarCalendario();
+    setTimeout(scrollToToday, 1000);
+
+    const visited = getStorageValue('braun_visited');
+    if (!visited) {
+        document.getElementById('welcomeScreen').style.display = 'flex';
+    } else {
+        const gs = document.getElementById('greetingScreen');
+        if (gs) {
+            gs.style.display = 'flex';
+            goToGreeting();
+        }
+    }
+});
 
     async function installPWA() {
         if (deferredPrompt) {
@@ -1224,6 +1244,7 @@
         }
     }
 
+    // ==================== INICIALIZAÇÃO CORRETA DA TURMA ====================
     let currentRegion = getStorageValue('braun_last_region') || 'BR';
     let dataAtiva = '';
     const _escalaCache = new Map();
@@ -1243,6 +1264,58 @@
     let currentAno = getStorageValue('braun_ano') || '2026';
     let currentTurma = getStorageValue(`braun_turma_${currentRegion}`) || 'AC';
 
+    // ============ INICIALIZAÇÃO CORRETA DA TURMA ============
+    (function init() {
+        const savedTurma = getStorageValue('braun_turma_perfil');
+        if (savedTurma) {
+            // Mapeia a turma individual para grupo e região
+            let region, grupo;
+            if (['A','B','C','D'].includes(savedTurma)) {
+                region = 'BR';
+                grupo = (savedTurma === 'A' || savedTurma === 'C') ? 'AC' : 'BD';
+            } else {
+                region = 'MNT';
+                grupo = (savedTurma === 'E' || savedTurma === 'G') ? 'EG' : 'FH';
+            }
+            currentRegion = region;
+            currentTurma = grupo;
+            setStorageValue('braun_last_region', region);
+            setStorageValue(`braun_turma_${region}`, grupo);
+        } else {
+            // Fallback: se não tiver perfil, usa padrão
+            const savedRegion = getStorageValue('braun_last_region') || 'BR';
+            currentRegion = savedRegion;
+            currentTurma = getStorageValue(`braun_turma_${savedRegion}`) || (savedRegion === 'BR' ? 'AC' : 'EG');
+        }
+        
+        // Atualizar aba ativa
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${currentRegion}`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.setAttribute('aria-selected', 'true');
+        }
+    })();
+// Transição
+welcome.classList.add('hide');
+setTimeout(() => {
+    welcome.style.display = 'none';
+    const greeting = document.getElementById('greetingScreen');
+    if (greeting) {
+        greeting.style.display = 'flex';
+        setTimeout(() => {
+            greeting.classList.add('hide');
+            setStorageValue('braun_visited', 'true');
+            setTimeout(() => {
+                greeting.style.display = 'none';
+                scrollToToday();
+            }, 500);
+        }, 2500);
+    } else {
+        setStorageValue('braun_visited', 'true');
+        scrollToToday();
+    }
+}, 500);
     // ==================== FUNÇÃO DE SAUDAÇÃO PERSONALIZADA ====================
     function goToGreeting() {
         const welcome = document.getElementById('welcomeScreen');
@@ -1563,6 +1636,9 @@
         const lang = translations[currentRegion];
         const hojeStr = new Date().toDateString();
 
+        // Identifica a turma individual para exibir turno
+        const turmaIndividual = getStorageValue('braun_turma_perfil') || 'A';
+
         for (let m = 0; m < 12; m++) {
             const dtM   = new Date(ano, m, 1);
             const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
@@ -1620,6 +1696,14 @@
                     cls += (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
                 }
 
+                // Adiciona indicador de turno (M/N) baseado na turma individual
+                let turnoLabel = '';
+                if (currentRegion === 'BR') {
+                    turnoLabel = (turmaIndividual === 'C' || turmaIndividual === 'D') ? ' (N)' : ' (M)';
+                } else {
+                    turnoLabel = (turmaIndividual === 'G' || turmaIndividual === 'H') ? ' (N)' : ' (M)';
+                }
+
                 const isBrazilGame = (ano === 2026 && BRAZIL_GAMES_2026.includes(isoF));
                 if (isBrazilGame) {
                     const trabGameStatus = (currentRegion === 'BR') ? checkBR(at, t).trab : checkMnt(at, t).trab;
@@ -1642,7 +1726,7 @@
                     hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`;
                 }
 
-                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')"${titleAttr}>${d}</div>`;
+                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')"${titleAttr}>${d}<span style="font-size:0.5em;opacity:0.5;display:block;">${turnoLabel}</span></div>`;
                 colAtual++;
             }
 
@@ -1653,8 +1737,14 @@
             frag.appendChild(container);
         }
 
+        // Limpa o conteúdo e adiciona os meses + botão de instalar
         box.innerHTML = '';
         box.appendChild(frag);
+        // O botão install-button já está no HTML, mas se ele for removido pelo innerHTML acima, reinserimos:
+        const installBtn = document.getElementById('install-button');
+        if (installBtn) {
+            box.appendChild(installBtn);
+        }
     }
 
     function tick() {
@@ -1675,20 +1765,8 @@
         }
     }
 
-    function gerenciarBotaoVotacao() {
-        const btn = document.getElementById('btn-flutuante-votar');
-        const agora = new Date();
-        const chave = `voto_realizado_${agora.getMonth()}_${agora.getFullYear()}`;
-        btn.style.display = getStorageValue(chave) === 'true' ? 'none' : 'flex';
-    }
-
-    function registrarVoto() {
-        const agora = new Date();
-        const chave = `voto_realizado_${agora.getMonth()}_${agora.getFullYear()}`;
-        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
-        setStorageValue(chave, 'true');
-        document.getElementById('btn-flutuante-votar').style.display = 'none';
-    }
+    // ========== REMOÇÃO DA FUNÇÃO DE VOTAÇÃO ==========
+    // As funções gerenciarBotaoVotacao() e registrarVoto() foram removidas.
 
     function openCard(iso) {
         dataAtiva = iso;
@@ -2154,10 +2232,10 @@
     function openMeuPerfil() {
         closeHamburger();
         // Carregar dados salvos
-        const ano = getStorageValue('braun_ano_perfil') || '2026';
         const nome = getStorageValue('braun_nome_completo') || '';
         const matricula = getStorageValue('braun_matricula') || '';
         const turma = getStorageValue('braun_turma_perfil') || 'A';
+        const ano = getStorageValue('braun_ano_perfil') || '2026';
         
         document.getElementById('nomePerfil').value = nome;
         document.getElementById('matriculaPerfil').value = matricula;
@@ -2179,142 +2257,119 @@
         setStorageValue('braun_turma_perfil', turma);
         setStorageValue('braun_ano_perfil', ano);
         
-        // Atualizar também o ano da escala (já existe)
-        if (ano !== currentAno) {
-            currentAno = ano;
-            setStorageValue('braun_ano', currentAno);
-            _escalaCache.clear();
-            gerarCalendario();
-            tick();
+        // Atualizar região e turma com base na seleção
+        let region, grupo;
+        if (['A','B','C','D'].includes(turma)) {
+            region = 'BR';
+            grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+        } else {
+            region = 'MNT';
+            grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
+        }
+        currentRegion = region;
+        currentTurma = grupo;
+        setStorageValue('braun_last_region', region);
+        setStorageValue(`braun_turma_${region}`, grupo);
+        
+        // Atualizar aba ativa
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${region}`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.setAttribute('aria-selected', 'true');
         }
         
-        // Feedback visual
-        const btn = document.querySelector('#meuPerfilCard button[onclick*="salvarDadosPerfil"]');
-        if (btn) {
-            const originalText = btn.textContent;
-            btn.textContent = '✓ SALVO!';
-            setTimeout(() => { btn.textContent = originalText; }, 1500);
-        }
-    }
-
-    function getDadosPerfil() {
-        return {
-            ano: getStorageValue('braun_ano_perfil') || '2026',
-            nome: getStorageValue('braun_nome_completo') || 'Colaborador',
-            matricula: getStorageValue('braun_matricula') || '000000',
-            turma: getStorageValue('braun_turma_perfil') || 'A'
-        };
-    }
-
-    function preencherDadosVotacao() {
-        const dados = getDadosPerfil();
-        document.getElementById('votacaoNome').textContent = dados.nome;
-        document.getElementById('votacaoMatricula').textContent = dados.matricula;
-        document.getElementById('votacaoAno').textContent = dados.ano;
-    }
-
-    function preencherDadosPedidos() {
-        const dados = getDadosPerfil();
-        document.getElementById('pedidoNome').textContent = dados.nome;
-        document.getElementById('pedidoMatricula').textContent = dados.matricula;
-        document.getElementById('pedidoTurma').textContent = dados.turma;
-        document.getElementById('pedidoAno').textContent = dados.ano;
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
     }
 
     function openColaboradorDoMes() {
         closeHamburger();
-        preencherDadosVotacao();
+        const nome = getStorageValue('braun_nome_completo') || 'Seu nome';
+        const matricula = getStorageValue('braun_matricula') || 'Sua matrícula';
+        const ano = getStorageValue('braun_ano_perfil') || '2026';
+        
+        document.getElementById('votacaoNome').textContent = nome;
+        document.getElementById('votacaoMatricula').textContent = matricula;
+        document.getElementById('votacaoAno').textContent = ano;
+        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('colaboradorDoMesCard').classList.add('show');
     }
 
+    function abrirFormularioVotacao() {
+        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
+    }
+
     function openMeusPedidos() {
         closeHamburger();
-        preencherDadosPedidos();
+        const nome = getStorageValue('braun_nome_completo') || 'Seu nome';
+        const matricula = getStorageValue('braun_matricula') || 'Sua matrícula';
+        const turma = getStorageValue('braun_turma_perfil') || 'A';
+        const ano = getStorageValue('braun_ano_perfil') || '2026';
+        
+        document.getElementById('pedidoNome').textContent = nome;
+        document.getElementById('pedidoMatricula').textContent = matricula;
+        document.getElementById('pedidoTurma').textContent = turma;
+        document.getElementById('pedidoAno').textContent = ano;
+        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meusPedidosCard').classList.add('show');
     }
 
-    function abrirFormularioVotacao() {
-        const dados = getDadosPerfil();
-        // URL do formulário de votação com parâmetros pré-preenchidos
-        const url = `https://docs.google.com/forms/d/e/1FAIpQLSdwSSfo4S1yP0yF1raqpWigpLKJV__DPBlb_9QGBrWoqmezxA/viewform?usp=dialog`;
-        window.open(url, '_blank');
-        closeAllModals();
-    }
-
     function enviarPedidoEmail() {
-        const dados = getDadosPerfil();
-        const item = document.getElementById('pedidoItem').value.trim();
-        const tamanho = document.getElementById('pedidoTamanho').value.trim();
-        const obs = document.getElementById('pedidoObs').value.trim();
-
-        // Validação
-        if (!dados.nome || dados.nome === 'Colaborador') {
-            alert('Por favor, preencha seu nome no Meu Perfil primeiro.');
-            closeAllModals();
-            openMeuPerfil();
-            return;
-        }
-
-        if (!item) {
-            alert('Por favor, digite o item desejado.');
-            return;
-        }
-
-        // Monta a mensagem
-        const mensagem = `📦 NOVO PEDIDO\n\n👤 Nome: ${dados.nome}\n🔢 Matrícula: ${dados.matricula}\n📚 Turma: ${dados.turma}\n📅 Ano: ${dados.ano}\n\n📦 Item: ${item}\n📏 Tamanho: ${tamanho || 'Não informado'}\n📝 Observações: ${obs || 'Nenhuma'}`;
-
-        // Envia por e-mail
-        const emailDestino = 'pedidos@braun.com.br'; // Substitua pelo e-mail correto
-        const urlEmail = `mailto:${emailDestino}?subject=${encodeURIComponent('Novo Pedido - ' + dados.nome)}&body=${encodeURIComponent(mensagem)}`;
-        
-        window.open(urlEmail, '_blank');
-        closeAllModals();
+        alert('Funcionalidade em desenvolvimento. Em breve você poderá enviar seu pedido.');
     }
 
-    // ==================== FIM DAS NOVAS FUNÇÕES ====================
-
-    function toggleDarkMode() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        setStorageValue('braun_dark', isDark);
-        closeHamburger();
-    }
-
+    // ============ FUNÇÃO PARA ROLAR ATÉ O DIA DE HOJE ============
     function scrollToToday() {
-        setTimeout(() => {
-            const h = document.querySelector('.hoje');
-            if (!h) return;
-            const mes = h.closest('.mes-container');
-            if (!mes) return;
-            
-            // Calcula a posição do topo do mês, considerando o cabeçalho fixo
-            const headerHeight = document.querySelector('header')?.offsetHeight || 80;
-            const statusHeight = document.querySelector('.status-panel')?.offsetHeight || 80;
-            const y = mes.getBoundingClientRect().top + window.pageYOffset - (headerHeight + statusHeight + 20);
-            
-            try {
-                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-            } catch (e) {
-                window.scrollTo(0, Math.max(0, y));
-            }
-        }, 500);
+        const hoje = document.querySelector('.hoje');
+        if (hoje) {
+            setTimeout(() => {
+                hoje.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 600);
+        }
     }
 
-    window.onload = () => {
-        if (getStorageValue('braun_dark') === 'true') document.body.classList.add('dark-mode');
-        const sA = getStorageValue('braun_ano');
-        if (sA) currentAno = sA;
-        setRegion(currentRegion);
-        if (!getStorageValue('braun_visited')) {
+    // ============ INICIALIZAÇÃO ============
+    window.addEventListener('DOMContentLoaded', function() {
+        // Exibe welcome screen se nunca visitou
+        const visited = getStorageValue('braun_visited');
+        if (!visited) {
             document.getElementById('welcomeScreen').style.display = 'flex';
         } else {
-            scrollToToday();
+            // Se já visitou, vai direto para a saudação
+            goToGreeting();
         }
-        gerenciarBotaoVotacao();
+        
         startClock();
         tick();
-    };
+        gerarCalendario();
+        setTimeout(scrollToToday, 1000);
+    });
+
+    // ============ DARK MODE ============
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode') ? 'true' : 'false');
+    }
+    // Recuperar dark mode salvo
+    if (getStorageValue('braun_dark_mode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // ============ VALIDAÇÃO DE FUNÇÕES FALTANTES ============
+    // Função para abrir o app corretamente
+    function openApp() {
+        const welcome = document.getElementById('welcomeScreen');
+        const greeting = document.getElementById('greetingScreen');
+        if (welcome.style.display !== 'none') {
+            welcome.style.display = 'flex';
+        } else {
+            goToGreeting();
+        }
+    }
 </script>
 </body>
 </html>
