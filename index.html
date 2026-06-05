@@ -2,14 +2,23 @@
 <html lang="pt-BR">
 <head>
 <script>
-  // ========== CORREÇÃO CRÍTICA PARA IPHONE ==========
+  // ========== CORREÇÃO CRÍTICA E DEFINITIVA ==========
   if ('serviceWorker' in navigator) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (!isIOS) {
+    
+    if (isIOS) {
+      // Se for iPhone, desativa o Service Worker para evitar bugs de cache do iOS
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
           registration.unregister();
         }
+      });
+    } else {
+      // Se for Android/Chrome, REGISTRA o Service Worker para liberar o botão de instalar!
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('PWA pronto para instalação no Android!', reg.scope))
+          .catch(err => console.error('Erro no instalador:', err));
       });
     }
   }
