@@ -8,9 +8,7 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
   './maskable_icon_x192.png',
-  './maskable_icon_x512.png',
-  './logo-cup.png', 
-  './qr-code.png'   
+  './maskable_icon_x512.png'
 ];
 
 self.addEventListener('install', event => {
