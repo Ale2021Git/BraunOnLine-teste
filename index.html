@@ -1529,7 +1529,7 @@
                 } else {
                     mensagemStatus = escolherMensagem(mensagens.trabalho.normal, genero);
                 }
-                icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
+                icon = (currentRegion === 'BR') ? 'Trabalho': 'Atividade';
             } else {
                 greeting.classList.add('off');
                 if (isFeriado) {
@@ -1537,7 +1537,7 @@
                 } else {
                     mensagemStatus = escolherMensagem(mensagens.folga.normal, genero);
                 }
-                icon = (currentRegion === 'BR') ? 'home' : 'chair';
+                icon = (currentRegion === 'BR') ? 'Folga' : 'Curta';
             }
         }
 
