@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>
+  // ========== CORREÇÃO CRÍTICA E DEFINITIVA ==========
+  if ('serviceWorker' in navigator) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+      // Se for iPhone, desativa o Service Worker para evitar bugs de cache do iOS
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    } else {
+      // Se for Android/Chrome, REGISTRA o Service Worker para liberar o botão de instalar!
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('PWA pronto para instalação no Android!', reg.scope))
+          .catch(err => console.error('Erro no instalador:', err));
+      });
+    }
+  }
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#00A97A">
+    <title>Braun OnLine 2026/2027</title>
+    <meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC e MANUTENÇÃO">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="manifest" href="manifest.json" id="pwa-manifest">
+    <link rel="apple-touch-icon" href="maskable_icon_x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Braun On Line">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQXB043RE1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LQXB043RE1');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;700;900&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+    <style>
+        :root {
+            --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+            --accent: #7030A0; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
+            --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
+        }
+        body.dark-mode {
+            --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
+            --primary: #00C48D; --semana-w: #00C48D;
+        }
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+            margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+        }
+        
+        /* ========== SPLASH SCREEN ORIGINAL ========== */
+        .welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); color: white; z-index: 3000;
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
+        }
+        .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
+        .welcome-logo { width: 120px; margin-bottom: 25px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        /* ========== TELA DE SAUDAÇÃO PERSONALIZADA ========== */
+        .greeting-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2900; display: none; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            transition: 0.5s; color: white;
+        }
+        .greeting-screen.work    { background: var(--accent); }
+        .greeting-screen.off     { background: var(--primary); }
+        .greeting-screen.holiday { background: #7030A0; }
+        .greeting-screen.hide    { opacity: 0; pointer-events: none; }
+        .greeting-icon     { font-size: 80px; margin-bottom: 20px; }
+        .greeting-text-main   { font-size: 1.5em; font-weight: 300; margin-bottom: 10px; }
+        .greeting-text-status { font-size: 2.2em; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
+        .btn-comecar {
+            background: white; color: var(--primary); border: none; padding: 15px 40px;
+            border-radius: 30px; font-weight: 800; font-size: 1.1em; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-top: 20px;
+        }
+
+        /* ========== SPLASH SCREEN COPA 2026 ========== */
+        #copaSplashScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); z-index: 5000; display: none;
+            flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 40px 20px; box-sizing: border-box; overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+        }
+        #copaSplashScreen::before {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 380px; height: 380px;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.12) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+        .cs-logo-wrap { 
+            width: 100%; max-width: 260px; margin: 0 auto; 
+            display: flex; justify-content: center; 
+            animation: csFadeDown 0.7s ease both; z-index: 1; 
+        }
+        .cs-logo-wrap svg { width: 100%; height: auto; fill: #FFFFFF; }
+        .cs-trophy-wrap { 
+            flex: 1; width: 100%; padding: 20px 0;
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 1; animation: csFadeIn 0.9s 0.3s ease both; 
+            background-color: transparent !important;
+        }
+        .cs-trophy-wrap img { 
+            width: 80%; max-width: 300px; 
+            max-height: 45vh;
+            height: auto; object-fit: contain; 
+            filter: drop-shadow(0 20px 48px rgba(0,0,0,0.35)); 
+            animation: csFloat 4s ease-in-out infinite; 
+            background: transparent;
+        }
+        .cs-tagline { 
+            z-index: 1; text-align: center; 
+            animation: csFadeUp 0.7s 0.5s ease both; margin-bottom: 25px; 
+        }
+        .cs-tagline p { 
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif; 
+            font-size: 2.8rem; letter-spacing: 0.10em; line-height: 1; 
+            color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,0.22); margin: 0; 
+        }
+        .cs-tagline p span { color: #ffeb3b; }
+        
+        @keyframes csFadeDown { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes csFadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes csFadeIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        @keyframes csFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+        #install-button {
+            display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
+            font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .hoje {
+            background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
+            border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
+            animation: hoje-pulsar 1.5s infinite ease-in-out;
+        }
+        body.dark-mode .hoje { border-color: #1E1E1E !important; }
+        @keyframes hoje-pulsar {
+            0%   { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+            50%  { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
+            100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+        }
+        @keyframes plane-fly {
+            0%   { transform: translate(0,0) rotate(0deg); opacity: 0.8; }
+            50%  { transform: translate(2px,-2px) rotate(-5deg); opacity: 1; }
+            100% { transform: translate(0,0) rotate(0deg); opacity: 0.8; }
+        }
+        @keyframes ballMove {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(2px, -2px) rotate(15deg); }
+            50%  { transform: translate(0, -4px) rotate(0deg); }
+            75%  { transform: translate(-2px, -2px) rotate(-15deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .FERIAS {
+            position: relative;
+            border: 2px dashed var(--ferias) !important;
+            box-shadow: inset 0 0 10px rgba(112,48,160,0.2);
+        }
+        .FERIAS::before {
+            content: 'flight'; font-family: 'Material Symbols Outlined';
+            position: absolute; top: -6px; right: -6px; font-size: 16px;
+            color: var(--ferias); background: var(--card); border-radius: 50%;
+            z-index: 5; animation: plane-fly 2s infinite ease-in-out;
+            font-variation-settings: 'FILL' 1;
+        }
+        .brasil-game-work::after,
+        .brasil-game-off::after {
+            content: '⚽';
+            position: absolute;
+            bottom: 0px;
+            right: 2px;
+            font-size: 1em;
+            animation: ballMove 1s infinite ease-in-out;
+            pointer-events: none;
+            font-weight: bold;
+            text-shadow: 0 0 2px white;
+        }
+        .brasil-game-work::after { color: #ff4d4d; }
+        .brasil-game-off::after  { color: #4caf50; }
+        body.dark-mode .brasil-game-work::after,
+        body.dark-mode .brasil-game-off::after {
+            text-shadow: 0 0 2px black;
+        }
+        .game-brasil-block {
+            background: linear-gradient(135deg, #005c2b, #003d1c);
+            border-radius: 18px;
+            padding: 14px 12px;
+            margin-bottom: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .game-brasil-icon {
+            font-size: 2.4em;
+            background: rgba(255,255,255,0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-brasil-info {
+            flex: 1;
+        }
+        .game-brasil-adversario {
+            font-weight: 900;
+            font-size: 1.2em;
+            letter-spacing: 0.5px;
+        }
+        .game-brasil-horario {
+            font-size: 0.7em;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        .game-brasil-status {
+            font-weight: 800;
+            font-size: 0.7rem;
+            background: rgba(0,0,0,0.35);
+            padding: 4px 10px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-top: 6px;
+        }
+        .game-brasil-status.work { background: var(--accent); color: white; }
+        .game-brasil-status.off  { background: var(--primary); color: white; }
+        header {
+            background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
+            justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+        .brand-logo-svg { height: 35px; width: auto; }
+        .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
+        .status-panel {
+            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 0px 15px 0px 15px;
+            border: 1px solid var(--border); text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            position: sticky; top: 85px; z-index: 95;
+        }
+        .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
+        .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
+        
+        #calendario-box {
+            margin-top: 0px;
+            padding-top: 0px;
+        }
+        .mes-container { 
+            perspective: 1000px; 
+            margin: 0 10px 25px 10px;
+            min-height: 400px; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 0px; 
+        }
+        #calendario-box > .mes-container:first-child { margin-top: 0px; }
+        
+        .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
+        .mes-inner.flipped { transform: rotateY(180deg); }
+        .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .mes-front { background: var(--card); }
+        .mes-back  { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
+        .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
+        .dia-label-w {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 900;
+            background: linear-gradient(135deg, var(--semana-w), #007d5a); color: #FFFFFF;
+            border-radius: 8px; height: 28px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .dia { 
+            aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
+            border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent; 
+            transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
+        }
+        .AMARELO  { background: var(--amarelo) !important; color: #1a1a1a !important; }
+        .VERDE    { background: var(--verde)   !important; color: #fff     !important; }
+        .AZUL     { background: var(--azul-mnt)!important; color: #fff     !important; }
+        .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
+        .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; height: 75px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.75em; font-weight: 700; background: none; border: none; cursor: pointer; }
+        .tab.active { color: #FFFFFF; }
+        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
+        .bottom-modal { position: fixed; bottom: -110%; left: 0; right: 0; background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px; z-index: 2000; transition: 0.5s; max-height: 85vh; overflow-y: auto; }
+        .bottom-modal.show { bottom: 0; }
+        .select-group { display: flex; gap: 12px; padding: 0 15px 20px 15px; }
+        select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
+        #anoSelect   { width: 95px; flex-shrink: 0; }
+        #turmaSelect { flex-grow: 1; }
+        .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .config-label { font-weight: 600; font-size: 0.95em; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; flex-wrap: wrap; gap: 10px; }
+        .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
+        .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .ramal-badge {
+            background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--primary);
+            text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
+        .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .stat-card-big.purple { border-color: var(--accent); }
+        .stat-card-big.teal   { border-color: var(--verde);  }
+        .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        .stat-val-big.purple { color: var(--accent); }
+        .stat-val-big.teal   { color: var(--verde);  }
+        .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .lote-box { background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; position: relative; }
+        .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+        .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
+        .privacy-link { color: var(--primary); font-weight: 800; text-decoration: none; display: block; margin-top: 10px; cursor: pointer; background: none; border: none; font-size: inherit; }
+        #btn-flutuante-votar {
+            position: fixed; bottom: 95px; right: 20px;
+            background: linear-gradient(135deg, #FFD700, #EBC13D); color: #1A1A1A;
+            border: none; border-radius: 50px; padding: 12px 22px; font-weight: 800;
+            font-size: 0.85em; display: none; align-items: center; gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
+            animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
+            text-decoration: none; cursor: pointer; border: 2px solid white;
+        }
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.5) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .hamburger-btn {
+            background: none; border: none; color: white; cursor: pointer;
+            display: flex; flex-direction: column; gap: 5px; padding: 8px;
+            border-radius: 8px;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2.5px;
+            background: white; border-radius: 3px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        #hamburgerDrawer {
+            position: fixed; top: 0; left: -100%; width: 82%; max-width: 320px; height: 100%;
+            background: var(--card); z-index: 3600; transition: left 0.38s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column; box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+        }
+        #hamburgerDrawer.open { left: 0; }
+        #drawerOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px);
+        }
+        #drawerOverlay.show { display: block; }
+        .drawer-brand {
+            background: var(--primary); padding: 50px 20px 20px 20px;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            position: relative;
+        }
+        .drawer-brand-icon {
+            width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .drawer-brand-text { color: white; font-size: 1em; font-weight: 800; }
+        .drawer-brand-sub  { color: rgba(255,255,255,0.7); font-size: 0.72em; font-weight: 600; margin-top: 2px; }
+        .drawer-close-btn {
+            background: none; border: none; color: white; cursor: pointer;
+            margin-left: auto; padding: 8px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: background 0.2s;
+        }
+        .drawer-close-btn:active { background: rgba(255,255,255,0.2); }
+        .drawer-close-btn span { font-size: 24px; }
+        .drawer-menu { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .drawer-section-label {
+            font-size: 0.65em; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--primary); opacity: 0.5;
+            padding: 15px 20px 5px 20px;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: none;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            border-top: none;
+            margin-bottom: 2px;
+        }
+        .drawer-item:active { background: rgba(0,0,0,0.05); }
+        body.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
+        .drawer-item.highlight {
+            background: rgba(0,169,122,0.08);
+        }
+        body.dark-mode .drawer-item.highlight {
+            background: rgba(0,169,122,0.15);
+        }
+        .drawer-item-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+        .drawer-item-label {
+            flex: 1;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .drawer-item-sub {
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.5;
+            margin-top: 2px;
+            color: var(--text);
+        }
+        .drawer-item-arrow {
+            color: var(--text);
+            opacity: 0.3;
+            font-size: 20px;
+        }
+        .drawer-item.no-arrow .drawer-item-arrow {
+            display: none;
+        }
+        .drawer-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            opacity: 0.6;
+            font-weight: 600;
+        }
+        .qr-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .qr-img {
+            filter: invert(1);
+        }
+        #copaPanel {
+            position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
+            background: var(--bg); z-index: 3700; transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        #copaPanel.open { right: 0; }
+        .copa-panel-header {
+            background: linear-gradient(135deg, #7030A0, #7030A0);
+            padding: 48px 16px 14px 16px; flex-shrink: 0; color: white;
+        }
+        .copa-panel-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .copa-back-btn {
+            background: rgba(255,255,255,0.15); border: none; color: white;
+            border-radius: 50%; width: 36px; height: 36px; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+        }
+        .copa-panel-title { font-size: 1.15em; font-weight: 800; }
+        .copa-panel-subtitle { font-size: 0.75em; opacity: 0.75; }
+        .copa-pills-row {
+            display: flex; gap: 6px; overflow-x: auto; padding: 0 0 2px 0;
+            scrollbar-width: none;
+        }
+        .copa-pills-row::-webkit-scrollbar { display: none; }
+        .copa-group-pill {
+            background: rgba(255,255,255,0.15); color: white; border: none;
+            border-radius: 20px; padding: 6px 14px; font-weight: 800; font-size: 0.8em;
+            cursor: pointer; flex-shrink: 0; transition: background 0.15s;
+        }
+        .copa-group-pill.active { background: white; color: #005c2b; }
+        .copa-group-pill.brasil-pill { border: 1.5px solid #ffdf00; }
+        .copa-panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+        .copa-standings {
+            background: var(--card); border-radius: 18px; overflow: hidden;
+            border: 1px solid var(--border); margin-bottom: 14px;
+        }
+        .copa-standings-header {
+            display: grid; grid-template-columns: 20px 1fr 28px 28px 28px 28px 28px 34px;
+            gap: 2px; padding: 8px 12px; background: var(--primary); color: white;
+            font-size: 0.65em; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .copa-standings-row {
+            display: grid; grid-template-columns: 20px 1fr 28px 28px 28px 28px 28px 34px;
+            gap: 2px; padding: 10px 12px; border-bottom: 1px solid var(--border);
+            align-items: center; transition: background 0.1s;
+        }
+        .copa-standings-row:last-child { border-bottom: none; }
+        .copa-standings-row.classified { background: rgba(0,169,122,0.06); }
+        .copa-standings-row.brasil-row { background: rgba(0,156,59,0.1); font-weight: 800; }
+        .copa-pos { font-size: 0.72em; font-weight: 800; opacity: 0.5; text-align: center; }
+        .copa-pos.q1, .copa-pos.q2 { color: var(--primary); opacity: 1; }
+        .copa-team-cell { display: flex; align-items: center; gap: 6px; font-size: 0.82em; font-weight: 700; }
+        .copa-cell { text-align: center; font-size: 0.78em; font-weight: 700; }
+        .copa-pts { text-align: center; font-size: 0.88em; font-weight: 900; color: var(--primary); }
+        .copa-classified-bar { height: 2px; background: var(--primary); opacity: 0.3; margin: 0; }
+        .copa-round-label {
+            font-size: 0.68em; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--primary); margin: 14px 0 6px 0;
+        }
+        .copa-match-card {
+            background: var(--card); border-radius: 16px; padding: 12px 14px;
+            border: 1.5px solid var(--border); margin-bottom: 8px;
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: transform 0.15s, border-color 0.15s;
+            position: relative;
+        }
+        .copa-match-card:active { transform: scale(0.98); }
+        .copa-match-card.has-score { border-color: var(--primary); }
+        .copa-match-team { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .copa-match-team.home { align-items: flex-end; }
+        .copa-match-team.away { align-items: flex-start; }
+        .copa-match-flag { font-size: 1.5em; line-height: 1; }
+        .copa-match-name { font-size: 0.7em; font-weight: 700; text-align: center; opacity: 0.75; }
+        .copa-score-box {
+            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+            background: var(--bg); border-radius: 12px; padding: 6px 10px;
+            border: 1.5px solid var(--border); min-width: 70px; justify-content: center;
+        }
+        .copa-score-box.live { border-color: var(--primary); background: rgba(0,169,122,0.08); }
+        .copa-score-num { font-family: 'JetBrains Mono', monospace; font-size: 1.2em; font-weight: 900; }
+        .copa-score-sep { font-size: 0.9em; font-weight: 700; opacity: 0.4; }
+        .copa-edit-hint {
+            position: absolute; bottom: 5px; right: 8px;
+            font-size: 0.6em; font-weight: 800; opacity: 0.35;
+            display: flex; align-items: center; gap: 3px;
+        }
+        #scoreModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 4000; display: none;
+            align-items: center; justify-content: center; backdrop-filter: blur(6px);
+        }
+        #scoreModal.show { display: flex; }
+        .score-modal-box {
+            background: var(--card); border-radius: 28px; padding: 28px 24px;
+            width: calc(100% - 48px); max-width: 340px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+        .score-modal-title { font-weight: 800; font-size: 0.95em; opacity: 0.6; text-align: center; margin-bottom: 4px; }
+        .score-modal-teams { text-align: center; font-weight: 900; font-size: 1.1em; margin-bottom: 20px; }
+        .score-inputs-row {
+            display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px;
+        }
+        .score-input-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .score-input-flag { font-size: 2em; }
+        .score-num-input {
+            font-family: 'JetBrains Mono', monospace; font-size: 2.5em; font-weight: 900;
+            width: 80px; text-align: center; background: var(--bg); color: var(--text);
+            border: 2.5px solid var(--primary); border-radius: 18px; padding: 8px 0;
+            outline: none; appearance: textfield;
+        }
+        .score-num-input::-webkit-inner-spin-button,
+        .score-num-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .score-vs-sep { font-size: 1.5em; font-weight: 900; opacity: 0.3; margin-top: 28px; }
+        .score-btns { display: flex; gap: 10px; }
+        .score-save-btn {
+            flex: 1; background: var(--primary); color: white; border: none;
+            padding: 15px; border-radius: 16px; font-weight: 800; font-size: 1em; cursor: pointer;
+        }
+        .score-save-btn:active { opacity: 0.85; }
+        .score-cancel-btn {
+            background: var(--bg); color: var(--text); border: 1px solid var(--border);
+            padding: 15px 18px; border-radius: 16px; font-weight: 800; font-size: 0.9em; cursor: pointer;
+        }
+        .score-clear-btn {
+            background: #ffefef; color: #ff6b6b; border: 1px solid #ff6b6b;
+            padding: 15px 14px; border-radius: 16px; font-weight: 800; font-size: 0.85em; cursor: pointer;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .skip-link:focus {
+            top: 10px;
+            left: 10px;
+            width: auto;
+            height: auto;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            z-index: 9999;
+            border-radius: 8px;
+        }
+        
+        /* Correções iOS */
+        @supports (-webkit-touch-callout: none) {
+            .mes-inner {
+                transform-style: preserve-3d;
+                -webkit-transform-style: preserve-3d;
+            }
+            .mes-face {
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<div id="welcomeScreen" class="welcome-screen">
+    <img src="maskable_icon_x512.png" class="welcome-logo" alt="Logo Braun OnLine">
+    <h1>Braun OnLine</h1>
+    <p>Sua escala na palma da mão.</p>
+    <button class="btn-comecar" onclick="goToGreeting()">ENTRAR NO APP</button>
+    <div style="position:absolute;bottom:40px;font-size:0.75em;opacity:0.7;font-weight:600;letter-spacing:1px;">VERSÃO 3.3 / 2026 / 2027</div>
+</div>
+
+<!-- TELA DE SAUDAÇÃO PERSONALIZADA -->
+<div id="greetingScreen" class="greeting-screen">
+    <div class="greeting-icon" id="greet-icon">🚀</div>
+    <div class="greeting-text-main" id="greet-main">Carregando...</div>
+    <div class="greeting-text-status" id="greet-status"></div>
+</div>
+
+<div id="copaSplashScreen">
+    <div class="cs-logo-wrap">
+        <svg version="1.1" viewBox="0 0 172 42" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Braun Logo">
+            <g>
+                <path class="st-logo-path" d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path class="st-logo-path" d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path class="st-logo-path" d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path class="st-logo-path" d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path class="st-logo-path" d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path class="st-logo-path" d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/>
+            </g>
+            <g>
+                <path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" class="st-logo-path" width="1.2" height="10.2"/>
+                <polygon class="st-logo-path" points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path class="st-logo-path" d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon class="st-logo-path" points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon class="st-logo-path" points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path class="st-logo-path" d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon class="st-logo-path" points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path class="st-logo-path" d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon class="st-logo-path" points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" class="st-logo-path" width="1.2" height="10.2"/>
+                <path class="st-logo-path" d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon class="st-logo-path" points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
+        </svg>
+    </div>
+    <div class="cs-trophy-wrap">
+      <img src="logo-cup.png" alt="Logo da Copa">
+</div>
+    <div class="cs-tagline">
+        <p>NA <span>COPA</span> 2026</p>
+    </div>
+</div>
+
+<button id="install-button" onclick="installPWA()">
+    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+</button>
+
+<header>
+    <div class="brand-container">
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="Braun Logo">
+            <title>Braun Logo</title>
+            <g><path class="st-logo-path" d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/><path class="st-logo-path" d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/><path class="st-logo-path" d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/><path class="st-logo-path" d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/><path class="st-logo-path" d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/><path class="st-logo-path" d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/><rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/></g>
+            <g><path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/><polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/><path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/><path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/><rect x="72.1" y="31.6" class="st-logo-path" width="1.2" height="10.2"/><polygon class="st-logo-path" points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/><path class="st-logo-path" d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/><polygon class="st-logo-path" points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/><polygon class="st-logo-path" points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/><path class="st-logo-path" d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/><polygon class="st-logo-path" points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/><path class="st-logo-path" d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/><polygon class="st-logo-path" points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/><rect x="153.5" y="31.6" class="st-logo-path" width="1.2" height="10.2"/><path class="st-logo-path" d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/><polygon class="st-logo-path" points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/></g>
+        </svg>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <button class="hamburger-btn" onclick="openHamburger()" aria-label="Menu principal" aria-expanded="false" id="menuButton">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+    </div>
+</header>
+
+<main id="main-content">
+<div class="status-panel" aria-live="polite">
+    <div id="big-clock" class="clock">00:00:00</div>
+    <div id="status-msg" class="status-msg">---</div>
+</div>
+
+<div id="calendario-box"></div>
+</main>
+
+<div class="tab-bar" role="tablist" aria-label="Selecionar região">
+    <button class="tab" onclick="setRegion('BR')" id="tab-BR" role="tab" aria-selected="true"><span class="material-symbols-outlined" aria-hidden="true">factory</span>ECOFLAC</button>
+    <button class="tab" onclick="setRegion('MNT')" id="tab-MNT" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">engineering</span>MANUTENÇÃO</button>
+</div>
+
+<div id="drawerOverlay" onclick="closeHamburger()" aria-hidden="true"></div>
+
+<div id="hamburgerDrawer" role="dialog" aria-label="Menu lateral" aria-modal="true">
+    <div class="drawer-brand">
+        <div class="drawer-brand-icon">
+            <span class="material-symbols-outlined" aria-hidden="true" style="color:white;font-size:22px;font-variation-settings:'FILL' 1">factory</span>
+        </div>
+        <div>
+            <div class="drawer-brand-text">Braun OnLine</div>
+            <div class="drawer-brand-sub">v3.3· 2026/2027</div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeHamburger()" aria-label="Fechar menu">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+    </div>
+    <div class="drawer-menu">
+        <div class="drawer-section-label">Destaques</div>
+        <button class="drawer-item highlight" onclick="showCopaSplash();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚽</div>
+            <div>
+                <div class="drawer-item-label">Copa do Mundo 2026</div>
+                <div class="drawer-item-sub">Grupos · Partidas · Placar</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Perfil</div>
+        <button class="drawer-item" onclick="openMeuPerfil()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">👤</div>
+            <div>
+                <div class="drawer-item-label">Meu Perfil</div>
+                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Contatos</div>
+        <button class="drawer-item" onclick="closeHamburger(); openRamais();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📞</div>
+            <div>
+                <div class="drawer-item-label">Ramais Úteis</div>
+                <div class="drawer-item-sub">Contatos internos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <div class="drawer-section-label">Colaborador</div>
+        <button class="drawer-item" onclick="openColaboradorDoMes()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🏆</div>
+            <div>
+                <div class="drawer-item-label">Colaborador do Mês</div>
+                <div class="drawer-item-sub">Votação mensal</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <button class="drawer-item" onclick="openMeusPedidos()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📦</div>
+            <div>
+                <div class="drawer-item-label">Meus Pedidos</div>
+                <div class="drawer-item-sub">Uniformes e requisitos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Ferramentas</div>
+        <button class="drawer-item" onclick="closeHamburger(); openConfig();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚙️</div>
+            <div>
+                <div class="drawer-item-label">Configurações</div>
+                <div class="drawer-item-sub">Férias · Tema · Estatísticas · Splash</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item no-arrow" onclick="toggleDarkMode(); closeHamburger();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🌓</div>
+            <div>
+                <div class="drawer-item-label">Modo Escuro</div>
+                <div class="drawer-item-sub">Alterna o tema</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <button class="drawer-item" onclick="closeHamburger(); openPrivacy();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🛡️</div>
+            <div>
+                <div class="drawer-item-label">Privacidade</div>
+                <div class="drawer-item-sub">Política de dados</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <div class="drawer-section-label">Conecte-se</div>
+        <div class="drawer-item" style="cursor:default; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 15px 0;">
+            <img src="qr-code.png" alt="QR Code para acessar o Braun OnLine" class="qr-img" style="width: 120px; height: 120px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;">Escaneie para acessar</div>
+        </div>
+    </div>
+    <div class="drawer-footer">© 2026 Braun OnLine · Todos os direitos reservados</div>
+</div>
+
+<div id="copaPanel" role="dialog" aria-label="Copa do Mundo 2026" aria-modal="true">
+    <div class="copa-panel-header">
+        <div class="copa-panel-nav">
+            <button class="copa-back-btn" onclick="closeCopaPanel()" aria-label="Voltar ao calendário">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            </button>
+            <div>
+                <div class="copa-panel-title">⚽ Copa do Mundo 2026</div>
+                <div class="copa-panel-subtitle">48 seleções · 104 jogos · 11/06 – 19/07</div>
+            </div>
+        </div>
+        <div class="copa-pills-row" id="copa-pills-row" role="tablist" aria-label="Grupos da Copa"></div>
+    </div>
+    <div class="copa-panel-body" id="copa-panel-body"></div>
+</div>
+
+<div id="scoreModal" role="dialog" aria-label="Editar placar do jogo" aria-modal="true">
+    <div class="score-modal-box">
+        <div class="score-modal-title">EDITAR PLACAR</div>
+        <div class="score-modal-teams" id="score-modal-teams">Brasil vs Marrocos</div>
+        <div class="score-inputs-row">
+            <div class="score-input-wrap">
+                <div class="score-input-flag" id="score-flag-home" aria-hidden="true">🇧🇷</div>
+                <label for="score-home" class="sr-only" id="home-team-label">Placar time da casa</label>
+                <input type="number" id="score-home" class="score-num-input" min="0" max="99" value="0" aria-labelledby="home-team-label">
+            </div>
+            <div class="score-vs-sep" aria-hidden="true">×</div>
+            <div class="score-input-wrap">
+                <div class="score-input-flag" id="score-flag-away" aria-hidden="true">🇲🇦</div>
+                <label for="score-away" class="sr-only" id="away-team-label">Placar time visitante</label>
+                <input type="number" id="score-away" class="score-num-input" min="0" max="99" value="0" aria-labelledby="away-team-label">
+            </div>
+        </div>
+        <div class="score-btns">
+            <button class="score-clear-btn" onclick="clearScore()" aria-label="Limpar placar">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;vertical-align:middle">delete</span>
+            </button>
+            <button class="score-cancel-btn" onclick="closeScoreModal()">Cancelar</button>
+            <button class="score-save-btn" onclick="saveScore()">✓ Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div id="overlay" onclick="closeAllModals()" aria-hidden="true"></div>
+
+<button id="btn-flutuante-votar" onclick="registrarVoto()" aria-label="Votar na pesquisa">
+    <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">award_star</span>
+    VOTE AQUI
+</button>
+
+<div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
+    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
+    <div id="game-brasil-container" style="margin-bottom:15px;"></div>
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <button class="material-symbols-outlined lote-copy" onclick="copyLote()" aria-label="Copiar lote">content_copy</button>
+    </div>
+    <label for="noteInput" class="sr-only">Anotação</label>
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
+    <button onclick="saveNota()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">SALVAR</button>
+</div>
+
+<div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
+    <div class="config-item">
+        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
+        <label class="switch">
+            <input type="checkbox" id="minimalGreetingToggle" onchange="toggleMinimalGreeting()" aria-label="Ativar saudação minimalista">
+            <span class="slider" aria-hidden="true"></span>
+        </label>
+    </div>
+    <button onclick="openFerias()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS
+    </button>
+    <button onclick="openStats()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA
+    </button>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">FECHAR</button>
+</div>
+
+<div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Programar Férias</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
+            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
+            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <button onclick="saveFerias()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;">SALVAR PERÍODO</button>
+        <button onclick="clearFerias()" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;">LIMPAR FÉRIAS</button>
+    </div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;">VOLTAR</button>
+</div>
+
+<div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
+    <div id="stats-content"></div>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">VOLTAR</button>
+</div>
+
+<div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
+    <div class="ramal-secao">URGÊNCIAS & SERVIÇOS</div>
+    <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Enfermaria / Emergência</span><div class="ramal-numeros-container"><a href="tel:26023358" class="ramal-badge">3358</a> <a href="tel:26023359" class="ramal-badge">3359</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
+    <div class="ramal-secao">ADMINISTRAÇÃO & RH</div>
+    <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
+    <div class="ramal-secao">ECOFLAC - PRODUÇÃO & QUALIDADE</div>
+    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Esterilização / Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a> <a href="tel:26023408" class="ramal-badge">3408</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
+    <div class="ramal-secao">MANUTENÇÃO & APOIO</div>
+    <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
+    <div class="ramal-secao">CONTATOS NOMINAIS & OUTROS</div>
+    <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">FECHAR</button>
+</div>
+
+<div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.8;">
+        Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.
+        <br><br><b>Coleta de Dados:</b> Não coletamos, não transmitimos e não compartilhamos nenhum dado pessoal ou sensível.
+        <br><br><b>Armazenamento:</b> Todas as suas configurações e anotações pessoais são salvas exclusivamente no seu dispositivo (localStorage).
+    </p>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">ENTENDI</button>
+</div>
+
+<!-- ==================== MODAL MEU PERFIL ==================== -->
+<div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <!-- NOME COMPLETO -->
+        <div>
+            <label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label>
+            <input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+        <!-- MATRÍCULA -->
+        <div>
+            <label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label>
+            <input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+        <!-- TURMA -->
+        <div>
+            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
+            <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                <option value="C">Turma C (Noite - ECOFLAC)</option>
+                <option value="D">Turma D (Noite - ECOFLAC)</option>
+                <option value="E">Turma E (Manhã - Manutenção)</option>
+                <option value="F">Turma F (Manhã - Manutenção)</option>
+                <option value="G">Turma G (Noite - Manutenção)</option>
+                <option value="H">Turma H (Noite - Manutenção)</option>
+            </select>
+        </div>
+        <!-- ANO -->
+        <div>
+            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
+            <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
+        <!-- SETOR (TEXTO LIVRE) -->
+        <div>
+            <label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label>
+            <input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+    </div>
+    <button onclick="salvarDadosPerfil(); closeAllModals();" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">SALVAR E FECHAR</button>
+</div>
+
+<!-- ==================== MODAL COLABORADOR DO MÊS ==================== -->
+<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="votacaoNome" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="votacaoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="votacaoAno" style="font-weight:800;">---</span></div>
+        </div>
+    </div>
+    <p style="font-size:0.9em;opacity:0.7;margin-bottom:15px;">Seus dados já estão pré-preenchidos. Clique abaixo para votar.</p>
+    <button onclick="abrirFormularioVotacao()" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span>
+        VOTAR AGORA
+    </button>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
+</div>
+
+<!-- ==================== MODAL MEUS PEDIDOS ==================== -->
+<div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
+    
+    <!-- Dados do perfil já preenchidos -->
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="display:flex;flex-direction:column;gap:5px;">
+            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="pedidoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Turma:</span> <span id="pedidoTurma" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="pedidoAno" style="font-weight:800;">---</span></div>
+        </div>
+    </div>
+
+    <!-- Campos para preenchimento -->
+    <div style="margin-bottom:15px;">
+        <label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label>
+        <input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoTamanho" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Tamanho</label>
+        <input type="text" id="pedidoTamanho" placeholder="Ex: M, G, GG..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Observações</label>
+        <textarea id="pedidoObs" placeholder="Digite qualquer observação..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <button onclick="enviarPedidoEmail()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span>
+        ENVIAR POR E-MAIL
+    </button>
+
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
+</div>
+
+<style>
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+</style>
+
+<script>
+    // ==================== STORAGE COMPATÍVEL ====================
+    function getStorageValue(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            try {
+                return sessionStorage.getItem(key);
+            } catch (f) {
+                return null;
+            }
+        }
+    }
+
+    function setStorageValue(key, value) {
+        try {
+            localStorage.setItem(key, value);
+        } catch (e) {
+            try {
+                sessionStorage.setItem(key, value);
+            } catch (f) {
+                // Não salva
+            }
+        }
+    }
+
+    function removeStorageValue(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            try {
+                sessionStorage.removeItem(key);
+            } catch (f) {}
+        }
+    }
+
+    // ==================== LÓGICA DA SPLASH DA COPA ====================
+    function showCopaSplash() {
+        closeHamburger();
+        const splash = document.getElementById('copaSplashScreen');
+        splash.style.display = 'flex';
+        
+        setTimeout(() => {
+            splash.style.display = 'none';
+            openCopaPanel();
+        }, 3500);
+    }
+
+    // ==================== OTIMIZAÇÕES DE PERFORMANCE ====================
+    let cachedFerias = null;
+    function getFeriasRange() {
+        if (cachedFerias) return cachedFerias;
+        const inicio = getStorageValue('braun_ferias_inicio');
+        const fim = getStorageValue('braun_ferias_fim');
+        cachedFerias = { inicio, fim };
+        return cachedFerias;
+    }
+    
+    function clearFeriasCache() {
+        cachedFerias = null;
+    }
+    
+    let cachedStats = {};
+    function clearStatsCache() {
+        cachedStats = {};
+    }
+    
+    let feriadosCache = {};
+    function getFeriados(ano) {
+        if (feriadosCache[ano]) return feriadosCache[ano];
+        const f = {
+            '01-01':'Ano Novo','01-10':'Padroeiro SG','04-21':'Tiradentes','04-23':'São Jorge',
+            '05-01':'Trabalho','09-07':'Independência','09-22':'Aniv. SG','10-12':'Aparecida',
+            '11-02':'Finados','11-15':'República','11-20':'Zumbi','12-25':'Natal'
+        };
+        if      (ano === 2026) { f['02-17'] = 'Carnaval'; f['04-03'] = 'Sexta Santa'; }
+        else if (ano === 2027) { f['02-09'] = 'Carnaval'; f['03-26'] = 'Sexta Santa'; }
+        feriadosCache[ano] = f;
+        return f;
+    }
+    
+    let weekNumberCache = new Map();
+    function getWeekNumberCached(d) {
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        if (weekNumberCache.has(key)) return weekNumberCache.get(key);
+        const result = getWeekNumber(d);
+        weekNumberCache.set(key, result);
+        return result;
+    }
+    
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    
+    let clockInterval;
+    function startClock() {
+        if (clockInterval) clearInterval(clockInterval);
+        clockInterval = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                tick();
+            }
+        }, 1000);
+    }
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            if (clockInterval) clearInterval(clockInterval);
+        } else {
+            startClock();
+            tick();
+        }
+    });
+    
+    // ==================== FIM DAS OTIMIZAÇÕES ====================
+    
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-button');
+
+    if ('serviceWorker' in navigator) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (!isIOS) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => {
+                        reg.onupdatefound = () => {
+                            const iw = reg.installing;
+                            iw.onstatechange = () => {
+                                if (iw.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('Nova versão pronta.');
+                                }
+                            };
+                        };
+                    })
+                    .catch(err => console.log('Erro SW:', err));
+            });
+        }
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'SW_UPDATED') {
+          console.log('Nova versão detectada. Atualizando...');
+          window.location.reload();
+        }
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'flex';
+    });
+
+    async function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    }
+
+    // ==================== INICIALIZAÇÃO CORRETA DA TURMA ====================
+    let currentRegion = getStorageValue('braun_last_region') || 'BR';
+    let dataAtiva = '';
+    const _escalaCache = new Map();
+
+    const translations = {
+        BR:  { statusTrab: 'TRABALHANDO', statusFolga: 'DE FOLGA',  days: ['S','T','Q','Q','S','S','D'] },
+        MNT: { statusTrab: 'TRABALHANDO', statusFolga: 'FOLGA MNT', days: ['S','T','Q','Q','S','S','D'] }
+    };
+
+    const BRAZIL_GAMES_2026_DETAILS = {
+        '2026-06-13': { adversary: 'Marrocos', hour: '19:00' },
+        '2026-06-19': { adversary: 'Haiti',    hour: '21:30' },
+        '2026-06-24': { adversary: 'Escócia',  hour: '19:00' }
+    };
+    const BRAZIL_GAMES_2026 = Object.keys(BRAZIL_GAMES_2026_DETAILS);
+
+    let currentAno = getStorageValue('braun_ano') || '2026';
+    let currentTurma = getStorageValue(`braun_turma_${currentRegion}`) || 'AC';
+
+    // ============ INICIALIZAÇÃO CORRETA DA TURMA ============
+    (function init() {
+        const savedTurma = getStorageValue('braun_turma_perfil');
+        if (savedTurma) {
+            // Mapeia a turma individual para grupo e região
+            let region, grupo;
+            if (['A','B','C','D'].includes(savedTurma)) {
+                region = 'BR';
+                grupo = (savedTurma === 'A' || savedTurma === 'C') ? 'AC' : 'BD';
+            } else {
+                region = 'MNT';
+                grupo = (savedTurma === 'E' || savedTurma === 'G') ? 'EG' : 'FH';
+            }
+            currentRegion = region;
+            currentTurma = grupo;
+            setStorageValue('braun_last_region', region);
+            setStorageValue(`braun_turma_${region}`, grupo);
+        } else {
+            // Fallback: se não tiver perfil, usa padrão
+            const savedRegion = getStorageValue('braun_last_region') || 'BR';
+            currentRegion = savedRegion;
+            currentTurma = getStorageValue(`braun_turma_${savedRegion}`) || (savedRegion === 'BR' ? 'AC' : 'EG');
+        }
+        
+        // Atualizar aba ativa
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${currentRegion}`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.setAttribute('aria-selected', 'true');
+        }
+    })();
+
+    // ==================== FUNÇÃO DE SAUDAÇÃO PERSONALIZADA ====================
+    function goToGreeting() {
+        const welcome = document.getElementById('welcomeScreen');
+        const greeting = document.getElementById('greetingScreen');
+        const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
+        
+        // Removida a verificação de noSplashGreeting – a saudação sempre será exibida.
+
+        const now = new Date();
+        const hour = now.getHours();
+
+        // Pega o nome do perfil e detecta gênero
+        const nomeCompleto = getStorageValue('braun_nome_completo') || '';
+        const nome = nomeCompleto.split(' ')[0]; // Primeiro nome
+        const genero = detectarGenero(nome); // 'masculino', 'feminino' ou 'neutro'
+
+        // Verifica se hoje é feriado
+        const ano = now.getFullYear();
+        const mes = String(now.getMonth() + 1).padStart(2, '0');
+        const dia = String(now.getDate()).padStart(2, '0');
+        const isoS = `${mes}-${dia}`;
+        const feriados = getFeriados(ano);
+        const isFeriado = feriados[isoS] !== undefined;
+
+        // Saudação base
+        let saudacao = 'Bom dia';
+        if (hour >= 12 && hour < 18) saudacao = 'Boa tarde';
+        else if (hour >= 18 || hour < 5) saudacao = 'Boa noite';
+
+        // Monta a saudação inicial
+        let saudacaoCompleta = nome ? `${saudacao}, ${nome}!` : `${saudacao}!`;
+
+        // Listas de mensagens avançadas
+        const mensagens = {
+            trabalho: {
+                feriado: {
+                    masculino: [
+                        'Bora trabalhar, guerreiro! É feriado, mas temos missão! 💪',
+                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
+                        'Mesmo no feriado, você não para! Que garra! ⚡',
+                        'Bora vencer, guerreiro! O trabalho não espera! 🚀',
+                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
+                    ],
+                    feminino: [
+                        'Bora trabalhar, guerreira! É feriado, mas temos missão! 💪',
+                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
+                        'Mesmo no feriado, você não para! Que garra! ⚡',
+                        'Bora vencer, guerreira! O trabalho não espera! 🚀',
+                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
+                    ],
+                    neutro: [
+                        'Bora trabalhar! É feriado, mas temos missão! 💪',
+                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
+                        'Mesmo no feriado, você não para! Que garra! ⚡',
+                        'Bora vencer! O trabalho não espera! 🚀',
+                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
+                    ]
+                },
+                normal: {
+                    masculino: [
+                        'Bora trabalhar, guerreiro! Vamos vencer hoje! 💪',
+                        'Mais um dia de luta, você consegue! 🔥',
+                        'Que a força esteja com você! Vamos nessa! ⚡',
+                        'Foco e determinação, guerreiro! 🚀',
+                        'O sucesso começa com a sua atitude! 🌟'
+                    ],
+                    feminino: [
+                        'Bora trabalhar, guerreira! Vamos vencer hoje! 💪',
+                        'Mais um dia de luta, você consegue! 🔥',
+                        'Que a força esteja com você! Vamos nessa! ⚡',
+                        'Foco e determinação, guerreira! 🚀',
+                        'O sucesso começa com a sua atitude! 🌟'
+                    ],
+                    neutro: [
+                        'Bora trabalhar! Vamos vencer hoje! 💪',
+                        'Mais um dia de luta, você consegue! 🔥',
+                        'Que a força esteja com você! Vamos nessa! ⚡',
+                        'Foco e determinação! 🚀',
+                        'O sucesso começa com a sua atitude! 🌟'
+                    ]
+                }
+            },
+            folga: {
+                feriado: {
+                    masculino: [
+                        'Excelente dia de feriado, guerreiro! Aproveite! 🎉',
+                        'Feriado é sagrado! Curta cada momento! 🌴',
+                        'O melhor do feriado é você descansar! Aproveite! 🏀',
+                        'Feriado merecido! Seja feliz e descanse! 😊',
+                        'Hoje é seu dia! Aproveite o feriado! 🌟'
+                    ],
+                    feminino: [
+                        'Excelente dia de feriado, guerreira! Aproveite! 🎉',
+                        'Feriado é sagrado! Curta cada momento! 🌴',
+                        'O melhor do feriado é você descansar! Aproveite! ⚾️' ,
+                        'Feriado merecido! Seja feliz e descanse! 😊',
+                        'Hoje é seu dia! Aproveite o feriado! 🌟'
+                    ],
+                    neutro: [
+                        'Excelente dia de feriado! Aproveite! 🎉',
+                        'Feriado é sagrado! Curta cada momento! 🌴',
+                        'O melhor do feriado é você descansar! Aproveite! ⚽️',
+                        'Feriado merecido! Seja feliz e descanse! 😊',
+                        'Hoje é seu dia! Aproveite o feriado! 🌟'
+                    ]
+                },
+                normal: {
+                    masculino: [
+                        'Descanse, guerreiro! Você merece! 😌',
+                        'A vida é boa quando a gente descansa! 😊',
+                        'Hoje é seu dia, faça o que quiser! ⚽️',
+                        'Curta sua folga, você trabalhou duro! 🌴',
+                        'Renove as energias, você merece descanso! 🔋'
+                    ],
+                    feminino: [
+                        'Descanse, guerreira! Você merece! 😌',
+                        'A vida é boa quando a gente descansa! 😊',
+                        'Hoje é seu dia, faça o que quiser! ,⚽️',
+                        'Curta sua folga, você trabalhou duro! 🌴',
+                        'Renove as energias, você merece descanso! 🔋'
+                    ],
+                    neutro: [
+                        'Descanse! Você merece! 😌',
+                        'A vida é boa quando a gente descanso! 😊',
+                        'Hoje é seu dia, faça o que quiser! ⚽️',
+                        'Curta sua folga, você trabalhou duro! 🌴',
+                        'Renove as energias, você merece descanso! 🔋'
+                    ]
+                }
+            },
+            ferias: {
+                mensagens: {
+                    masculino: [
+                        'Aproveite suas férias, guerreiro! O mundo espera por você! ✈️',
+                        'Descanse, viaje e seja feliz! 🌴',
+                        'Férias merecidas, curta muito! 🎉',
+                        'Desconecte-se e renove as energias! 🔋',
+                        'Você trabalhou duro, agora é hora de curtir! 🌍'
+                    ],
+                    feminino: [
+                        'Aproveite suas férias, guerreira! O mundo espera por você! ✈️',
+                        'Descanse, viaje e seja feliz! 🌴',
+                        'Férias merecidas, curta muito! 🎉',
+                        'Desconecte-se e renove as energias! 🔋',
+                        'Você trabalhou duro, agora é hora de curtir! 🌍'
+                    ],
+                    neutro: [
+                        'Aproveite suas férias! O mundo espera por você! ✈️',
+                        'Descanse, viaje e seja feliz! 🌴',
+                        'Férias merecidas, curta muito! 🎉',
+                        'Desconecte-se e renove as energias! 🔋',
+                        'Você trabalhou duro, agora é hora de curtir! 🌍'
+                    ]
+                }
+            },
+            minimal: {
+                mensagens: [
+                    'Você já está no app, isso é o que importa! 😊',
+                    'Sorria, você está aqui! 🌟',
+                    'Que bom te ver por aqui! 👋',
+                    'O app está feliz com a sua presença! 🎉',
+                    'Você é bem-vindo sempre! ❤️'
+                ]
+            }
+        };
+
+        // Função para escolher mensagem aleatória
+        function escolherMensagem(lista, genero) {
+            const listaGenero = lista[genero] || lista['neutro'];
+            const index = Math.floor(Math.random() * listaGenero.length);
+            return listaGenero[index];
+        }
+
+        // Escolhe a mensagem baseada na situação
+        let mensagemStatus = '';
+        let icon = '';
+        greeting.classList.remove('work', 'off', 'holiday');
+
+        if (isFerias(now)) {
+            greeting.classList.add('holiday');
+            mensagemStatus = escolherMensagem(mensagens.ferias.mensagens, genero);
+            icon = 'flight';
+        } else if (minimalMode) {
+            greeting.classList.add('off');
+            mensagemStatus = mensagens.minimal.mensagens[Math.floor(Math.random() * mensagens.minimal.mensagens.length)];
+            icon = 'mood';
+        } else {
+            const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
+            if (isTrab) {
+                greeting.classList.add('work');
+                if (isFeriado) {
+                    mensagemStatus = escolherMensagem(mensagens.trabalho.feriado, genero);
+                } else {
+                    mensagemStatus = escolherMensagem(mensagens.trabalho.normal, genero);
+                }
+                icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
+            } else {
+                greeting.classList.add('off');
+                if (isFeriado) {
+                    mensagemStatus = escolherMensagem(mensagens.folga.feriado, genero);
+                } else {
+                    mensagemStatus = escolherMensagem(mensagens.folga.normal, genero);
+                }
+                icon = (currentRegion === 'BR') ? 'home' : 'chair';
+            }
+        }
+
+        // Atualiza a interface
+        document.getElementById('greet-main').innerText = saudacaoCompleta;
+        document.getElementById('greet-status').innerHTML = mensagemStatus;
+        document.getElementById('greet-icon').innerText = icon;
+
+        // Transição
+        welcome.classList.add('hide');
+        setTimeout(() => {
+            welcome.style.display = 'none';
+            greeting.style.display = 'flex';
+            setTimeout(() => {
+                greeting.classList.add('hide');
+                setStorageValue('braun_visited', 'true');
+                setTimeout(() => {
+                    greeting.style.display = 'none';
+                    scrollToToday();
+                }, 500);
+            }, 2500);
+        }, 500);
+    }
+
+    // ==================== FUNÇÃO PARA DETECTAR GÊNERO ====================
+    function detectarGenero(nome) {
+        if (!nome) return 'neutro';
+
+        const terminaisFemininos = ['a', 'ia', 'na', 'ra', 'la', 'sa', 'ta'];
+        const terminaisMasculinos = ['o', 'io', 'no', 'ro', 'lo', 'so', 'to'];
+
+        const ultimaLetra = nome.toLowerCase().slice(-1);
+        const duasUltimas = nome.toLowerCase().slice(-2);
+
+        const femininosEspeciais = ['Daniele', 'Gabriele', 'Rafaele', 'Simone', 'Michele', 'Dany'];
+        const masculinosEspeciais = ['Lucas', 'André', 'Andrey', 'Matheus', 'Pedro', 'Junior'];
+
+        if (femininosEspeciais.some(n => nome.toLowerCase() === n.toLowerCase())) return 'feminino';
+        if (masculinosEspeciais.some(n => nome.toLowerCase() === n.toLowerCase())) return 'masculino';
+
+        if (terminaisFemininos.includes(ultimaLetra)) return 'feminino';
+        if (terminaisMasculinos.includes(ultimaLetra)) return 'masculino';
+        if (ultimaLetra === 'e') {
+            if (duasUltimas === 'le' || duasUltimas === 'ne') return 'feminino';
+            if (duasUltimas === 're' || duasUltimas === 'se') return 'masculino';
+        }
+
+        return 'neutro';
+    }
+
+    // ==================== DEMAIS FUNÇÕES DO APP ====================
+    
+    function setRegion(r) {
+        currentRegion = r;
+        setStorageValue('braun_last_region', r);
+        document.querySelectorAll('.tab').forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        const activeTab = document.getElementById(`tab-${r}`);
+        activeTab.classList.add('active');
+        activeTab.setAttribute('aria-selected', 'true');
+
+        const savedTurma = getStorageValue(`braun_turma_${r}`);
+        if (savedTurma) {
+            currentTurma = savedTurma;
+        } else {
+            currentTurma = r === 'BR' ? 'AC' : 'EG';
+        }
+        
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+    }
+
+    function checkBR(dt, t) {
+        const key = `BR_${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}_${t}`;
+        if (_escalaCache.has(key)) return _escalaCache.get(key);
+        const baseDate = new Date(2026, 0, 18);
+        const diff     = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const isA      = (((diff % 4) + 4) % 4) < 2;
+        const result   = { isA, trab: (t === 'AC' && isA) || (t === 'BD' && !isA) };
+        _escalaCache.set(key, result);
+        return result;
+    }
+
+    function checkMnt(dt, t) {
+        const key = `MNT_${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}_${t}`;
+        if (_escalaCache.has(key)) return _escalaCache.get(key);
+        const baseDate = new Date(2026, 2, 6);
+        const diff     = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const ciclo    = ((diff % 4) + 4) % 4;
+        const isEG     = ciclo < 2;
+        const result   = { isEG, trab: (t === 'EG' ? isEG : !isEG) };
+        _escalaCache.set(key, result);
+        return result;
+    }
+
+    function isTrabalhando(dt, region, turma) {
+        return region === 'BR' ? checkBR(dt, turma).trab : checkMnt(dt, turma).trab;
+    }
+
+    function isFerias(dt) {
+        const range = getFeriasRange();
+        if (!range.inicio || !range.fim) return false;
+        const d = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+        return d >= new Date(range.inicio + 'T00:00:00').getTime() && d <= new Date(range.fim + 'T00:00:00').getTime();
+    }
+
+    function gerarCalendario() {
+        const box  = document.getElementById('calendario-box');
+        const frag = document.createDocumentFragment();
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        const ano  = parseInt(currentAno);
+        const t    = currentTurma;
+        const fer  = getFeriados(ano);
+        const lang = translations[currentRegion];
+        const hojeStr = new Date().toDateString();
+
+        // Identifica a turma individual para exibir turno
+        const turmaIndividual = getStorageValue('braun_turma_perfil') || 'A';
+
+        for (let m = 0; m < 12; m++) {
+            const dtM   = new Date(ano, m, 1);
+            const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
+            const container = document.createElement('div');
+            container.className = 'mes-container';
+
+            // 🔹 ANO NA EXTREMIDADE DIREITA 🔹
+            let hF = `<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="color:var(--primary);font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div class="grid">
+                          <div class="dia-label">W</div>
+                          ${lang.days.map(s => `<div class="dia-label">${s}</div>`).join('')}`;
+
+            let hB = `<div class="mes-face mes-back" onclick="this.parentElement.classList.toggle('flipped')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>`;
+
+            let hasEv = false;
+            const diasNoMes = new Date(ano, m + 1, 0).getDate();
+            const diaSemanaInicial = dtM.getDay();
+            const esp = diaSemanaInicial === 0 ? 6 : diaSemanaInicial - 1;
+
+            hF += `<div class="dia-label-w">${getWeekNumberCached(dtM)}</div>`;
+            for (let i = 0; i < esp; i++) hF += `<div></div>`;
+
+            let colAtual = esp;
+
+            for (let d = 1; d <= diasNoMes; d++) {
+                const at   = new Date(ano, m, d);
+                const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isoF = `${ano}-${isoS}`;
+                const f    = fer[isoS];
+                const nt   = logs[isoF];
+
+                if (colAtual === 7) {
+                    colAtual = 0;
+                    hF += `<div class="dia-label-w">${getWeekNumberCached(at)}</div>`;
+                }
+
+                let cls = 'dia ';
+
+                if (currentRegion === 'BR') {
+                    const r = checkBR(at, t);
+                    cls += (r.isA ? 'AMARELO ' : 'VERDE ');
+                    cls += (r.trab ? 'TRABALHO ' : 'FOLGA ');
+                } else {
+                    const mnt = checkMnt(at, t);
+                    cls += (mnt.isEG ? 'AZUL ' : 'VERDE ');
+                    cls += (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
+                }
+
+                // Adiciona indicador de turno (M/N) baseado na turma individual
+                let turnoLabel = '';
+                if (currentRegion === 'BR') {
+                    turnoLabel = (turmaIndividual === 'C' || turmaIndividual === 'D') ? ' (N)' : ' (M)';
+                } else {
+                    turnoLabel = (turmaIndividual === 'G' || turmaIndividual === 'H') ? ' (N)' : ' (M)';
+                }
+
+                const isBrazilGame = (ano === 2026 && BRAZIL_GAMES_2026.includes(isoF));
+                if (isBrazilGame) {
+                    const trabGameStatus = (currentRegion === 'BR') ? checkBR(at, t).trab : checkMnt(at, t).trab;
+                    cls += ` brasil-game-${trabGameStatus ? 'work' : 'off'} `;
+                }
+
+                if (hojeStr === at.toDateString()) cls += 'hoje ';
+                if (nt) cls += 'HAS_NOTE ';
+                if (isFerias(at)) cls += 'FERIAS ';
+
+                let titleAttr = '';
+                if (isBrazilGame) {
+                    const trabGameStatus = (currentRegion === 'BR') ? checkBR(at, t).trab : checkMnt(at, t).trab;
+                    const statusMsg = trabGameStatus ? 'Você TRABALHA neste dia' : 'Você está de FOLGA neste dia';
+                    titleAttr = ` title="🇧🇷 Jogo do Brasil! ${statusMsg}"`;
+                }
+
+                if (f || nt) {
+                    hasEv = true;
+                    hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`;
+                }
+
+                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')"${titleAttr}>${d}<span style="font-size:0.5em;opacity:0.5;display:block;">${turnoLabel}</span></div>`;
+                colAtual++;
+            }
+
+            hF += `</div></div>`;
+            hB += `${!hasEv ? '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>' : ''}</div>`;
+
+            container.innerHTML = `<div class="mes-inner">${hF}${hB}</div>`;
+            frag.appendChild(container);
+        }
+
+        box.innerHTML = '';
+        box.appendChild(frag);
+    }
+
+    function tick() {
+        const now      = new Date();
+        const bigClock = document.getElementById('big-clock');
+        if (bigClock) bigClock.innerText = now.toLocaleTimeString('pt-BR');
+
+        const msg = document.getElementById('status-msg');
+        if (!msg) return;
+
+        if (isFerias(now)) {
+            msg.innerText   = 'EM FÉRIAS ✈️';
+            msg.style.color = '#7030A0';
+        } else {
+            const trab      = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
+            msg.innerText   = trab ? translations[currentRegion].statusTrab : translations[currentRegion].statusFolga;
+            msg.style.color = trab ? 'var(--accent)' : 'var(--primary)';
+        }
+    }
+
+    function gerenciarBotaoVotacao() {
+        const btn = document.getElementById('btn-flutuante-votar');
+        const agora = new Date();
+        const chave = `voto_realizado_${agora.getMonth()}_${agora.getFullYear()}`;
+        btn.style.display = getStorageValue(chave) === 'true' ? 'none' : 'flex';
+    }
+
+    function registrarVoto() {
+        const agora = new Date();
+        const chave = `voto_realizado_${agora.getMonth()}_${agora.getFullYear()}`;
+        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
+        setStorageValue(chave, 'true');
+        document.getElementById('btn-flutuante-votar').style.display = 'none';
+    }
+
+    function openCard(iso) {
+        dataAtiva = iso;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        const d    = iso.split('-');
+        document.getElementById('card-data').innerText  = `${d[2]}/${d[1]}/${d[0]}`;
+        document.getElementById('noteInput').value       = logs[iso] || '';
+
+        const dtSel  = new Date(d[0], d[1] - 1, d[2]);
+        const yy     = dtSel.getFullYear().toString().slice(-2);
+        const ww     = String(getWeekNumberCached(dtSel)).padStart(2, '0');
+        let diaSem   = dtSel.getDay();
+        diaSem       = (diaSem === 0) ? 7 : diaSem;
+        document.getElementById('lote-display').innerText = `${yy}${ww}${diaSem}`;
+
+        const gameContainer = document.getElementById('game-brasil-container');
+        const anoNum = parseInt(d[0]);
+        if (anoNum === 2026 && BRAZIL_GAMES_2026_DETAILS[iso]) {
+            const game = BRAZIL_GAMES_2026_DETAILS[iso];
+            const isTrab = (currentRegion === 'BR') ? checkBR(dtSel, currentTurma).trab : checkMnt(dtSel, currentTurma).trab;
+            const statusText = isTrab ? 'TRABALHA' : 'FOLGA';
+            const statusClass = isTrab ? 'work' : 'off';
+            gameContainer.innerHTML = `
+                <div class="game-brasil-block">
+                    <div class="game-brasil-icon">⚽</div>
+                    <div class="game-brasil-info">
+                        <div class="game-brasil-adversario">🇧🇷 Brasil × ${game.adversary}</div>
+                        <div class="game-brasil-horario">${game.hour}</div>
+                        <div class="game-brasil-status ${statusClass}">${statusText}</div>
+                    </div>
+                </div>`;
+        } else {
+            gameContainer.innerHTML = '';
+        }
+
+        document.getElementById('overlay').style.display  = 'block';
+        document.getElementById('infoCard').classList.add('show');
+    }
+
+    function copyLote() {
+        const lote = document.getElementById('lote-display').innerText;
+        navigator.clipboard.writeText(lote).catch(() => {});
+        const disp = document.getElementById('lote-display');
+        const orig = disp.innerText;
+        disp.innerText = 'COPIADO!';
+        setTimeout(() => { disp.innerText = orig; }, 1000);
+    }
+
+    function openHamburger() {
+        document.getElementById('hamburgerDrawer').classList.add('open');
+        document.getElementById('drawerOverlay').classList.add('show');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+    }
+    
+    function closeHamburger() {
+        document.getElementById('hamburgerDrawer').classList.remove('open');
+        document.getElementById('drawerOverlay').classList.remove('show');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    // COPA 2026 DATA
+    const COPA_GROUPS = {
+        A: { teams: [
+            { id:'MEX', n:'México',        f:'🇲🇽' }, { id:'RSA', n:'África do Sul', f:'🇿🇦' },
+            { id:'KOR', n:'Coreia do Sul', f:'🇰🇷' }, { id:'CZE', n:'Rep. Tcheca',   f:'🇨🇿' }],
+            matches:[
+            { id:'A1', h:'MEX', a:'RSA', rd:1, dt:'11/jun 15h30', stadium:'Estádio do México' },
+            { id:'A2', h:'KOR', a:'CZE', rd:1, dt:'11/jun 19h00', stadium:'Estádio da Coreia do Sul' },
+            { id:'A3', h:'MEX', a:'KOR', rd:2, dt:'18/jun 15h30', stadium:'Estádio do México' },
+            { id:'A4', h:'RSA', a:'CZE', rd:2, dt:'18/jun 19h00', stadium:'Estádio da África do Sul' },
+            { id:'A5', h:'MEX', a:'CZE', rd:3, dt:'24/jun 15h30', stadium:'Estádio do México' },
+            { id:'A6', h:'RSA', a:'KOR', rd:3, dt:'24/jun 19h00', stadium:'Estádio da África do Sul' }]
+        },
+        B: { teams: [
+            { id:'CAN', n:'Canadá',  f:'🇨🇦' }, { id:'BIH', n:'Bósnia',  f:'🇧🇦' },
+            { id:'QAT', n:'Qatar',   f:'🇶🇦' }, { id:'SUI', n:'Suíça',   f:'🇨🇭' }],
+            matches:[
+            { id:'B1', h:'CAN', a:'BIH', rd:1, dt:'12/jun 14h00', stadium:'Estádio do Canadá' },
+            { id:'B2', h:'QAT', a:'SUI', rd:1, dt:'12/jun 17h00', stadium:'Estádio do Catar' },
+            { id:'B3', h:'CAN', a:'QAT', rd:2, dt:'18/jun 20h00', stadium:'Estádio do Canadá' },
+            { id:'B4', h:'BIH', a:'SUI', rd:2, dt:'18/jun 23h00', stadium:'Estádio da Bósnia' },
+            { id:'B5', h:'CAN', a:'SUI', rd:3, dt:'24/jun 20h00', stadium:'Estádio do Canadá' },
+            { id:'B6', h:'BIH', a:'QAT', rd:3, dt:'24/jun 23h00', stadium:'Estádio da Bósnia' }]
+        },
+        C: { teams: [
+            { id:'BRA', n:'Brasil',  f:'🇧🇷' }, { id:'MAR', n:'Marrocos', f:'🇲🇦' },
+            { id:'HAI', n:'Haiti',   f:'🇭🇹' }, { id:'SCO', n:'Escócia',  f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿' }],
+            matches:[
+            { id:'C1', h:'BRA', a:'MAR', rd:1, dt:'13/jun 19h00', stadium:'Estádio do Brasil' },
+            { id:'C2', h:'HAI', a:'SCO', rd:1, dt:'13/jun 16h00', stadium:'Estádio do Haiti' },
+            { id:'C3', h:'BRA', a:'HAI', rd:2, dt:'18/jun 21h30', stadium:'Estádio do Brasil' },
+            { id:'C4', h:'MAR', a:'SCO', rd:2, dt:'18/jun 23h00', stadium:'Estádio do Marrocos' },
+            { id:'C5', h:'BRA', a:'SCO', rd:3, dt:'24/jun 19h00', stadium:'Estádio do Brasil' },
+            { id:'C6', h:'MAR', a:'HAI', rd:3, dt:'24/jun 23h00', stadium:'Estádio do Marrocos' }]
+        },
+        D: { teams: [
+            { id:'USA', n:'EUA',      f:'🇺🇸' }, { id:'PAR', n:'Paraguai', f:'🇵🇾' },
+            { id:'AUS', n:'Austrália',f:'🇦🇺' }, { id:'TUR', n:'Turquia',  f:'🇹🇷' }],
+            matches:[
+            { id:'D1', h:'USA', a:'AUS', rd:1, dt:'12/jun 20h00', stadium:'Estádio dos EUA' },
+            { id:'D2', h:'PAR', a:'TUR', rd:1, dt:'12/jun 14h00', stadium:'Estádio do Paraguai' },
+            { id:'D3', h:'USA', a:'PAR', rd:2, dt:'19/jun 20h00', stadium:'Estádio dos EUA' },
+            { id:'D4', h:'AUS', a:'TUR', rd:2, dt:'19/jun 23h00', stadium:'Estádio da Austrália' },
+            { id:'D5', h:'USA', a:'TUR', rd:3, dt:'25/jun 20h00', stadium:'Estádio dos EUA' },
+            { id:'D6', h:'PAR', a:'AUS', rd:3, dt:'25/jun 23h00', stadium:'Estádio do Paraguai' }]
+        },
+        E: { teams: [
+        { id:'GER', n:'Alemanha', f:'🇩🇪' },
+        { id:'CUW', n:'Curaçao', f:'🇨🇼' },
+        { id:'CIV', n:'Costa do Marfim', f:'🇨🇮' },
+        { id:'ECU', n:'Equador', f:'🇪🇨' }
+    ],
+    matches:[
+        { id:'E1', h:'GER', a:'CUW', rd:1, dt:'14/jun 14h00', stadium:'Estádio da Alemanha' },
+        { id:'E2', h:'CIV', a:'ECU', rd:1, dt:'14/jun 17h00', stadium:'Estádio da Costa do Marfim' },
+        { id:'E3', h:'GER', a:'CIV', rd:2, dt:'20/jun 17h00', stadium:'Estádio da Alemanha' },
+        { id:'E4', h:'CUW', a:'ECU', rd:2, dt:'20/jun 20h00', stadium:'Estádio de Curaçao' },
+        { id:'E5', h:'ECU', a:'GER', rd:3, dt:'25/jun 17h00', stadium:'Estádio do Equador' },
+        { id:'E6', h:'CIV', a:'CUW', rd:3, dt:'25/jun 20h00', stadium:'Estádio da Costa do Marfim' }
+    ]},
+        F: { teams: [
+            { id:'NED', n:'Holanda', f:'🇳🇱' }, { id:'JPN', n:'Japão',   f:'🇯🇵' },
+            { id:'SWE', n:'Suécia',  f:'🇸🇪' }, { id:'TUN', n:'Tunísia', f:'🇹🇳' }],
+            matches:[
+            { id:'F1', h:'NED', a:'JPN', rd:1, dt:'14/jun 20h00', stadium:'Estádio da Holanda' },
+            { id:'F2', h:'SWE', a:'TUN', rd:1, dt:'14/jun 17h00', stadium:'Estádio da Suécia' },
+            { id:'F3', h:'NED', a:'SWE', rd:2, dt:'21/jun 14h00', stadium:'Estádio da Holanda' },
+            { id:'F4', h:'JPN', a:'TUN', rd:2, dt:'21/jun 17h00', stadium:'Estádio do Japão' },
+            { id:'F5', h:'NED', a:'TUN', rd:3, dt:'25/jun 20h00', stadium:'Estádio da Holanda' },
+            { id:'F6', h:'JPN', a:'SWE', rd:3, dt:'25/jun 17h00', stadium:'Estádio do Japão' }]
+        },
+        G: { teams: [
+            { id:'BEL', n:'Bélgica',       f:'🇧🇪' }, { id:'EGY', n:'Egito',         f:'🇪🇬' },
+            { id:'IRN', n:'Irã',            f:'🇮🇷' }, { id:'NZL', n:'Nova Zelândia', f:'🇳🇿' }],
+            matches:[
+            { id:'G1', h:'BEL', a:'IRN', rd:1, dt:'15/jun 14h00', stadium:'Estádio da Bélgica' },
+            { id:'G2', h:'EGY', a:'NZL', rd:1, dt:'15/jun 17h00', stadium:'Estádio do Egito' },
+            { id:'G3', h:'BEL', a:'EGY', rd:2, dt:'21/jun 20h00', stadium:'Estádio da Bélgica' },
+            { id:'G4', h:'IRN', a:'NZL', rd:2, dt:'21/jun 17h00', stadium:'Estádio do Irã' },
+            { id:'G5', h:'BEL', a:'NZL', rd:3, dt:'26/jun 14h00', stadium:'Estádio da Bélgica' },
+            { id:'G6', h:'EGY', a:'IRN', rd:3, dt:'26/jun 17h00', stadium:'Estádio do Egito' }]
+        },
+        H: { teams: [
+            { id:'ESP', n:'Espanha',       f:'🇪🇸' }, { id:'CPV', n:'Cabo Verde',     f:'🇨🇻' },
+            { id:'KSA', n:'Arábia Saudita',f:'🇸🇦' }, { id:'URU', n:'Uruguai',        f:'🇺🇾' }],
+            matches:[
+            { id:'H1', h:'ESP', a:'URU', rd:1, dt:'15/jun 20h00', stadium:'Estádio da Espanha' },
+            { id:'H2', h:'CPV', a:'KSA', rd:1, dt:'15/jun 17h00', stadium:'Estádio de Cabo Verde' },
+            { id:'H3', h:'ESP', a:'CPV', rd:2, dt:'22/jun 14h00', stadium:'Estádio da Espanha' },
+            { id:'H4', h:'KSA', a:'URU', rd:2, dt:'22/jun 17h00', stadium:'Estádio da Arábia Saudita' },
+            { id:'H5', h:'ESP', a:'KSA', rd:3, dt:'26/jun 20h00', stadium:'Estádio da Espanha' },
+            { id:'H6', h:'CPV', a:'URU', rd:3, dt:'26/jun 17h00', stadium:'Estádio de Cabo Verde' }]
+        },
+        I: { teams: [
+            { id:'FRA', n:'França',  f:'🇫🇷' }, { id:'SEN', n:'Senegal', f:'🇸🇳' },
+            { id:'IRQ', n:'Iraque',  f:'🇮🇶' }, { id:'NOR', n:'Noruega', f:'🇳🇴' }],
+            matches:[
+            { id:'I1', h:'FRA', a:'SEN', rd:1, dt:'16/jun 14h00', stadium:'Estádio da França' },
+            { id:'I2', h:'IRQ', a:'NOR', rd:1, dt:'16/jun 17h00', stadium:'Estádio do Iraque' },
+            { id:'I3', h:'FRA', a:'IRQ', rd:2, dt:'22/jun 20h00', stadium:'Estádio da França' },
+            { id:'I4', h:'SEN', a:'NOR', rd:2, dt:'22/jun 17h00', stadium:'Estádio do Senegal' },
+            { id:'I5', h:'FRA', a:'NOR', rd:3, dt:'26/jun 14h00', stadium:'Estádio da França' },
+            { id:'I6', h:'SEN', a:'IRQ', rd:3, dt:'26/jun 17h00', stadium:'Estádio do Senegal' }]
+        },
+        J: { teams: [
+            { id:'ARG', n:'Argentina', f:'🇦🇷' }, { id:'ALG', n:'Argélia',  f:'🇩🇿' },
+            { id:'AUT', n:'Áustria',   f:'🇦🇹' }, { id:'JOR', n:'Jordânia', f:'🇯🇴' }],
+            matches:[
+            { id:'J1', h:'ARG', a:'AUT', rd:1, dt:'17/jun 14h00', stadium:'Estádio da Argentina' },
+            { id:'J2', h:'ALG', a:'JOR', rd:1, dt:'17/jun 17h00', stadium:'Estádio da Argélia' },
+            { id:'J3', h:'ARG', a:'ALG', rd:2, dt:'23/jun 14h00', stadium:'Estádio da Argentina' },
+            { id:'J4', h:'AUT', a:'JOR', rd:2, dt:'23/jun 17h00', stadium:'Estádio da Áustria' },
+            { id:'J5', h:'ARG', a:'JOR', rd:3, dt:'27/jun 14h00', stadium:'Estádio da Argentina' },
+            { id:'J6', h:'ALG', a:'AUT', rd:3, dt:'27/jun 17h00', stadium:'Estádio da Argélia' }]
+        },
+        K: { teams: [
+            { id:'POR', n:'Portugal',    f:'🇵🇹' }, { id:'COD', n:'RD Congo',     f:'🇨🇩' },
+            { id:'UZB', n:'Uzbequistão', f:'🇺🇿' }, { id:'COL', n:'Colômbia',     f:'🇨🇴' }],
+            matches:[
+            { id:'K1', h:'POR', a:'COL', rd:1, dt:'17/jun 20h00', stadium:'Estádio de Portugal' },
+            { id:'K2', h:'COD', a:'UZB', rd:1, dt:'17/jun 17h00', stadium:'Estádio da RD Congo' },
+            { id:'K3', h:'POR', a:'COD', rd:2, dt:'23/jun 20h00', stadium:'Estádio de Portugal' },
+            { id:'K4', h:'UZB', a:'COL', rd:2, dt:'23/jun 17h00', stadium:'Estádio do Uzbequistão' },
+            { id:'K5', h:'POR', a:'UZB', rd:3, dt:'27/jun 20h00', stadium:'Estádio de Portugal' },
+            { id:'K6', h:'COD', a:'COL', rd:3, dt:'27/jun 17h00', stadium:'Estádio da RD Congo' }]
+        },
+        L: { teams: [
+            { id:'ENG', n:'Inglaterra', f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' }, { id:'CRO', n:'Croácia', f:'🇭🇷' },
+            { id:'GHA', n:'Gana',       f:'🇬🇭' }, { id:'PAN', n:'Panamá',  f:'🇵🇦' }],
+            matches:[
+            { id:'L1', h:'ENG', a:'CRO', rd:1, dt:'18/jun 14h00', stadium:'Estádio da Inglaterra' },
+            { id:'L2', h:'GHA', a:'PAN', rd:1, dt:'18/jun 18h00', stadium:'Estádio de Gana' },
+            { id:'L3', h:'ENG', a:'GHA', rd:2, dt:'24/jun 20h00', stadium:'Estádio da Inglaterra' },
+            { id:'L4', h:'CRO', a:'PAN', rd:2, dt:'24/jun 23h00', stadium:'Estádio da Croácia' },
+            { id:'L5', h:'ENG', a:'PAN', rd:3, dt:'27/jun 20h00', stadium:'Estádio da Inglaterra' },
+            { id:'L6', h:'CRO', a:'GHA', rd:3, dt:'27/jun 23h00', stadium:'Estádio da Croácia' }]
+        }
+    };
+
+    let copaGrupoAtivo = 'A';
+    let scoreEditMatchId = null;
+
+    function copaTeam(groupKey, id) {
+        return COPA_GROUPS[groupKey].teams.find(t => t.id === id);
+    }
+    function getScores() { return JSON.parse(getStorageValue('copa2026_scores') || '{}'); }
+    function setScores(s) { setStorageValue('copa2026_scores', JSON.stringify(s)); }
+
+    function calcStandings(groupKey) {
+        const g = COPA_GROUPS[groupKey];
+        const sc = getScores();
+        const st = {};
+        g.teams.forEach(t => { st[t.id] = { id:t.id, j:0, v:0, e:0, d:0, gp:0, gc:0, pts:0 }; });
+        g.matches.forEach(m => {
+            const s = sc[m.id];
+            if (!s) return;
+            st[m.h].j++; st[m.a].j++;
+            st[m.h].gp += s.h; st[m.h].gc += s.a;
+            st[m.a].gp += s.a; st[m.a].gc += s.h;
+            if (s.h > s.a) { st[m.h].v++; st[m.h].pts += 3; st[m.a].d++; }
+            else if (s.h < s.a) { st[m.a].v++; st[m.a].pts += 3; st[m.h].d++; }
+            else { st[m.h].e++; st[m.h].pts++; st[m.a].e++; st[m.a].pts++; }
+        });
+        return Object.values(st).sort((a,b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            const sa = a.gp - a.gc, sb = b.gp - b.gc;
+            if (sb !== sa) return sb - sa;
+            return b.gp - a.gp;
+        });
+    }
+
+    function openCopaPanel() {
+        renderCopaPills();
+        renderCopaGroup(copaGrupoAtivo);
+        document.getElementById('copaPanel').classList.add('open');
+    }
+    function closeCopaPanel() {
+        document.getElementById('copaPanel').classList.remove('open');
+    }
+
+    function renderCopaPills() {
+        const row = document.getElementById('copa-pills-row');
+        row.innerHTML = Object.keys(COPA_GROUPS).map(k => {
+            const isBr = k === 'C';
+            const active = k === copaGrupoAtivo ? 'active' : '';
+            const br = isBr ? 'brasil-pill' : '';
+            return `<button class="copa-group-pill ${active} ${br}" onclick="selectCopaGroup('${k}')" role="tab" aria-selected="${active === 'active'}">${isBr ? '🇧🇷 ' : ''}Grupo ${k}</button>`;
+        }).join('');
+    }
+
+    function selectCopaGroup(k) {
+        copaGrupoAtivo = k;
+        renderCopaPills();
+        renderCopaGroup(k);
+    }
+
+    function renderCopaGroup(groupKey) {
+        const g  = COPA_GROUPS[groupKey];
+        const sc = getScores();
+        const st = calcStandings(groupKey);
+        let html = `
+        <div class="copa-standings">
+            <div class="copa-standings-header">
+                <div>#</div><div style="text-align:left">Seleção</div>
+                <div>J</div><div>V</div><div>E</div><div>D</div><div>SG</div><div>Pts</div>
+            </div>`;
+        st.forEach((row, i) => {
+            const team = copaTeam(groupKey, row.id);
+            const isBr = row.id === 'BRA';
+            const cls  = isBr ? 'brasil-row' : (i < 2 ? 'classified' : '');
+            const posCls = i === 0 ? 'q1' : (i === 1 ? 'q2' : '');
+            html += `
+            <div class="copa-standings-row ${cls}">
+                <div class="copa-pos ${posCls}">${i+1}</div>
+                <div class="copa-team-cell">${team.f} ${team.n}</div>
+                <div class="copa-cell">${row.j}</div>
+                <div class="copa-cell">${row.v}</div>
+                <div class="copa-cell">${row.e}</div>
+                <div class="copa-cell">${row.d}</div>
+                <div class="copa-cell">${row.gp - row.gc}</div>
+                <div class="copa-pts">${row.pts}</div>
+            </div>`;
+            if (i === 1) html += `<div class="copa-classified-bar"></div>`;
+        });
+        html += `</div>`;
+        const byRound = {};
+        g.matches.forEach(m => { (byRound[m.rd] = byRound[m.rd] || []).push(m); });
+        Object.entries(byRound).forEach(([rd, matches]) => {
+            html += `<div class="copa-round-label">Rodada ${rd}</div>`;
+            matches.forEach(m => {
+                const ht = copaTeam(groupKey, m.h);
+                const at = copaTeam(groupKey, m.a);
+                const s  = sc[m.id];
+                const hasScore = !!s;
+                html += `
+                <div class="copa-match-card ${hasScore ? 'has-score' : ''}" onclick="openScoreModal('${groupKey}','${m.id}')">
+                    <div class="copa-match-team home">
+                        <div class="copa-match-flag">${ht.f}</div>
+                        <div class="copa-match-name">${ht.n}</div>
+                    </div>
+                    <div class="copa-score-box ${hasScore ? 'live' : ''}">
+                        <span class="copa-score-num">${hasScore ? s.h : '–'}</span>
+                        <span class="copa-score-sep">×</span>
+                        <span class="copa-score-num">${hasScore ? s.a : '–'}</span>
+                    </div>
+                    <div class="copa-match-team away">
+                        <div class="copa-match-flag">${at.f}</div>
+                        <div class="copa-match-name">${at.n}</div>
+                    </div>
+                    <div class="copa-edit-hint"><span class="material-symbols-outlined" style="font-size:11px">edit</span>${m.dt}</div>
+                </div>`;
+            });
+        });
+        document.getElementById('copa-panel-body').innerHTML = html;
+    }
+
+    function openScoreModal(groupKey, matchId) {
+        const g  = COPA_GROUPS[groupKey];
+        const m  = g.matches.find(x => x.id === matchId);
+        const ht = copaTeam(groupKey, m.h);
+        const at = copaTeam(groupKey, m.a);
+        const sc = getScores();
+        const s  = sc[matchId];
+        scoreEditMatchId = matchId;
+        document.getElementById('score-modal-teams').textContent  = `${ht.f} ${ht.n}  ×  ${at.f} ${at.n}`;
+        document.getElementById('score-flag-home').textContent    = ht.f;
+        document.getElementById('score-flag-away').textContent    = at.f;
+        document.getElementById('score-home').value               = s ? s.h : 0;
+        document.getElementById('score-away').value               = s ? s.a : 0;
+        document.getElementById('scoreModal').classList.add('show');
+        setTimeout(() => document.getElementById('score-home').focus(), 100);
+    }
+
+    function closeScoreModal() {
+        document.getElementById('scoreModal').classList.remove('show');
+        scoreEditMatchId = null;
+    }
+
+    function saveScore() {
+        if (!scoreEditMatchId) return;
+        const h = parseInt(document.getElementById('score-home').value) || 0;
+        const a = parseInt(document.getElementById('score-away').value) || 0;
+        const sc = getScores();
+        sc[scoreEditMatchId] = { h, a };
+        setScores(sc);
+        closeScoreModal();
+        renderCopaGroup(copaGrupoAtivo);
+    }
+
+    function clearScore() {
+        if (!scoreEditMatchId) return;
+        const sc = getScores();
+        delete sc[scoreEditMatchId];
+        setScores(sc);
+        closeScoreModal();
+        renderCopaGroup(copaGrupoAtivo);
+    }
+
+    function openRamais() {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('ramaisCard').classList.add('show');
+    }
+
+    function openPrivacy() { document.getElementById('overlay').style.display = 'block'; document.getElementById('privacyCard').classList.add('show'); }
+
+    function openFerias() {
+        document.getElementById('feriasInicio').value = getStorageValue('braun_ferias_inicio') || '';
+        document.getElementById('feriasFim').value    = getStorageValue('braun_ferias_fim')    || '';
+        document.getElementById('configCard').classList.remove('show');
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('feriasCard').classList.add('show');
+    }
+
+    function saveFerias() {
+        const ini = document.getElementById('feriasInicio').value;
+        const fim = document.getElementById('feriasFim').value;
+        if (!ini || !fim) { alert('Preencha as duas datas.'); return; }
+        if (ini > fim)    { alert('A data de início não pode ser após o término.'); return; }
+        setStorageValue('braun_ferias_inicio', ini);
+        setStorageValue('braun_ferias_fim', fim);
+        clearFeriasCache();
+        closeAllModals(); gerarCalendario(); tick();
+    }
+
+    function clearFerias() {
+        removeStorageValue('braun_ferias_inicio');
+        removeStorageValue('braun_ferias_fim');
+        clearFeriasCache();
+        closeAllModals(); gerarCalendario(); tick();
+    }
+
+    function openConfig() {
+        document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
+        // O toggle de splash de saudação foi removido.
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('configCard').classList.add('show');
+    }
+
+    function toggleMinimalGreeting() {
+        setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked);
+    }
+
+    function openStats() {
+        const ano      = parseInt(currentAno);
+        const turma    = currentTurma;
+        const cacheKey = `${ano}_${turma}_${currentRegion}`;
+        
+        if (cachedStats[cacheKey]) {
+            document.getElementById('stats-content').innerHTML = cachedStats[cacheKey];
+            document.getElementById('configCard').classList.remove('show');
+            document.getElementById('statsCard').classList.add('show');
+            return;
+        }
+        
+        const feriados = getFeriados(ano);
+        let diasTrabalho = 0, diasFolga = 0, feriadosTrab = 0, feriadosFolga = 0, listaFeriadosHTML = '';
+        
+        for (let m = 0; m < 12; m++) {
+            for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {
+                const dataTeste = new Date(ano, m, d);
+                const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const res  = (currentRegion === 'BR') ? checkBR(dataTeste, turma).trab : checkMnt(dataTeste, turma).trab;
+                if (res) diasTrabalho++; else diasFolga++;
+                
+                // Conta feriados trabalhados
+                if (feriados[isoS] !== undefined) {
+                    if (res) feriadosTrab++; else feriadosFolga++;
+                    listaFeriadosHTML += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+                        <span>${d}/${String(m+1).padStart(2,'0')}</span>
+                        <span>${feriados[isoS]}</span>
+                        <span style="font-weight:800;color:${res ? 'var(--accent)' : 'var(--primary)'};">${res ? 'TRABALHO' : 'FOLGA'}</span>
+                    </div>`;
+                }
+            }
+        }
+        
+        const html = `
+            <div class="stat-grid">
+                <div class="stat-card-big"><div class="stat-val-big">${diasTrabalho}</div><div class="stat-lab-big">Dias Trabalhados</div></div>
+                <div class="stat-card-big"><div class="stat-val-big" style="color:var(--text);">${diasFolga}</div><div class="stat-lab-big">Dias de Folga</div></div>
+                <div class="stat-card-big purple"><div class="stat-val-big purple">${feriadosTrab}</div><div class="stat-lab-big">Feriados Trabalhados</div></div>
+                <div class="stat-card-big teal"><div class="stat-val-big teal">${feriadosFolga}</div><div class="stat-lab-big">Feriados de Folga</div></div>
+            </div>
+            <div style="font-weight:800;color:var(--primary);margin-top:10px;margin-bottom:10px;font-size:1.1em;">📅 Feriados no Ano</div>
+            ${listaFeriadosHTML || '<div style="opacity:0.6;">Nenhum feriado listado.</div>'}
+        `;
+        cachedStats[cacheKey] = html;
+        document.getElementById('stats-content').innerHTML = html;
+        document.getElementById('configCard').classList.remove('show');
+        document.getElementById('statsCard').classList.add('show');
+    }
+
+    // ==================== FUNÇÕES PARA OS MODAIS DE PERFIL E COLABORADOR ====================
+    function openMeuPerfil() {
+        document.getElementById('nomePerfil').value = getStorageValue('braun_nome_completo') || '';
+        document.getElementById('matriculaPerfil').value = getStorageValue('braun_matricula') || '';
+        const savedTurma = getStorageValue('braun_turma_perfil') || 'A';
+        document.getElementById('turmaPerfil').value = savedTurma;
+        document.getElementById('anoPerfil').value = getStorageValue('braun_ano') || '2026';
+        document.getElementById('setorPerfil').value = getStorageValue('braun_setor') || '';
+        closeHamburger();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('meuPerfilCard').classList.add('show');
+    }
+
+    function salvarDadosPerfil() {
+        const nome = document.getElementById('nomePerfil').value;
+        const matricula = document.getElementById('matriculaPerfil').value;
+        const turma = document.getElementById('turmaPerfil').value;
+        const ano = document.getElementById('anoPerfil').value;
+        const setor = document.getElementById('setorPerfil').value;
+        
+        setStorageValue('braun_nome_completo', nome);
+        setStorageValue('braun_matricula', matricula);
+        setStorageValue('braun_turma_perfil', turma);
+        setStorageValue('braun_ano', ano);
+        setStorageValue('braun_setor', setor);
+        
+        // Atualiza região e turma do grupo
+        let region, grupo;
+        if (['A','B','C','D'].includes(turma)) {
+            region = 'BR';
+            grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+        } else {
+            region = 'MNT';
+            grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
+        }
+        currentRegion = region;
+        currentTurma = grupo;
+        setStorageValue('braun_last_region', region);
+        setStorageValue(`braun_turma_${region}`, grupo);
+        
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+        
+        closeAllModals();
+    }
+
+    function openColaboradorDoMes() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        document.getElementById('votacaoNome').innerText = nome;
+        document.getElementById('votacaoMatricula').innerText = matricula;
+        document.getElementById('votacaoAno').innerText = ano;
+        closeHamburger();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('colaboradorDoMesCard').classList.add('show');
+    }
+
+    function abrirFormularioVotacao() {
+        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
+    }
+
+    function openMeusPedidos() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const turma = getStorageValue('braun_turma_perfil') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        document.getElementById('pedidoNome').innerText = nome;
+        document.getElementById('pedidoMatricula').innerText = matricula;
+        document.getElementById('pedidoTurma').innerText = turma;
+        document.getElementById('pedidoAno').innerText = ano;
+        document.getElementById('pedidoItem').value = '';
+        document.getElementById('pedidoTamanho').value = '';
+        document.getElementById('pedidoObs').value = '';
+        closeHamburger();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('meusPedidosCard').classList.add('show');
+    }
+
+    function enviarPedidoEmail() {
+        const nome = document.getElementById('pedidoNome').innerText;
+        const matricula = document.getElementById('pedidoMatricula').innerText;
+        const turma = document.getElementById('pedidoTurma').innerText;
+        const ano = document.getElementById('pedidoAno').innerText;
+        const item = document.getElementById('pedidoItem').value;
+        const tamanho = document.getElementById('pedidoTamanho').value;
+        const obs = document.getElementById('pedidoObs').value;
+        
+        if (!item) { alert('Por favor, informe o item desejado.'); return; }
+        if (!tamanho) { alert('Por favor, informe o tamanho.'); return; }
+        
+        const corpo = `Nome: ${nome}\nMatrícula: ${matricula}\nTurma: ${turma}\nAno: ${ano}\nItem: ${item}\nTamanho: ${tamanho}\nObservações: ${obs}`;
+        window.location.href = `mailto:rh@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
+    }
+
+    // ==================== FUNÇÕES DE FECHAMENTO E SALVAMENTO DE NOTA ====================
+    function closeAllModals() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.bottom-modal').forEach(m => m.classList.remove('show'));
+        document.getElementById('scoreModal').classList.remove('show');
+    }
+
+    function saveNota() {
+        const nota = document.getElementById('noteInput').value;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        if (nota.trim() === '') {
+            delete logs[dataAtiva];
+        } else {
+            logs[dataAtiva] = nota;
+        }
+        setStorageValue('logs_v26', JSON.stringify(logs));
+        closeAllModals();
+        gerarCalendario();
+    }
+
+    function scrollToToday() {
+        const hoje = new Date().toDateString();
+        const targets = document.querySelectorAll('.hoje');
+        if (targets.length > 0) {
+            const t = targets[0];
+            const rect = t.getBoundingClientRect();
+            const offset = rect.top + window.pageYOffset - 100;
+            window.scrollTo({ top: offset, behavior: 'smooth' });
+        }
+    }
+
+    // ==================== INICIALIZAÇÃO FINAL - SAUDAÇÃO SEMPRE ====================
+
+    // Controle de tempo para evitar saudação repetida em trocas rápidas de app
+    const GREETING_COOLDOWN_MS = 30 * 1000; // 30 segundos
+    let _lastGreetingTime = 0;
+    let _greetingTimer = null;
+
+    function showGreeting() {
+        const greetingScreen = document.getElementById('greetingScreen');
+        if (!greetingScreen) return;
+
+        // Cancela timer anterior se ainda estiver rodando
+        if (_greetingTimer) {
+            clearTimeout(_greetingTimer);
+            _greetingTimer = null;
+        }
+
+        // Reseta estado visual
+        greetingScreen.classList.remove('hide', 'work', 'off', 'holiday');
+        greetingScreen.style.opacity = '1';
+        greetingScreen.style.display = 'flex';
+
+        const now = new Date();
+        const hour = now.getHours();
+        const nomeCompleto = getStorageValue('braun_nome_completo') || '';
+        const nome = nomeCompleto.split(' ')[0] || 'Colaborador';
+
+        let saudacao = 'Bom dia';
+        if (hour >= 12 && hour < 18) saudacao = 'Boa tarde';
+        else if (hour >= 18 || hour < 5) saudacao = 'Boa noite';
+
+        document.getElementById('greet-main').innerText = `${saudacao}, ${nome}!`;
+
+        const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
+        const isFeriasHoje = isFerias(now);
+
+        let mensagemStatus = 'Bem-vindo!';
+        let icon = 'mood';
+
+        greetingScreen.classList.remove('work', 'off', 'holiday');
+
+        if (isFeriasHoje) {
+            greetingScreen.classList.add('holiday');
+            mensagemStatus = 'Aproveite suas férias! ✈️';
+            icon = 'flight';
+        } else if (minimalMode) {
+            greetingScreen.classList.add('off');
+            mensagemStatus = 'Que bom te ver por aqui! 👋';
+        } else {
+            const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
+            if (isTrab) {
+                greetingScreen.classList.add('work');
+                icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
+                mensagemStatus = 'Bora trabalhar com energia! 💪';
+            } else {
+                greetingScreen.classList.add('off');
+                icon = (currentRegion === 'BR') ? 'home' : 'chair';
+                mensagemStatus = 'Folga merecida! Descanse bem 🌴';
+            }
+        }
+
+        document.getElementById('greet-icon').innerText = icon;
+        document.getElementById('greet-status').innerHTML = mensagemStatus;
+
+        _lastGreetingTime = Date.now();
+
+        // Fecha automaticamente após 2.5s
+        _greetingTimer = setTimeout(() => {
+            greetingScreen.classList.add('hide');
+            setTimeout(() => {
+                greetingScreen.style.display = 'none';
+                scrollToToday();
+            }, 700);
+            _greetingTimer = null;
+        }, 2500);
+    }
+
+    // Reexibe saudação quando app volta do background (minimizado/trocou de app)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            const elapsed = Date.now() - _lastGreetingTime;
+            if (elapsed >= GREETING_COOLDOWN_MS) {
+                showGreeting();
+            }
+        }
+    });
+
+    // Reexibe saudação em navegação com bfcache (iOS Safari PWA)
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            const elapsed = Date.now() - _lastGreetingTime;
+            if (elapsed >= GREETING_COOLDOWN_MS) {
+                showGreeting();
+            }
+        }
+    });
+
+    (function initApp() {
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+        console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (isPWA ? 'PWA' : 'Browser'), 'color:#00A97A;font-weight:bold');
+
+        // Mostra saudação na carga inicial
+        showGreeting();
+
+        // Inicializações do app
+        startClock();
+        gerarCalendario();
+        gerenciarBotaoVotacao();
+    })();
+</script>
+</body>
+</html>
