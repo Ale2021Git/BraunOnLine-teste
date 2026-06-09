@@ -2357,35 +2357,20 @@
         }
     }
 
-    // ==================== DARK MODE ====================
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode') ? 'true' : 'false');
-    }
-
-    (function loadDarkMode() {
-        if (getStorageValue('braun_dark_mode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
-    })();
-
-    // ==================== INICIALIZAÇÃO FINAL (VERSÃO FORÇADA) ====================
+    // ==================== INICIALIZAÇÃO FINAL - VERSÃO ESTÁVEL ====================
     (function initApp() {
-        console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (window.matchMedia('(display-mode: standalone)').matches ? 'PWA Standalone' : 'Browser'), 'color:#00A97A;font-weight:bold');
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+        console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (isPWA ? 'PWA' : 'Browser'), 'color:#00A97A;font-weight:bold');
 
-        // Reset completo
+        // Reset
         document.getElementById('welcomeScreen').style.display = 'none';
+        
         const greetingScreen = document.getElementById('greetingScreen');
-        greetingScreen.style.display = 'none';
+        greetingScreen.style.display = 'flex';
+        greetingScreen.style.opacity = '1';
         greetingScreen.classList.remove('hide', 'work', 'off', 'holiday');
 
-        const isVisited = getStorageValue('braun_visited') === 'true';
-
-        function forceShowGreeting() {
-            greetingScreen.style.display = 'flex';
-            greetingScreen.style.opacity = '1';
-            greetingScreen.style.transform = 'none';
-
+        function showGreeting() {
             const now = new Date();
             const hour = now.getHours();
             const nomeCompleto = getStorageValue('braun_nome_completo') || '';
@@ -2427,28 +2412,23 @@
 
             document.getElementById('greet-icon').innerText = icon;
             document.getElementById('greet-status').innerHTML = mensagemStatus;
+        }
 
-            // Fecha automaticamente após 2,4 segundos
+        showGreeting();
+
+        // Fecha automaticamente com timeout mais confiável
+        setTimeout(() => {
+            greetingScreen.classList.add('hide');
             setTimeout(() => {
-                greetingScreen.classList.add('hide');
-                setTimeout(() => {
-                    greetingScreen.style.display = 'none';
-                    scrollToToday();
-                }, 700);
-            }, 2400);
-        }
+                greetingScreen.style.display = 'none';
+                scrollToToday();
+            }, 800);
+        }, 2600);
 
-        // Força a saudação sempre na primeira execução do PWA
-        if (isVisited) {
-            forceShowGreeting();
-        } else {
-            document.getElementById('welcomeScreen').style.display = 'flex';
-        }
-
-        // Marca como visitado imediatamente
+        // Marca como visitado
         setStorageValue('braun_visited', 'true');
 
-        // Inicializações
+        // Resto do app
         startClock();
         gerarCalendario();
         gerenciarBotaoVotacao();
