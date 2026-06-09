@@ -903,13 +903,6 @@
             <span class="slider" aria-hidden="true"></span>
         </label>
     </div>
-    <div class="config-item">
-        <span class="config-label">Exibir Splash de Saudação?<br><small style="font-weight:400;opacity:0.7;">Mostra "Bom dia..." ao entrar.</small></span>
-        <label class="switch">
-            <input type="checkbox" id="splashGreetingToggle" onchange="toggleSplashGreeting()" aria-label="Ativar/Desativar Splash de Saudação">
-            <span class="slider" aria-hidden="true"></span>
-        </label>
-    </div>
     <button onclick="openFerias()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
         <span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS
     </button>
@@ -1328,19 +1321,8 @@
         const welcome = document.getElementById('welcomeScreen');
         const greeting = document.getElementById('greetingScreen');
         const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
-        const noSplashGreeting = getStorageValue('braun_no_splash_greeting') === 'true';
         
-        // Se a splash de saudação estiver desativada, pula para o calendário
-        if (noSplashGreeting) {
-            welcome.classList.add('hide');
-            setTimeout(() => {
-                welcome.style.display = 'none';
-                greeting.style.display = 'none';
-                setStorageValue('braun_visited', 'true');
-                scrollToToday();
-            }, 200);
-            return;
-        }
+        // Removida a verificação de noSplashGreeting – a saudação sempre será exibida.
 
         const now = new Date();
         const hour = now.getHours();
@@ -1529,7 +1511,7 @@
                 } else {
                     mensagemStatus = escolherMensagem(mensagens.trabalho.normal, genero);
                 }
-                icon = (currentRegion === 'BR') ? 'Trabalho': 'Atividade';
+                icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
             } else {
                 greeting.classList.add('off');
                 if (isFeriado) {
@@ -1537,7 +1519,7 @@
                 } else {
                     mensagemStatus = escolherMensagem(mensagens.folga.normal, genero);
                 }
-                icon = (currentRegion === 'BR') ? 'Folga' : 'Curta';
+                icon = (currentRegion === 'BR') ? 'home' : 'chair';
             }
         }
 
@@ -2189,17 +2171,13 @@
 
     function openConfig() {
         document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
-        document.getElementById('splashGreetingToggle').checked = (getStorageValue('braun_no_splash_greeting') === 'true');
+        // O toggle de splash de saudação foi removido.
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('configCard').classList.add('show');
     }
 
     function toggleMinimalGreeting() {
         setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked);
-    }
-
-    function toggleSplashGreeting() {
-        setStorageValue('braun_no_splash_greeting', document.getElementById('splashGreetingToggle').checked);
     }
 
     function openStats() {
@@ -2223,205 +2201,266 @@
                 const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const res  = (currentRegion === 'BR') ? checkBR(dataTeste, turma).trab : checkMnt(dataTeste, turma).trab;
                 if (res) diasTrabalho++; else diasFolga++;
-                if (feriados[isoS]) {
-                    const statusText = res ? 'TRAB' : 'FOLGA';
-                    const corTexto   = res ? '#A800C4' : '#00A97A';
+                
+                // Conta feriados trabalhados
+                if (feriados[isoS] !== undefined) {
                     if (res) feriadosTrab++; else feriadosFolga++;
-                    listaFeriadosHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 5px;border-bottom:1px solid var(--border);font-size:0.9em;"><span style="font-weight:600;">${String(d).padStart(2,'0')}/${String(m+1).padStart(2,'0')} - ${feriados[isoS]}</span><span style="font-weight:900;color:${corTexto};">${statusText}</span></div>`;
+                    listaFeriadosHTML += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+                        <span>${d}/${String(m+1).padStart(2,'0')}</span>
+                        <span>${feriados[isoS]}</span>
+                        <span style="font-weight:800;color:${res ? 'var(--accent)' : 'var(--primary)'};">${res ? 'TRABALHO' : 'FOLGA'}</span>
+                    </div>`;
                 }
             }
         }
         
-        const statsHTML = `
+        const html = `
             <div class="stat-grid">
-                <div class="stat-card-big"><div class="stat-val-big">${diasTrabalho}d</div><div class="stat-lab-big">Trabalho</div></div>
-                <div class="stat-card-big"><div class="stat-val-big">${diasFolga}d</div><div class="stat-lab-big">Folgas</div></div>
-                <div class="stat-card-big purple"><div class="stat-val-big purple">${feriadosTrab}</div><div class="stat-lab-big">Feriado c/ Trab</div></div>
-                <div class="stat-card-big teal"><div class="stat-val-big teal">${feriadosFolga}</div><div class="stat-lab-big">Feriado de Folga</div></div>
+                <div class="stat-card-big"><div class="stat-val-big">${diasTrabalho}</div><div class="stat-lab-big">Dias Trabalhados</div></div>
+                <div class="stat-card-big"><div class="stat-val-big" style="color:var(--text);">${diasFolga}</div><div class="stat-lab-big">Dias de Folga</div></div>
+                <div class="stat-card-big purple"><div class="stat-val-big purple">${feriadosTrab}</div><div class="stat-lab-big">Feriados Trabalhados</div></div>
+                <div class="stat-card-big teal"><div class="stat-val-big teal">${feriadosFolga}</div><div class="stat-lab-big">Feriados de Folga</div></div>
             </div>
-            <h3 style="font-size:1.1em;color:var(--primary);margin:25px 0 10px 0;font-weight:800;text-align:left;">Cruzamento de Feriados</h3>
-            <div style="background:var(--bg);border-radius:20px;padding:10px;border:1px solid var(--border);text-align:left;">
-                ${listaFeriadosHTML || '<div style="text-align:center;opacity:0.5;padding:10px;">Nenhum feriado encontrado.</div>'}
-            </div>`;
-        
-        cachedStats[cacheKey] = statsHTML;
-        document.getElementById('stats-content').innerHTML = statsHTML;
+            <div style="font-weight:800;color:var(--primary);margin-top:10px;margin-bottom:10px;font-size:1.1em;">📅 Feriados no Ano</div>
+            ${listaFeriadosHTML || '<div style="opacity:0.6;">Nenhum feriado listado.</div>'}
+        `;
+        cachedStats[cacheKey] = html;
+        document.getElementById('stats-content').innerHTML = html;
         document.getElementById('configCard').classList.remove('show');
         document.getElementById('statsCard').classList.add('show');
     }
 
-    function saveNota() {
-        const msg  = document.getElementById('noteInput').value.trim();
-        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
-        if (msg) logs[dataAtiva] = msg; else delete logs[dataAtiva];
-        setStorageValue('logs_v26', JSON.stringify(logs));
-        closeAllModals(); gerarCalendario();
-    }
-
-    function closeAllModals() {
-        document.querySelectorAll('.bottom-modal').forEach(m => m.classList.remove('show'));
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    // ==================== NOVAS FUNÇÕES DO MENU ====================
-
+    // ==================== FUNÇÕES PARA OS MODAIS DE PERFIL E COLABORADOR ====================
     function openMeuPerfil() {
+        document.getElementById('nomePerfil').value = getStorageValue('braun_nome_completo') || '';
+        document.getElementById('matriculaPerfil').value = getStorageValue('braun_matricula') || '';
+        const savedTurma = getStorageValue('braun_turma_perfil') || 'A';
+        document.getElementById('turmaPerfil').value = savedTurma;
+        document.getElementById('anoPerfil').value = getStorageValue('braun_ano') || '2026';
+        document.getElementById('setorPerfil').value = getStorageValue('braun_setor') || '';
         closeHamburger();
-        // Carregar dados salvos
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        const setor = getStorageValue('braun_setor') || '';
-        
-        document.getElementById('nomePerfil').value = nome;
-        document.getElementById('matriculaPerfil').value = matricula;
-        if (turma) {
-            const select = document.getElementById('turmaPerfil');
-            select.value = turma;
-        }
-        if (ano) {
-            document.getElementById('anoPerfil').value = ano;
-        }
-        document.getElementById('setorPerfil').value = setor;
-        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meuPerfilCard').classList.add('show');
     }
 
     function salvarDadosPerfil() {
-        const nome = document.getElementById('nomePerfil').value.trim();
-        const matricula = document.getElementById('matriculaPerfil').value.trim();
+        const nome = document.getElementById('nomePerfil').value;
+        const matricula = document.getElementById('matriculaPerfil').value;
         const turma = document.getElementById('turmaPerfil').value;
         const ano = document.getElementById('anoPerfil').value;
-        const setor = document.getElementById('setorPerfil').value.trim();
-
-        if (nome) setStorageValue('braun_nome_completo', nome);
-        if (matricula) setStorageValue('braun_matricula', matricula);
-        if (turma) setStorageValue('braun_turma_perfil', turma);
-        if (ano) setStorageValue('braun_ano_perfil', ano);
-        if (setor) setStorageValue('braun_setor', setor);
+        const setor = document.getElementById('setorPerfil').value;
         
-        // Atualizar a turma atual
-        if (turma) {
-            let region, grupo;
-            if (['A','B','C','D'].includes(turma)) {
-                region = 'BR';
-                grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
-            } else {
-                region = 'MNT';
-                grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
-            }
-            currentRegion = region;
-            currentTurma = grupo;
-            setStorageValue('braun_last_region', region);
-            setStorageValue(`braun_turma_${region}`, grupo);
+        setStorageValue('braun_nome_completo', nome);
+        setStorageValue('braun_matricula', matricula);
+        setStorageValue('braun_turma_perfil', turma);
+        setStorageValue('braun_ano', ano);
+        setStorageValue('braun_setor', setor);
+        
+        // Atualiza região e turma do grupo
+        let region, grupo;
+        if (['A','B','C','D'].includes(turma)) {
+            region = 'BR';
+            grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+        } else {
+            region = 'MNT';
+            grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
         }
-        if (ano) setStorageValue('braun_ano', ano);
+        currentRegion = region;
+        currentTurma = grupo;
+        setStorageValue('braun_last_region', region);
+        setStorageValue(`braun_turma_${region}`, grupo);
         
+        _escalaCache.clear();
         gerarCalendario();
         tick();
+        
         closeAllModals();
     }
 
     function openColaboradorDoMes() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        document.getElementById('votacaoNome').innerText = nome;
+        document.getElementById('votacaoMatricula').innerText = matricula;
+        document.getElementById('votacaoAno').innerText = ano;
         closeHamburger();
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        
-        document.getElementById('votacaoNome').innerText = nome || 'Não preenchido';
-        document.getElementById('votacaoMatricula').innerText = matricula || 'Não preenchido';
-        document.getElementById('votacaoAno').innerText = ano || 'Não preenchido';
-        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('colaboradorDoMesCard').classList.add('show');
     }
 
     function abrirFormularioVotacao() {
         window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
-        closeAllModals();
     }
 
     function openMeusPedidos() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const turma = getStorageValue('braun_turma_perfil') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        document.getElementById('pedidoNome').innerText = nome;
+        document.getElementById('pedidoMatricula').innerText = matricula;
+        document.getElementById('pedidoTurma').innerText = turma;
+        document.getElementById('pedidoAno').innerText = ano;
+        document.getElementById('pedidoItem').value = '';
+        document.getElementById('pedidoTamanho').value = '';
+        document.getElementById('pedidoObs').value = '';
         closeHamburger();
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        
-        document.getElementById('pedidoNome').innerText = nome || 'Não preenchido';
-        document.getElementById('pedidoMatricula').innerText = matricula || 'Não preenchido';
-        document.getElementById('pedidoTurma').innerText = turma || 'Não preenchido';
-        document.getElementById('pedidoAno').innerText = ano || 'Não preenchido';
-        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meusPedidosCard').classList.add('show');
     }
 
     function enviarPedidoEmail() {
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        const item = document.getElementById('pedidoItem').value.trim();
-        const tamanho = document.getElementById('pedidoTamanho').value.trim();
-        const obs = document.getElementById('pedidoObs').value.trim();
+        const nome = document.getElementById('pedidoNome').innerText;
+        const matricula = document.getElementById('pedidoMatricula').innerText;
+        const turma = document.getElementById('pedidoTurma').innerText;
+        const ano = document.getElementById('pedidoAno').innerText;
+        const item = document.getElementById('pedidoItem').value;
+        const tamanho = document.getElementById('pedidoTamanho').value;
+        const obs = document.getElementById('pedidoObs').value;
         
-        if (!item || !tamanho) {
-            alert('Por favor, preencha o Item desejado e o Tamanho.');
-            return;
-        }
+        if (!item) { alert('Por favor, informe o item desejado.'); return; }
+        if (!tamanho) { alert('Por favor, informe o tamanho.'); return; }
         
-        const corpo = `Pedido de Uniforme:\n\nNome: ${nome}\nMatrícula: ${matricula}\nTurma: ${turma}\nAno: ${ano}\n\nItem desejado: ${item}\nTamanho: ${tamanho}\nObservações: ${obs}\n\nEnviado via Braun OnLine.`;
-        const mailto = `mailto:embreve@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
-        window.open(mailto, '_blank');
-        closeAllModals();
+        const corpo = `Nome: ${nome}\nMatrícula: ${matricula}\nTurma: ${turma}\nAno: ${ano}\nItem: ${item}\nTamanho: ${tamanho}\nObservações: ${obs}`;
+        window.location.href = `mailto:rh@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
     }
 
-    // ==================== SCROLL PERFEITO - CORREÇÃO DE ESPAÇAMENTO ====================
-    function setupScrollPadding() {
-        const header = document.querySelector('header');
-        const statusPanel = document.querySelector('.status-panel');
-        if (header && statusPanel) {
-            const headerHeight = header.offsetHeight;
-            const statusHeight = statusPanel.offsetHeight;
-            const totalOffset = headerHeight + statusHeight;
-            document.documentElement.style.scrollPaddingTop = totalOffset + 'px';
+    // ==================== FUNÇÕES DE FECHAMENTO E SALVAMENTO DE NOTA ====================
+    function closeAllModals() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.bottom-modal').forEach(m => m.classList.remove('show'));
+        document.getElementById('scoreModal').classList.remove('show');
+    }
+
+    function saveNota() {
+        const nota = document.getElementById('noteInput').value;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        if (nota.trim() === '') {
+            delete logs[dataAtiva];
+        } else {
+            logs[dataAtiva] = nota;
         }
+        setStorageValue('logs_v26', JSON.stringify(logs));
+        closeAllModals();
+        gerarCalendario();
     }
 
     function scrollToToday() {
-        const hoje = document.querySelector('.hoje');
-        if (hoje) {
-            const mesContainer = hoje.closest('.mes-container');
-            if (mesContainer) {
-                mesContainer.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start'
-                });
-            }
+        const hoje = new Date().toDateString();
+        const targets = document.querySelectorAll('.hoje');
+        if (targets.length > 0) {
+            const t = targets[0];
+            const rect = t.getBoundingClientRect();
+            const offset = rect.top + window.pageYOffset - 100;
+            window.scrollTo({ top: offset, behavior: 'smooth' });
         }
     }
 
     // ==================== DARK MODE ====================
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
-        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode'));
+        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode') ? 'true' : 'false');
     }
 
+    (function loadDarkMode() {
+        if (getStorageValue('braun_dark_mode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+
     // ==================== INICIALIZAÇÃO FINAL ====================
-    document.addEventListener('DOMContentLoaded', function() {
+    (function initApp() {
+        const visited = getStorageValue('braun_visited');
+        if (visited === 'true') {
+            // Já visitou antes: pula a welcome e vai direto para a saudação
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('greetingScreen').style.display = 'flex';
+            // Chama a função de saudação (já com display flex)
+            // Mas precisamos preencher a saudação com dados atuais
+            const now = new Date();
+            const hour = now.getHours();
+            const nomeCompleto = getStorageValue('braun_nome_completo') || '';
+            const nome = nomeCompleto.split(' ')[0];
+            const genero = detectarGenero(nome);
+            let saudacao = 'Bom dia';
+            if (hour >= 12 && hour < 18) saudacao = 'Boa tarde';
+            else if (hour >= 18 || hour < 5) saudacao = 'Boa noite';
+            const saudacaoCompleta = nome ? `${saudacao}, ${nome}!` : `${saudacao}!`;
+            document.getElementById('greet-main').innerText = saudacaoCompleta;
+            
+            // Determina mensagem de status
+            const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
+            const mensagens = {
+                trabalho: { feriado: { masculino: ['Bora trabalhar, guerreiro! É feriado, mas temos missão! 💪'], feminino: ['Bora trabalhar, guerreira! É feriado, mas temos missão! 💪'], neutro: ['Bora trabalhar! É feriado, mas temos missão! 💪'] }, normal: { masculino: ['Bora trabalhar, guerreiro! Vamos vencer hoje! 💪'], feminino: ['Bora trabalhar, guerreira! Vamos vencer hoje! 💪'], neutro: ['Bora trabalhar! Vamos vencer hoje! 💪'] } },
+                folga: { feriado: { masculino: ['Excelente dia de feriado, guerreiro! Aproveite! 🎉'], feminino: ['Excelente dia de feriado, guerreira! Aproveite! 🎉'], neutro: ['Excelente dia de feriado! Aproveite! 🎉'] }, normal: { masculino: ['Descanse, guerreiro! Você merece! 😌'], feminino: ['Descanse, guerreira! Você merece! 😌'], neutro: ['Descanse! Você merece! 😌'] } },
+                ferias: { mensagens: { masculino: ['Aproveite suas férias, guerreiro! O mundo espera por você! ✈️'], feminino: ['Aproveite suas férias, guerreira! O mundo espera por você! ✈️'], neutro: ['Aproveite suas férias! O mundo espera por você! ✈️'] } },
+                minimal: { mensagens: ['Você já está no app, isso é o que importa! 😊'] }
+            };
+            function escolherMensagem(lista, genero) {
+                const listaGenero = lista[genero] || lista['neutro'];
+                return listaGenero[Math.floor(Math.random() * listaGenero.length)];
+            }
+            let mensagemStatus = '';
+            let icon = '';
+            const greeting = document.getElementById('greetingScreen');
+            greeting.classList.remove('work', 'off', 'holiday');
+            if (isFerias(now)) {
+                greeting.classList.add('holiday');
+                mensagemStatus = escolherMensagem(mensagens.ferias.mensagens, genero);
+                icon = 'flight';
+            } else if (minimalMode) {
+                greeting.classList.add('off');
+                mensagemStatus = mensagens.minimal.mensagens[Math.floor(Math.random() * mensagens.minimal.mensagens.length)];
+                icon = 'mood';
+            } else {
+                const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
+                const ano = now.getFullYear();
+                const mes = String(now.getMonth() + 1).padStart(2, '0');
+                const dia = String(now.getDate()).padStart(2, '0');
+                const isoS = `${mes}-${dia}`;
+                const feriados = getFeriados(ano);
+                const isFeriado = feriados[isoS] !== undefined;
+                if (isTrab) {
+                    greeting.classList.add('work');
+                    if (isFeriado) {
+                        mensagemStatus = escolherMensagem(mensagens.trabalho.feriado, genero);
+                    } else {
+                        mensagemStatus = escolherMensagem(mensagens.trabalho.normal, genero);
+                    }
+                    icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
+                } else {
+                    greeting.classList.add('off');
+                    if (isFeriado) {
+                        mensagemStatus = escolherMensagem(mensagens.folga.feriado, genero);
+                    } else {
+                        mensagemStatus = escolherMensagem(mensagens.folga.normal, genero);
+                    }
+                    icon = (currentRegion === 'BR') ? 'home' : 'chair';
+                }
+            }
+            document.getElementById('greet-status').innerHTML = mensagemStatus;
+            document.getElementById('greet-icon').innerText = icon;
+            
+            // Após 2.5s, esconde e mostra calendário
+            setTimeout(() => {
+                greeting.classList.add('hide');
+                setTimeout(() => {
+                    greeting.style.display = 'none';
+                    scrollToToday();
+                }, 500);
+            }, 2500);
+        } else {
+            // Primeira visita: mostra welcomeScreen
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            // A função goToGreeting será chamada no clique do botão.
+        }
+        
+        // Inicializa relógio e calendário
         startClock();
-        tick();
         gerarCalendario();
         gerenciarBotaoVotacao();
-        setupScrollPadding();
-        setTimeout(() => {
-            // Sempre exibe a tela de boas-vindas ao entrar no app
-            document.getElementById('welcomeScreen').style.display = 'flex';
-        }, 100);
-    });
+    })();
 </script>
 </body>
 </html>
