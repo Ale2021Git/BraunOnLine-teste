@@ -2370,28 +2370,29 @@
     })();
 
     // ==================== INICIALIZAÇÃO FINAL ====================
-    // ==================== INICIALIZAÇÃO FINAL ====================
     (function initApp() {
-        console.log('🚀 initApp iniciado - Modo:', window.matchMedia('(display-mode: standalone)').matches ? 'PWA Standalone' : 'Browser');
+        console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (window.matchMedia('(display-mode: standalone)').matches ? 'PWA' : 'Browser'), 'color:#00A97A;font-weight:bold');
 
-        // Reset visual inicial
+        // Reset visual
         document.getElementById('welcomeScreen').style.display = 'none';
         const greetingScreen = document.getElementById('greetingScreen');
         greetingScreen.style.display = 'none';
         greetingScreen.classList.remove('hide', 'work', 'off', 'holiday');
 
-        const visited = getStorageValue('braun_visited') === 'true';
+        const isVisited = getStorageValue('braun_visited') === 'true';
 
-        function showGreeting() {
+        function showGreetingScreen() {
             greetingScreen.style.display = 'flex';
             
             const now = new Date();
             const hour = now.getHours();
             const nomeCompleto = getStorageValue('braun_nome_completo') || '';
             const nome = nomeCompleto.split(' ')[0] || 'Colaborador';
-            const genero = detectarGenero(nome);
-
-            let saudacao = hour >= 12 && hour < 18 ? 'Boa tarde' : (hour >= 18 || hour < 5 ? 'Boa noite' : 'Bom dia');
+            
+            let saudacao = 'Bom dia';
+            if (hour >= 12 && hour < 18) saudacao = 'Boa tarde';
+            else if (hour >= 18 || hour < 5) saudacao = 'Boa noite';
+            
             document.getElementById('greet-main').innerText = `${saudacao}, ${nome}!`;
 
             const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
@@ -2404,66 +2405,55 @@
 
             if (isFeriasHoje) {
                 greetingScreen.classList.add('holiday');
-                mensagemStatus = ['Aproveite suas férias! ✈️', 'Descanse e recarregue as energias 🌴', 'Férias merecidas! 🎉'][Math.floor(Math.random()*3)];
+                mensagemStatus = 'Aproveite suas férias! ✈️';
                 icon = 'flight';
             } else if (minimalMode) {
                 greetingScreen.classList.add('off');
-                mensagemStatus = ['Você já está no app! 😊', 'Que bom te ver por aqui! 👋', 'Vamos para mais um dia! 💪'][Math.floor(Math.random()*3)];
+                mensagemStatus = 'Que bom te ver por aqui! 👋';
                 icon = 'mood';
             } else {
-                const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
-                const ano = now.getFullYear();
-                const mes = String(now.getMonth() + 1).padStart(2, '0');
-                const dia = String(now.getDate()).padStart(2, '0');
-                const isoS = `\( {mes}- \){dia}`;
-                const feriados = getFeriados(ano);
-                const isFeriado = !!feriados[isoS];
-
+                const isTrab = (currentRegion === 'BR') 
+                    ? checkBR(now, currentTurma).trab 
+                    : checkMnt(now, currentTurma).trab;
+                
                 if (isTrab) {
                     greetingScreen.classList.add('work');
                     icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
-                    if (isFeriado) {
-                        mensagemStatus = ['Mesmo no feriado, bora vencer! 💪', 'Feriado trabalhado = dobro de garra! 🔥'][Math.floor(Math.random()*2)];
-                    } else {
-                        mensagemStatus = ['Bora trabalhar! Vamos com tudo hoje! ⚡', 'Foco total, você consegue! 🚀'][Math.floor(Math.random()*2)];
-                    }
+                    mensagemStatus = 'Bora trabalhar com energia! 💪';
                 } else {
                     greetingScreen.classList.add('off');
                     icon = (currentRegion === 'BR') ? 'home' : 'chair';
-                    if (isFeriado) {
-                        mensagemStatus = ['Excelente feriado! Aproveite bastante 🎉', 'Dia de descanso merecido 😌'][Math.floor(Math.random()*2)];
-                    } else {
-                        mensagemStatus = ['Folga merecida! Descanse bem 🌴', 'Recarregue as energias hoje! 🔋'][Math.floor(Math.random()*2)];
-                    }
+                    mensagemStatus = 'Folga merecida! Descanse bem 🌴';
                 }
             }
 
             document.getElementById('greet-icon').innerText = icon;
             document.getElementById('greet-status').innerHTML = mensagemStatus;
 
-            // Animação mais confiável para PWA
+            // Fecha a saudação automaticamente
             setTimeout(() => {
                 greetingScreen.classList.add('hide');
                 setTimeout(() => {
                     greetingScreen.style.display = 'none';
                     scrollToToday();
-                }, 700);
-            }, 2600);
+                }, 600);
+            }, 2400);
         }
 
-        if (visited) {
-            showGreeting();
+        if (isVisited) {
+            showGreetingScreen();
         } else {
+            // Primeira vez ou PWA nova instalação
             document.getElementById('welcomeScreen').style.display = 'flex';
         }
 
-        // Inicializações comuns
+        // Marca como visitado (funciona melhor no PWA)
+        setStorageValue('braun_visited', 'true');
+
+        // Inicializações finais
         startClock();
         gerarCalendario();
         gerenciarBotaoVotacao();
-
-        // Marca como visitado
-        setStorageValue('braun_visited', 'true');
     })();
 </script>
 </body>
