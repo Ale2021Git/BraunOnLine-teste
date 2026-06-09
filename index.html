@@ -2369,11 +2369,11 @@
         }
     })();
 
-    // ==================== INICIALIZAÇÃO FINAL ====================
+    // ==================== INICIALIZAÇÃO FINAL (VERSÃO FORÇADA) ====================
     (function initApp() {
-        console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (window.matchMedia('(display-mode: standalone)').matches ? 'PWA' : 'Browser'), 'color:#00A97A;font-weight:bold');
+        console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (window.matchMedia('(display-mode: standalone)').matches ? 'PWA Standalone' : 'Browser'), 'color:#00A97A;font-weight:bold');
 
-        // Reset visual
+        // Reset completo
         document.getElementById('welcomeScreen').style.display = 'none';
         const greetingScreen = document.getElementById('greetingScreen');
         greetingScreen.style.display = 'none';
@@ -2381,9 +2381,11 @@
 
         const isVisited = getStorageValue('braun_visited') === 'true';
 
-        function showGreetingScreen() {
+        function forceShowGreeting() {
             greetingScreen.style.display = 'flex';
-            
+            greetingScreen.style.opacity = '1';
+            greetingScreen.style.transform = 'none';
+
             const now = new Date();
             const hour = now.getHours();
             const nomeCompleto = getStorageValue('braun_nome_completo') || '';
@@ -2398,7 +2400,7 @@
             const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
             const isFeriasHoje = isFerias(now);
 
-            let mensagemStatus = '';
+            let mensagemStatus = 'Bem-vindo!';
             let icon = 'mood';
 
             greetingScreen.classList.remove('work', 'off', 'holiday');
@@ -2410,12 +2412,8 @@
             } else if (minimalMode) {
                 greetingScreen.classList.add('off');
                 mensagemStatus = 'Que bom te ver por aqui! 👋';
-                icon = 'mood';
             } else {
-                const isTrab = (currentRegion === 'BR') 
-                    ? checkBR(now, currentTurma).trab 
-                    : checkMnt(now, currentTurma).trab;
-                
+                const isTrab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
                 if (isTrab) {
                     greetingScreen.classList.add('work');
                     icon = (currentRegion === 'BR') ? 'factory' : 'engineering';
@@ -2430,27 +2428,27 @@
             document.getElementById('greet-icon').innerText = icon;
             document.getElementById('greet-status').innerHTML = mensagemStatus;
 
-            // Fecha a saudação automaticamente
+            // Fecha automaticamente após 2,4 segundos
             setTimeout(() => {
                 greetingScreen.classList.add('hide');
                 setTimeout(() => {
                     greetingScreen.style.display = 'none';
                     scrollToToday();
-                }, 600);
+                }, 700);
             }, 2400);
         }
 
+        // Força a saudação sempre na primeira execução do PWA
         if (isVisited) {
-            showGreetingScreen();
+            forceShowGreeting();
         } else {
-            // Primeira vez ou PWA nova instalação
             document.getElementById('welcomeScreen').style.display = 'flex';
         }
 
-        // Marca como visitado (funciona melhor no PWA)
+        // Marca como visitado imediatamente
         setStorageValue('braun_visited', 'true');
 
-        // Inicializações finais
+        // Inicializações
         startClock();
         gerarCalendario();
         gerenciarBotaoVotacao();
