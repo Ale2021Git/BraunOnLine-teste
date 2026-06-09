@@ -2357,14 +2357,12 @@
         }
     }
 
-    // ==================== INICIALIZAÇÃO FINAL - VERSÃO ESTÁVEL ====================
+    // ==================== INICIALIZAÇÃO FINAL - SAUDAÇÃO SEMPRE ====================
     (function initApp() {
         const isPWA = window.matchMedia('(display-mode: standalone)').matches;
         console.log('%c🚀 Braun OnLine Iniciando - Modo: ' + (isPWA ? 'PWA' : 'Browser'), 'color:#00A97A;font-weight:bold');
 
-        // Reset
-        document.getElementById('welcomeScreen').style.display = 'none';
-        
+        // Sempre mostra a saudação ao abrir
         const greetingScreen = document.getElementById('greetingScreen');
         greetingScreen.style.display = 'flex';
         greetingScreen.style.opacity = '1';
@@ -2416,19 +2414,16 @@
 
         showGreeting();
 
-        // Fecha automaticamente com timeout mais confiável
+        // Fecha automaticamente
         setTimeout(() => {
             greetingScreen.classList.add('hide');
             setTimeout(() => {
                 greetingScreen.style.display = 'none';
                 scrollToToday();
-            }, 800);
-        }, 2600);
+            }, 700);
+        }, 2500);
 
-        // Marca como visitado
-        setStorageValue('braun_visited', 'true');
-
-        // Resto do app
+        // Inicializações do app
         startClock();
         gerarCalendario();
         gerenciarBotaoVotacao();
