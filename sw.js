@@ -2,7 +2,7 @@
 // ATENÇÃO: Sempre que alterar o index.html ou qualquer arquivo local, 
 // mude a string ou a data abaixo (ex: v3.1, v4, etc.) para forçar o update!
 // ============================================================================
-const CACHE_NAME = 'braun-online-v3-2026_rev1'; 
+const CACHE_NAME = 'braun-online-v3.3-2026_rev2'; 
 
 const LOCAL_ASSETS = [
   './',
