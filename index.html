@@ -636,6 +636,135 @@
                 backface-visibility: hidden;
             }
         }
+
+        /* ========== ESTILO DO BRACKET DA FASE FINAL ========== */
+        #copa-final-container {
+            padding: 5px 0;
+        }
+        .bracket {
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            gap: 24px;
+            padding: 16px 8px;
+            align-items: flex-start;
+        }
+        .bracket-round {
+            flex: 0 0 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .bracket-round-label {
+            font-size: 0.7em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 4px;
+            padding: 4px 0;
+            border-bottom: 2px solid var(--border);
+        }
+        .bracket-match-card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
+            min-height: 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .bracket-match-card:active { transform: scale(0.97); }
+        .bracket-match-card.has-score { border-color: var(--primary); background: rgba(0,169,122,0.04); }
+        .bracket-match-teams {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .bracket-match-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75em;
+            font-weight: 700;
+            gap: 4px;
+        }
+        .bracket-match-team .flag { font-size: 1.2em; }
+        .bracket-match-team .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .bracket-score {
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 0 6px;
+            font-weight: 900;
+            min-width: 22px;
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text);
+        }
+        .bracket-match-card .winner {
+            font-weight: 900;
+        }
+        .bracket-match-card .winner .name { color: var(--primary); }
+        .bracket-final-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 0 0 140px;
+        }
+        .bracket-final-row .bracket-match-card {
+            min-height: 50px;
+        }
+        /* Responsivo: no mobile vira coluna única */
+        @media (max-width: 600px) {
+            .bracket {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+                padding: 12px 4px;
+            }
+            .bracket-round {
+                flex: 1 1 auto;
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 10px;
+                padding: 6px 0;
+            }
+            .bracket-round-label {
+                writing-mode: vertical-lr;
+                rotate: 180deg;
+                font-size: 0.6em;
+                min-width: 16px;
+                padding: 4px 2px;
+                border-bottom: none;
+                border-right: 2px solid var(--border);
+                margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .bracket-match-card {
+                min-width: 160px;
+                flex: 0 0 auto;
+            }
+            .bracket-final-row {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 10px;
+                flex: 1 1 auto;
+            }
+        }
+        .copa-final-empty {
+            text-align: center;
+            padding: 30px 10px;
+            opacity: 0.6;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -844,7 +973,9 @@
         </div>
         <div class="copa-pills-row" id="copa-pills-row" role="tablist" aria-label="Grupos da Copa"></div>
     </div>
-    <div class="copa-panel-body" id="copa-panel-body"></div>
+    <div class="copa-panel-body" id="copa-panel-body">
+        <!-- Aqui será renderizado o conteúdo (grupo ou fase final) -->
+    </div>
 </div>
 
 <div id="scoreModal" role="dialog" aria-label="Editar placar do jogo" aria-modal="true">
@@ -1838,7 +1969,7 @@
         if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
     }
 
-    // COPA 2026 DATA
+    // ==================== COPA 2026 – DADOS COMPLETOS ====================
     const COPA_GROUPS = {
         A: { teams: [
             { id:'MEX', n:'México',        f:'🇲🇽' }, { id:'RSA', n:'África do Sul', f:'🇿🇦' },
@@ -1977,8 +2108,35 @@
         }
     };
 
+    // ==================== FASE FINAL – BRACKET ====================
+    const FINAL_STAGE = {
+        oitavas: [
+            { id: 'R1', h: null, a: null, label: 'Oitavas 1' },
+            { id: 'R2', h: null, a: null, label: 'Oitavas 2' },
+            { id: 'R3', h: null, a: null, label: 'Oitavas 3' },
+            { id: 'R4', h: null, a: null, label: 'Oitavas 4' },
+            { id: 'R5', h: null, a: null, label: 'Oitavas 5' },
+            { id: 'R6', h: null, a: null, label: 'Oitavas 6' },
+            { id: 'R7', h: null, a: null, label: 'Oitavas 7' },
+            { id: 'R8', h: null, a: null, label: 'Oitavas 8' }
+        ],
+        quartas: [
+            { id: 'Q1', h: null, a: null, label: 'Quartas 1' },
+            { id: 'Q2', h: null, a: null, label: 'Quartas 2' },
+            { id: 'Q3', h: null, a: null, label: 'Quartas 3' },
+            { id: 'Q4', h: null, a: null, label: 'Quartas 4' }
+        ],
+        semi: [
+            { id: 'S1', h: null, a: null, label: 'Semifinal 1' },
+            { id: 'S2', h: null, a: null, label: 'Semifinal 2' }
+        ],
+        terceiro: { id: 'T3', h: null, a: null, label: 'Disputa 3º lugar' },
+        final: { id: 'F', h: null, a: null, label: 'FINAL' }
+    };
+
     let copaGrupoAtivo = 'A';
     let scoreEditMatchId = null;
+    let copaMode = 'group'; // 'group' ou 'final'
 
     function copaTeam(groupKey, id) {
         return COPA_GROUPS[groupKey].teams.find(t => t.id === id);
@@ -2009,7 +2167,103 @@
         });
     }
 
+    // ==================== CLASSIFICAÇÃO PARA FASE FINAL ====================
+    function getKnockoutTeams() {
+        const allTeams = [];
+        Object.keys(COPA_GROUPS).forEach(gk => {
+            const standings = calcStandings(gk);
+            if (standings.length >= 2) {
+                allTeams.push({ ...standings[0], group: gk, pos: 1 });
+                allTeams.push({ ...standings[1], group: gk, pos: 2 });
+            }
+        });
+        // Ordena por pontos, saldo e gols
+        allTeams.sort((a, b) => b.pts - a.pts || (b.gp - b.gc) - (a.gp - a.gc) || b.gp - a.gp);
+        // Pega os 12 primeiros (melhores) + 4 melhores segundos
+        const firsts = allTeams.filter(t => t.pos === 1).slice(0,12);
+        const seconds = allTeams.filter(t => t.pos === 2).sort((a,b) => b.pts - a.pts || (b.gp - b.gc) - (a.gp - a.gc) || b.gp - a.gp).slice(0,4);
+        return [...firsts, ...seconds].slice(0,16);
+    }
+
+    // ==================== MONTAGEM DO BRACKET ====================
+    function buildKnockoutBracket() {
+        const classified = getKnockoutTeams();
+        if (classified.length < 16) {
+            // Ainda não temos 16 classificados – retorna bracket vazio
+            return null;
+        }
+
+        // Ordena os 16 classificados para o chaveamento (1º vs 16º, 2º vs 15º, etc.)
+        const sorted = classified.slice().sort((a,b) => b.pts - a.pts || (b.gp - b.gc) - (a.gp - a.gc) || b.gp - a.gp);
+        const bracket = JSON.parse(JSON.stringify(FINAL_STAGE));
+
+        // Preenche oitavas: cruzamento 1º vs 16º, 2º vs 15º, etc.
+        const teams = sorted.map(t => t.id);
+        const matchOrder = [0,15,7,8,3,12,4,11,1,14,6,9,2,13,5,10];
+        for (let i = 0; i < 8; i++) {
+            const idx1 = matchOrder[i*2];
+            const idx2 = matchOrder[i*2 + 1];
+            if (idx1 < teams.length && idx2 < teams.length) {
+                bracket.oitavas[i].h = teams[idx1];
+                bracket.oitavas[i].a = teams[idx2];
+            }
+        }
+
+        // Atualiza fases seguintes com base nos resultados
+        const sc = getScores();
+        updateKnockoutRound(bracket, 'oitavas', 'quartas', 0);
+        updateKnockoutRound(bracket, 'quartas', 'semi', 0);
+        updateKnockoutRound(bracket, 'semi', 'terceiro', 0);
+        updateKnockoutRound(bracket, 'semi', 'final', 1);
+        // Disputa de 3º: se houver resultados da semi, os perdedores vão para T3
+        if (bracket.semi[0].h && bracket.semi[0].a && sc[bracket.semi[0].id]) {
+            const winner1 = getWinner(bracket.semi[0].id);
+            const loser1 = (winner1 === bracket.semi[0].h) ? bracket.semi[0].a : bracket.semi[0].h;
+            if (!bracket.terceiro.h) bracket.terceiro.h = loser1;
+        }
+        if (bracket.semi[1].h && bracket.semi[1].a && sc[bracket.semi[1].id]) {
+            const winner2 = getWinner(bracket.semi[1].id);
+            const loser2 = (winner2 === bracket.semi[1].h) ? bracket.semi[1].a : bracket.semi[1].h;
+            if (!bracket.terceiro.a) bracket.terceiro.a = loser2;
+        }
+
+        return bracket;
+    }
+
+    function updateKnockoutRound(bracket, fromRound, toRound, offset) {
+        const sc = getScores();
+        const fromMatches = bracket[fromRound];
+        const toMatches = bracket[toRound];
+        if (!fromMatches || !toMatches) return;
+        for (let i = 0; i < fromMatches.length; i++) {
+            const m = fromMatches[i];
+            if (!m.h || !m.a) continue;
+            if (sc[m.id]) {
+                const winner = getWinner(m.id);
+                const targetIdx = Math.floor(i / 2) + offset;
+                if (targetIdx < toMatches.length) {
+                    if (i % 2 === 0) {
+                        toMatches[targetIdx].h = winner;
+                    } else {
+                        toMatches[targetIdx].a = winner;
+                    }
+                }
+            }
+        }
+    }
+
+    function getWinner(matchId) {
+        const sc = getScores();
+        const s = sc[matchId];
+        if (!s) return null;
+        // Precisa saber quem é casa e visitante – como o bracket armazena h e a, usamos os times do próprio match.
+        // Para grupos, temos a referência. Para fase final, o matchId está no bracket.
+        return s.h > s.a ? matchId + '_h' : (s.h < s.a ? matchId + '_a' : null);
+    }
+
+    // ==================== RENDERIZAÇÃO DO PAINEL DA COPA ====================
     function openCopaPanel() {
+        copaMode = 'group';
         renderCopaPills();
         renderCopaGroup(copaGrupoAtivo);
         document.getElementById('copaPanel').classList.add('open');
@@ -2020,18 +2274,30 @@
 
     function renderCopaPills() {
         const row = document.getElementById('copa-pills-row');
-        row.innerHTML = Object.keys(COPA_GROUPS).map(k => {
+        let html = '';
+        Object.keys(COPA_GROUPS).forEach(k => {
             const isBr = k === 'C';
-            const active = k === copaGrupoAtivo ? 'active' : '';
+            const active = (k === copaGrupoAtivo && copaMode === 'group') ? 'active' : '';
             const br = isBr ? 'brasil-pill' : '';
-            return `<button class="copa-group-pill ${active} ${br}" onclick="selectCopaGroup('${k}')" role="tab" aria-selected="${active === 'active'}">${isBr ? '🇧🇷 ' : ''}Grupo ${k}</button>`;
-        }).join('');
+            html += `<button class="copa-group-pill ${active} ${br}" onclick="selectCopaGroup('${k}')" role="tab" aria-selected="${active === 'active'}">${isBr ? '🇧🇷 ' : ''}Grupo ${k}</button>`;
+        });
+        // Botão da fase final
+        const finalActive = copaMode === 'final' ? 'active' : '';
+        html += `<button class="copa-group-pill ${finalActive} final-pill" onclick="showFinalStage()" role="tab" aria-selected="${finalActive === 'active'}">🏆 Fase Final</button>`;
+        row.innerHTML = html;
     }
 
     function selectCopaGroup(k) {
+        copaMode = 'group';
         copaGrupoAtivo = k;
         renderCopaPills();
         renderCopaGroup(k);
+    }
+
+    function showFinalStage() {
+        copaMode = 'final';
+        renderCopaPills();
+        renderFinalStage();
     }
 
     function renderCopaGroup(groupKey) {
@@ -2094,19 +2360,120 @@
         document.getElementById('copa-panel-body').innerHTML = html;
     }
 
-    function openScoreModal(groupKey, matchId) {
-        const g  = COPA_GROUPS[groupKey];
-        const m  = g.matches.find(x => x.id === matchId);
-        const ht = copaTeam(groupKey, m.h);
-        const at = copaTeam(groupKey, m.a);
+    function renderFinalStage() {
+        const bracket = buildKnockoutBracket();
+        const container = document.getElementById('copa-panel-body');
+        if (!bracket) {
+            container.innerHTML = `
+                <div class="copa-final-empty">
+                    <p>⏳ A fase final ainda não pode ser montada.</p>
+                    <p>É necessário que todos os grupos tenham pelo menos 2 jogos com placares definidos.</p>
+                </div>`;
+            return;
+        }
+
         const sc = getScores();
-        const s  = sc[matchId];
+        // Helper para renderizar um jogo do bracket
+        function renderMatch(m, roundName) {
+            const hasScore = !!sc[m.id];
+            const hTeam = m.h ? m.h : null;
+            const aTeam = m.a ? m.a : null;
+            const hName = hTeam ? (copaTeam(roundName, hTeam) ? copaTeam(roundName, hTeam).n : hTeam) : '?';
+            const aName = aTeam ? (copaTeam(roundName, aTeam) ? copaTeam(roundName, aTeam).n : aTeam) : '?';
+            const hFlag = hTeam ? (copaTeam(roundName, hTeam) ? copaTeam(roundName, hTeam).f : '🏳️') : '🏳️';
+            const aFlag = aTeam ? (copaTeam(roundName, aTeam) ? copaTeam(roundName, aTeam).f : '🏳️') : '🏳️';
+            const s = sc[m.id];
+            const hScore = s ? s.h : '–';
+            const aScore = s ? s.a : '–';
+            return `
+                <div class="bracket-match-card ${hasScore ? 'has-score' : ''}" onclick="openScoreModal('final','${m.id}')">
+                    <div class="bracket-match-teams">
+                        <div class="bracket-match-team ${hasScore && s.h > s.a ? 'winner' : ''}">
+                            <span class="flag">${hFlag}</span>
+                            <span class="name">${hName}</span>
+                            <span class="bracket-score">${hScore}</span>
+                        </div>
+                        <div class="bracket-match-team ${hasScore && s.a > s.h ? 'winner' : ''}">
+                            <span class="flag">${aFlag}</span>
+                            <span class="name">${aName}</span>
+                            <span class="bracket-score">${aScore}</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        let html = `<div id="copa-final-container"><div class="bracket">`;
+
+        // Oitavas
+        html += `<div class="bracket-round"><div class="bracket-round-label">Oitavas</div>`;
+        bracket.oitavas.forEach(m => {
+            html += renderMatch(m, 'oitavas');
+        });
+        html += `</div>`;
+
+        // Quartas
+        html += `<div class="bracket-round"><div class="bracket-round-label">Quartas</div>`;
+        bracket.quartas.forEach(m => {
+            html += renderMatch(m, 'quartas');
+        });
+        html += `</div>`;
+
+        // Semifinais
+        html += `<div class="bracket-round"><div class="bracket-round-label">Semifinais</div>`;
+        bracket.semi.forEach(m => {
+            html += renderMatch(m, 'semi');
+        });
+        html += `</div>`;
+
+        // Final e 3º lugar
+        html += `<div class="bracket-round"><div class="bracket-round-label">3º lugar</div>`;
+        html += renderMatch(bracket.terceiro, 'terceiro');
+        html += `</div>`;
+        html += `<div class="bracket-round"><div class="bracket-round-label" style="color:#ffdf00;">FINAL</div>`;
+        html += renderMatch(bracket.final, 'final');
+        html += `</div>`;
+
+        html += `</div></div>`;
+        container.innerHTML = html;
+    }
+
+    // ==================== MODAL DE PLACAR (GENÉRICO) ====================
+    function openScoreModal(groupOrFinal, matchId) {
+        let groupKey, match;
+        if (groupOrFinal === 'final') {
+            // Busca no bracket
+            const bracket = buildKnockoutBracket();
+            if (!bracket) return;
+            const allMatches = [
+                ...bracket.oitavas, ...bracket.quartas, ...bracket.semi,
+                bracket.terceiro, bracket.final
+            ];
+            match = allMatches.find(m => m.id === matchId);
+            if (!match) return;
+            // Determina o nome dos times (pode ser nulo)
+            const hTeam = match.h ? match.h : '?';
+            const aTeam = match.a ? match.a : '?';
+            const hName = match.h ? (copaTeam('', match.h) ? copaTeam('', match.h).n : match.h) : '?';
+            const aName = match.a ? (copaTeam('', match.a) ? copaTeam('', match.a).n : match.a) : '?';
+            document.getElementById('score-modal-teams').textContent = `${hName} × ${aName}`;
+            document.getElementById('score-flag-home').textContent = match.h ? (copaTeam('', match.h) ? copaTeam('', match.h).f : '🏳️') : '🏳️';
+            document.getElementById('score-flag-away').textContent = match.a ? (copaTeam('', match.a) ? copaTeam('', match.a).f : '🏳️') : '🏳️';
+        } else {
+            groupKey = groupOrFinal;
+            const g = COPA_GROUPS[groupKey];
+            match = g.matches.find(x => x.id === matchId);
+            if (!match) return;
+            const ht = copaTeam(groupKey, match.h);
+            const at = copaTeam(groupKey, match.a);
+            document.getElementById('score-modal-teams').textContent = `${ht.f} ${ht.n}  ×  ${at.f} ${at.n}`;
+            document.getElementById('score-flag-home').textContent = ht.f;
+            document.getElementById('score-flag-away').textContent = at.f;
+        }
+        const sc = getScores();
+        const s = sc[matchId];
+        document.getElementById('score-home').value = s ? s.h : 0;
+        document.getElementById('score-away').value = s ? s.a : 0;
         scoreEditMatchId = matchId;
-        document.getElementById('score-modal-teams').textContent  = `${ht.f} ${ht.n}  ×  ${at.f} ${at.n}`;
-        document.getElementById('score-flag-home').textContent    = ht.f;
-        document.getElementById('score-flag-away').textContent    = at.f;
-        document.getElementById('score-home').value               = s ? s.h : 0;
-        document.getElementById('score-away').value               = s ? s.a : 0;
         document.getElementById('scoreModal').classList.add('show');
         setTimeout(() => document.getElementById('score-home').focus(), 100);
     }
@@ -2124,7 +2491,12 @@
         sc[scoreEditMatchId] = { h, a };
         setScores(sc);
         closeScoreModal();
-        renderCopaGroup(copaGrupoAtivo);
+        // Re-renderiza o painel atual
+        if (copaMode === 'final') {
+            renderFinalStage();
+        } else {
+            renderCopaGroup(copaGrupoAtivo);
+        }
     }
 
     function clearScore() {
@@ -2133,9 +2505,14 @@
         delete sc[scoreEditMatchId];
         setScores(sc);
         closeScoreModal();
-        renderCopaGroup(copaGrupoAtivo);
+        if (copaMode === 'final') {
+            renderFinalStage();
+        } else {
+            renderCopaGroup(copaGrupoAtivo);
+        }
     }
 
+    // ==================== DEMAIS FUNÇÕES (RAMAI, CONFIG, ETC) ====================
     function openRamais() {
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('ramaisCard').classList.add('show');
@@ -2171,7 +2548,6 @@
 
     function openConfig() {
         document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
-        // O toggle de splash de saudação foi removido.
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('configCard').classList.add('show');
     }
