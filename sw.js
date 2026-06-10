@@ -1,73 +1,93 @@
-// sw.js - Service Worker para Braun OnLine v3.3
-const CACHE_NAME = 'braun-online-v3-2026';
+// ============================================================================
+// ATENÇÃO: Sempre que alterar o index.html ou qualquer arquivo local, 
+// mude a string ou a data abaixo (ex: v3.1, v4, etc.) para forçar o update!
+// ============================================================================
+const CACHE_NAME = 'braun-online-v3-2026_rev1'; 
 
-const ASSETS_TO_CACHE = [
+const LOCAL_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './maskable_icon_x192.png',
   './maskable_icon_x512.png',
   './logo-cup.png',
-  './qr-code.png',
-  // Fontes externas
-  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;700;900&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap',
-  'https://fonts.gstatic.com/s/bebasneue/v9/JTUSjIg69CK48gW7Zoo3lw.woff2',
-  'https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm45dW9zg7Q.woff2',
-  'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SQ.woff2',
-  'https://fonts.gstatic.com/s/jetbrainsmono/v18/lDdI8s1q5w8W8bZq1p7eP8o5.woff2',
-  'https://cdnjs.cloudflare.com/ajax/libs/material-symbols/1.0.0/material-symbols-outlined.woff2'
+  './qr-code.png'
 ];
 
+// Instalação do Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Cacheando ativos...');
-        return cache.addAll(ASSETS_TO_CACHE);
+        console.log('[SW] Cacheando ativos iniciais...');
+        return cache.addAll(LOCAL_ASSETS);
       })
-      .then(() => self.skipWaiting())
+      .catch(err => console.error('[SW] Erro no cache inicial:', err))
+      .then(() => self.skipWaiting()) // Força o SW a se tornar ativo sem esperar
   );
 });
 
+// Ativação e limpeza de versões antigas
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Removendo cache antigo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(
+      keys.map(key => {
+        if (key !== CACHE_NAME) {
+          console.log('[SW] Removendo cache antigo:', key);
+          return caches.delete(key);
+        }
+      })
+    )).then(() => self.clients.claim()) // Assume o controle das páginas imediatamente
   );
 });
 
+// Interceptação de requisições (Fetch)
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) return cachedResponse;
+  const url = new URL(event.request.url);
+  const isLocal = url.origin === self.location.origin;
 
-        return fetch(event.request).then(networkResponse => {
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      
+      // Se for um recurso local (index.html, imagens da lista, etc)
+      // Usamos Stale-While-Revalidate: entrega o cache rápido, mas atualiza em background
+      if (isLocal) {
+        const fetchPromise = fetch(event.request).then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
             const clone = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
           }
           return networkResponse;
         }).catch(() => {
-          // Melhoria: se o usuário tentar acessar a página principal offline, retorna o index.html
+          // Fallback offline se a rede falhar e não tiver nada no cache
           if (event.request.destination === 'document') {
             return caches.match('./index.html');
           }
-          return new Response('Você está offline. Conecte-se à internet.', {
-            status: 503,
-            statusText: 'Serviço indisponível'
-          });
         });
-      })
+
+        // Retorna o que está no cache IMEDIATAMENTE, ou espera a rede se não houver cache
+        return cached || fetchPromise;
+      }
+
+      // Para recursos EXTERNOS (APIs, fontes do google, etc), mantém a sua lógica original
+      if (cached) return cached;
+
+      return fetch(event.request).then(res => {
+        // Cacheia recursos externos bem-sucedidos (opcional)
+        if (res && res.status === 200) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return res;
+      }).catch(() => {
+        if (event.request.destination === 'document') {
+          return caches.match('./index.html');
+        }
+        return new Response('Offline', { status: 503 });
+      });
+
+    })
   );
 });
