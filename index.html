@@ -133,12 +133,6 @@
             z-index: 1; text-align: center; 
             animation: csFadeUp 0.7s 0.5s ease both; margin-bottom: 25px; 
         }
-        .cs-tagline p { 
-            font-family: 'Bebas Neue', 'Arial Black', sans-serif; 
-            font-size: 2.8rem; letter-spacing: 0.10em; line-height: 1; 
-            color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,0.22); margin: 0; 
-        }
-        .cs-tagline p span { color: #ffeb3b; }
         
         @keyframes csFadeDown { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes csFadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
@@ -674,7 +668,7 @@
                 <rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/>
             </g>
             <g>
-                <path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
                 <polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
                 <path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
                 <path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
@@ -696,8 +690,12 @@
     <div class="cs-trophy-wrap">
       <img src="logo-cup.png" alt="Logo da Copa">
     </div>
+    <!-- NOVO CONTEÚDO DA TAGLINE CONFORME SOLICITADO -->
     <div class="cs-tagline">
-        <p>NA <span>COPA</span> 2026</p>
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0; text-transform: uppercase; color: #ffffff;">NA COPA,</p>
+            <p style="font-size: 3.8rem; font-weight: 900; margin: 5px 0 0 0; line-height: 1; color: #ffffff;">2026</p>
+        </div>
     </div>
 </div>
 
@@ -1018,17 +1016,14 @@
 <div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
     <div style="display:flex;flex-direction:column;gap:15px;">
-        <!-- NOME COMPLETO -->
         <div>
             <label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label>
             <input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
         </div>
-        <!-- MATRÍCULA -->
         <div>
             <label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label>
             <input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
         </div>
-        <!-- TURMA -->
         <div>
             <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
             <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
@@ -1042,7 +1037,6 @@
                 <option value="H">Turma H (Noite - Manutenção)</option>
             </select>
         </div>
-        <!-- ANO -->
         <div>
             <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
             <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
@@ -1050,7 +1044,6 @@
                 <option value="2027">2027</option>
             </select>
         </div>
-        <!-- SETOR (TEXTO LIVRE) -->
         <div>
             <label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label>
             <input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
@@ -1081,7 +1074,6 @@
 <div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
     
-    <!-- Dados do perfil já preenchidos -->
     <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
         <div style="display:flex;flex-direction:column;gap:5px;">
             <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
@@ -1091,7 +1083,6 @@
         </div>
     </div>
 
-    <!-- Campos para preenchimento -->
     <div style="margin-bottom:15px;">
         <label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label>
         <input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
@@ -1453,24 +1444,19 @@
         document.getElementById('greet-status').innerHTML = mensagemStatus;
         document.getElementById('greet-icon').innerText = icon;
 
-        // Esconde o welcome (se estiver visível)
-        if (welcome.style.display !== 'none') {
-            welcome.classList.add('hide');
-            setTimeout(() => {
-                welcome.style.display = 'none';
-            }, 500);
-        }
-
-        // Exibe a saudação
-        greeting.style.display = 'flex';
+        welcome.classList.add('hide');
         setTimeout(() => {
-            greeting.classList.add('hide');
-            setStorageValue('braun_visited', 'true');
+            welcome.style.display = 'none';
+            greeting.style.display = 'flex';
             setTimeout(() => {
-                greeting.style.display = 'none';
-                scrollToToday();
-            }, 500);
-        }, 2500);
+                greeting.classList.add('hide');
+                setStorageValue('braun_visited', 'true');
+                setTimeout(() => {
+                    greeting.style.display = 'none';
+                    scrollToToday();
+                }, 500);
+            }, 2500);
+        }, 500);
     }
 
     // ==================== FUNÇÃO PARA DETECTAR GÊNERO ====================
@@ -2442,12 +2428,11 @@
         gerenciarBotaoVotacao();
         preencherDadosModais();
         if (!getStorageValue('braun_visited')) {
-            // Primeira vez: mostra o welcome (que chama a saudação)
             document.getElementById('welcomeScreen').style.display = 'flex';
         } else {
-            // Já visitou: mostra a saudação diretamente, sem o welcome
             document.getElementById('welcomeScreen').style.display = 'none';
-            goToGreeting();  // agora sempre chama a saudação
+            document.getElementById('greetingScreen').style.display = 'none';
+            scrollToToday();
         }
     });
 
