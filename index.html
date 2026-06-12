@@ -31,12 +31,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="manifest" href="manifest.json" id="pwa-manifest">
+    <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="maskable_icon_x192.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Braun On Line">
+    <meta name="apple-mobile-web-app-title" content="Braun OnLine">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQXB043RE1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -133,12 +133,6 @@
             z-index: 1; text-align: center; 
             animation: csFadeUp 0.7s 0.5s ease both; margin-bottom: 25px; 
         }
-        .cs-tagline p { 
-            font-family: 'Bebas Neue', 'Arial Black', sans-serif; 
-            font-size: 2.8rem; letter-spacing: 0.10em; line-height: 1; 
-            color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,0.22); margin: 0; 
-        }
-        .cs-tagline p span { color: #ffeb3b; }
         
         @keyframes csFadeDown { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes csFadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
@@ -254,6 +248,10 @@
         header {
             background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
             justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+        .brand-container {
+            display: flex;
+            align-items: center;
         }
         .brand-logo-svg { height: 35px; width: auto; }
         .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
@@ -670,7 +668,7 @@
                 <rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/>
             </g>
             <g>
-                <path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
                 <polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
                 <path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
                 <path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
@@ -691,9 +689,13 @@
     </div>
     <div class="cs-trophy-wrap">
       <img src="logo-cup.png" alt="Logo da Copa">
-</div>
+    </div>
+    <!-- NOVO CONTEÚDO DA TAGLINE CONFORME SOLICITADO -->
     <div class="cs-tagline">
-        <p>NA <span>COPA</span> 2026</p>
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0; text-transform: uppercase; color: #ffffff;">NA COPA,</p>
+            <p style="font-size: 3.8rem; font-weight: 900; margin: 5px 0 0 0; line-height: 1; color: #ffffff;">2026</p>
+        </div>
     </div>
 </div>
 
@@ -703,10 +705,36 @@
 
 <header>
     <div class="brand-container">
-        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="Braun Logo">
-            <title>Braun Logo</title>
-            <g><path class="st-logo-path" d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/><path class="st-logo-path" d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/><path class="st-logo-path" d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/><path class="st-logo-path" d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/><path class="st-logo-path" d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/><path class="st-logo-path" d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/><rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/></g>
-            <g><path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/><polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/><path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/><path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/><rect x="72.1" y="31.6" class="st-logo-path" width="1.2" height="10.2"/><polygon class="st-logo-path" points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/><path class="st-logo-path" d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/><polygon class="st-logo-path" points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/><polygon class="st-logo-path" points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/><path class="st-logo-path" d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/><polygon class="st-logo-path" points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/><path class="st-logo-path" d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/><polygon class="st-logo-path" points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/><rect x="153.5" y="31.6" class="st-logo-path" width="1.2" height="10.2"/><path class="st-logo-path" d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/><polygon class="st-logo-path" points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/></g>
+        <!-- LOGO B|BRAUN OFICIAL (SVG) -->
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Logo">
+            <title>B|BRAUN Logo Oficial</title>
+            <g fill="#FFFFFF">
+                <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" width="0.8" height="26.2"/>
+            </g>
+            <g fill="#FFFFFF">
+                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
+                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
+                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
         </svg>
     </div>
     <div style="display:flex; gap:10px; align-items:center;">
@@ -903,13 +931,6 @@
             <span class="slider" aria-hidden="true"></span>
         </label>
     </div>
-    <div class="config-item">
-        <span class="config-label">Exibir Splash de Saudação?<br><small style="font-weight:400;opacity:0.7;">Mostra "Bom dia..." ao entrar.</small></span>
-        <label class="switch">
-            <input type="checkbox" id="splashGreetingToggle" onchange="toggleSplashGreeting()" aria-label="Ativar/Desativar Splash de Saudação">
-            <span class="slider" aria-hidden="true"></span>
-        </label>
-    </div>
     <button onclick="openFerias()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
         <span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS
     </button>
@@ -995,17 +1016,14 @@
 <div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
     <div style="display:flex;flex-direction:column;gap:15px;">
-        <!-- NOME COMPLETO -->
         <div>
             <label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label>
             <input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
         </div>
-        <!-- MATRÍCULA -->
         <div>
             <label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label>
             <input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
         </div>
-        <!-- TURMA -->
         <div>
             <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
             <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
@@ -1019,7 +1037,6 @@
                 <option value="H">Turma H (Noite - Manutenção)</option>
             </select>
         </div>
-        <!-- ANO -->
         <div>
             <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
             <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
@@ -1027,7 +1044,6 @@
                 <option value="2027">2027</option>
             </select>
         </div>
-        <!-- SETOR (TEXTO LIVRE) -->
         <div>
             <label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label>
             <input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
@@ -1058,7 +1074,6 @@
 <div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
     <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
     
-    <!-- Dados do perfil já preenchidos -->
     <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
         <div style="display:flex;flex-direction:column;gap:5px;">
             <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
@@ -1068,7 +1083,6 @@
         </div>
     </div>
 
-    <!-- Campos para preenchimento -->
     <div style="margin-bottom:15px;">
         <label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label>
         <input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
@@ -1107,6 +1121,10 @@
 </style>
 
 <script>
+    // ==============================================================
+    // TODAS AS FUNÇÕES DO APP (CORRIGIDAS E UNIFICADAS)
+    // ==============================================================
+
     // ==================== STORAGE COMPATÍVEL ====================
     function getStorageValue(key) {
         try {
@@ -1294,7 +1312,6 @@
     (function init() {
         const savedTurma = getStorageValue('braun_turma_perfil');
         if (savedTurma) {
-            // Mapeia a turma individual para grupo e região
             let region, grupo;
             if (['A','B','C','D'].includes(savedTurma)) {
                 region = 'BR';
@@ -1308,13 +1325,11 @@
             setStorageValue('braun_last_region', region);
             setStorageValue(`braun_turma_${region}`, grupo);
         } else {
-            // Fallback: se não tiver perfil, usa padrão
             const savedRegion = getStorageValue('braun_last_region') || 'BR';
             currentRegion = savedRegion;
             currentTurma = getStorageValue(`braun_turma_${savedRegion}`) || (savedRegion === 'BR' ? 'AC' : 'EG');
         }
         
-        // Atualizar aba ativa
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         const activeTab = document.getElementById(`tab-${currentRegion}`);
         if (activeTab) {
@@ -1328,29 +1343,14 @@
         const welcome = document.getElementById('welcomeScreen');
         const greeting = document.getElementById('greetingScreen');
         const minimalMode = getStorageValue('braun_minimal_greeting') === 'true';
-        const noSplashGreeting = getStorageValue('braun_no_splash_greeting') === 'true';
-        
-        // Se a splash de saudação estiver desativada, pula para o calendário
-        if (noSplashGreeting) {
-            welcome.classList.add('hide');
-            setTimeout(() => {
-                welcome.style.display = 'none';
-                greeting.style.display = 'none';
-                setStorageValue('braun_visited', 'true');
-                scrollToToday();
-            }, 200);
-            return;
-        }
 
         const now = new Date();
         const hour = now.getHours();
 
-        // Pega o nome do perfil e detecta gênero
         const nomeCompleto = getStorageValue('braun_nome_completo') || '';
-        const nome = nomeCompleto.split(' ')[0]; // Primeiro nome
-        const genero = detectarGenero(nome); // 'masculino', 'feminino' ou 'neutro'
+        const nome = nomeCompleto.split(' ')[0];
+        const genero = detectarGenero(nome);
 
-        // Verifica se hoje é feriado
         const ano = now.getFullYear();
         const mes = String(now.getMonth() + 1).padStart(2, '0');
         const dia = String(now.getDate()).padStart(2, '0');
@@ -1358,156 +1358,55 @@
         const feriados = getFeriados(ano);
         const isFeriado = feriados[isoS] !== undefined;
 
-        // Saudação base
         let saudacao = 'Bom dia';
         if (hour >= 12 && hour < 18) saudacao = 'Boa tarde';
         else if (hour >= 18 || hour < 5) saudacao = 'Boa noite';
 
-        // Monta a saudação inicial
         let saudacaoCompleta = nome ? `${saudacao}, ${nome}!` : `${saudacao}!`;
 
-        // Listas de mensagens avançadas
         const mensagens = {
             trabalho: {
                 feriado: {
-                    masculino: [
-                        'Bora trabalhar, guerreiro! É feriado, mas temos missão! 💪',
-                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
-                        'Mesmo no feriado, você não para! Que garra! ⚡',
-                        'Bora vencer, guerreiro! O trabalho não espera! 🚀',
-                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
-                    ],
-                    feminino: [
-                        'Bora trabalhar, guerreira! É feriado, mas temos missão! 💪',
-                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
-                        'Mesmo no feriado, você não para! Que garra! ⚡',
-                        'Bora vencer, guerreira! O trabalho não espera! 🚀',
-                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
-                    ],
-                    neutro: [
-                        'Bora trabalhar! É feriado, mas temos missão! 💪',
-                        'Feriado trabalhado, dobro de força! Vamos nessa! 🔥',
-                        'Mesmo no feriado, você não para! Que garra! ⚡',
-                        'Bora vencer! O trabalho não espera! 🚀',
-                        'Foco total! Feriado é só mais um dia de vitória! 🌟'
-                    ]
+                    masculino: ['Bora trabalhar, guerreiro! É feriado, mas temos missão! 💪','Feriado trabalhado, dobro de força! Vamos nessa! 🔥','Mesmo no feriado, você não para! Que garra! ⚡','Bora vencer, guerreiro! O trabalho não espera! 🚀','Foco total! Feriado é só mais um dia de vitória! 🌟'],
+                    feminino: ['Bora trabalhar, guerreira! É feriado, mas temos missão! 💪','Feriado trabalhado, dobro de força! Vamos nessa! 🔥','Mesmo no feriado, você não para! Que garra! ⚡','Bora vencer, guerreira! O trabalho não espera! 🚀','Foco total! Feriado é só mais um dia de vitória! 🌟'],
+                    neutro: ['Bora trabalhar! É feriado, mas temos missão! 💪','Feriado trabalhado, dobro de força! Vamos nessa! 🔥','Mesmo no feriado, você não para! Que garra! ⚡','Bora vencer! O trabalho não espera! 🚀','Foco total! Feriado é só mais um dia de vitória! 🌟']
                 },
                 normal: {
-                    masculino: [
-                        'Bora trabalhar, guerreiro! Vamos vencer hoje! 💪',
-                        'Mais um dia de luta, você consegue! 🔥',
-                        'Que a força esteja com você! Vamos nessa! ⚡',
-                        'Foco e determinação, guerreiro! 🚀',
-                        'O sucesso começa com a sua atitude! 🌟'
-                    ],
-                    feminino: [
-                        'Bora trabalhar, guerreira! Vamos vencer hoje! 💪',
-                        'Mais um dia de luta, você consegue! 🔥',
-                        'Que a força esteja com você! Vamos nessa! ⚡',
-                        'Foco e determinação, guerreira! 🚀',
-                        'O sucesso começa com a sua atitude! 🌟'
-                    ],
-                    neutro: [
-                        'Bora trabalhar! Vamos vencer hoje! 💪',
-                        'Mais um dia de luta, você consegue! 🔥',
-                        'Que a força esteja com você! Vamos nessa! ⚡',
-                        'Foco e determinação! 🚀',
-                        'O sucesso começa com a sua atitude! 🌟'
-                    ]
+                    masculino: ['Bora trabalhar, guerreiro! Vamos vencer hoje! 💪','Mais um dia de luta, você consegue! 🔥','Que a força esteja com você! Vamos nessa! ⚡','Foco e determinação, guerreiro! 🚀','O sucesso começa com a sua atitude! 🌟'],
+                    feminino: ['Bora trabalhar, guerreira! Vamos vencer hoje! 💪','Mais um dia de luta, você consegue! 🔥','Que a força esteja com você! Vamos nessa! ⚡','Foco e determinação, guerreira! 🚀','O sucesso começa com a sua atitude! 🌟'],
+                    neutro: ['Bora trabalhar! Vamos vencer hoje! 💪','Mais um dia de luta, você consegue! 🔥','Que a força esteja com você! Vamos nessa! ⚡','Foco e determinação! 🚀','O sucesso começa com a sua atitude! 🌟']
                 }
             },
             folga: {
                 feriado: {
-                    masculino: [
-                        'Excelente dia de feriado, guerreiro! Aproveite! 🎉',
-                        'Feriado é sagrado! Curta cada momento! 🌴',
-                        'O melhor do feriado é você descansar! Aproveite! 🏀',
-                        'Feriado merecido! Seja feliz e descanse! 😊',
-                        'Hoje é seu dia! Aproveite o feriado! 🌟'
-                    ],
-                    feminino: [
-                        'Excelente dia de feriado, guerreira! Aproveite! 🎉',
-                        'Feriado é sagrado! Curta cada momento! 🌴',
-                        'O melhor do feriado é você descansar! Aproveite! ⚾️' ,
-                        'Feriado merecido! Seja feliz e descanse! 😊',
-                        'Hoje é seu dia! Aproveite o feriado! 🌟'
-                    ],
-                    neutro: [
-                        'Excelente dia de feriado! Aproveite! 🎉',
-                        'Feriado é sagrado! Curta cada momento! 🌴',
-                        'O melhor do feriado é você descansar! Aproveite! ⚽️',
-                        'Feriado merecido! Seja feliz e descanse! 😊',
-                        'Hoje é seu dia! Aproveite o feriado! 🌟'
-                    ]
+                    masculino: ['Excelente dia de feriado, guerreiro! Aproveite! 🎉','Feriado é sagrado! Curta cada momento! 🌴','O melhor do feriado é você descansar! Aproveite! 🏀','Feriado merecido! Seja feliz e descanse! 😊','Hoje é seu dia! Aproveite o feriado! 🌟'],
+                    feminino: ['Excelente dia de feriado, guerreira! Aproveite! 🎉','Feriado é sagrado! Curta cada momento! 🌴','O melhor do feriado é você descansar! Aproveite! ⚾️','Feriado merecido! Seja feliz e descanse! 😊','Hoje é seu dia! Aproveite o feriado! 🌟'],
+                    neutro: ['Excelente dia de feriado! Aproveite! 🎉','Feriado é sagrado! Curta cada momento! 🌴','O melhor do feriado é você descansar! Aproveite! ⚽️','Feriado merecido! Seja feliz e descanse! 😊','Hoje é seu dia! Aproveite o feriado! 🌟']
                 },
                 normal: {
-                    masculino: [
-                        'Descanse, guerreiro! Você merece! 😌',
-                        'A vida é boa quando a gente descansa! 😊',
-                        'Hoje é seu dia, faça o que quiser! ⚽️',
-                        'Curta sua folga, você trabalhou duro! 🌴',
-                        'Renove as energias, você merece descanso! 🔋'
-                    ],
-                    feminino: [
-                        'Descanse, guerreira! Você merece! 😌',
-                        'A vida é boa quando a gente descansa! 😊',
-                        'Hoje é seu dia, faça o que quiser! ,⚽️',
-                        'Curta sua folga, você trabalhou duro! 🌴',
-                        'Renove as energias, você merece descanso! 🔋'
-                    ],
-                    neutro: [
-                        'Descanse! Você merece! 😌',
-                        'A vida é boa quando a gente descanso! 😊',
-                        'Hoje é seu dia, faça o que quiser! ⚽️',
-                        'Curta sua folga, você trabalhou duro! 🌴',
-                        'Renove as energias, você merece descanso! 🔋'
-                    ]
+                    masculino: ['Descanse, guerreiro! Você merece! 😌','A vida é boa quando a gente descansa! 😊','Hoje é seu dia, faça o que quiser! ⚽️','Curta sua folga, você trabalhou duro! 🌴','Renove as energias, você merece descanso! 🔋'],
+                    feminino: ['Descanse, guerreira! Você merece! 😌','A vida é boa quando a gente descansa! 😊','Hoje é seu dia, faça o que quiser! ⚽️','Curta sua folga, você trabalhou duro! 🌴','Renove as energias, você merece descanso! 🔋'],
+                    neutro: ['Descanse! Você merece! 😌','A vida é boa quando a gente descanso! 😊','Hoje é seu dia, faça o que quiser! ⚽️','Curta sua folga, você trabalhou duro! 🌴','Renove as energias, você merece descanso! 🔋']
                 }
             },
             ferias: {
                 mensagens: {
-                    masculino: [
-                        'Aproveite suas férias, guerreiro! O mundo espera por você! ✈️',
-                        'Descanse, viaje e seja feliz! 🌴',
-                        'Férias merecidas, curta muito! 🎉',
-                        'Desconecte-se e renove as energias! 🔋',
-                        'Você trabalhou duro, agora é hora de curtir! 🌍'
-                    ],
-                    feminino: [
-                        'Aproveite suas férias, guerreira! O mundo espera por você! ✈️',
-                        'Descanse, viaje e seja feliz! 🌴',
-                        'Férias merecidas, curta muito! 🎉',
-                        'Desconecte-se e renove as energias! 🔋',
-                        'Você trabalhou duro, agora é hora de curtir! 🌍'
-                    ],
-                    neutro: [
-                        'Aproveite suas férias! O mundo espera por você! ✈️',
-                        'Descanse, viaje e seja feliz! 🌴',
-                        'Férias merecidas, curta muito! 🎉',
-                        'Desconecte-se e renove as energias! 🔋',
-                        'Você trabalhou duro, agora é hora de curtir! 🌍'
-                    ]
+                    masculino: ['Aproveite suas férias, guerreiro! O mundo espera por você! ✈️','Descanse, viaje e seja feliz! 🌴','Férias merecidas, curta muito! 🎉','Desconecte-se e renove as energias! 🔋','Você trabalhou duro, agora é hora de curtir! 🌍'],
+                    feminino: ['Aproveite suas férias, guerreira! O mundo espera por você! ✈️','Descanse, viaje e seja feliz! 🌴','Férias merecidas, curta muito! 🎉','Desconecte-se e renove as energias! 🔋','Você trabalhou duro, agora é hora de curtir! 🌍'],
+                    neutro: ['Aproveite suas férias! O mundo espera por você! ✈️','Descanse, viaje e seja feliz! 🌴','Férias merecidas, curta muito! 🎉','Desconecte-se e renove as energias! 🔋','Você trabalhou duro, agora é hora de curtir! 🌍']
                 }
             },
             minimal: {
-                mensagens: [
-                    'Você já está no app, isso é o que importa! 😊',
-                    'Sorria, você está aqui! 🌟',
-                    'Que bom te ver por aqui! 👋',
-                    'O app está feliz com a sua presença! 🎉',
-                    'Você é bem-vindo sempre! ❤️'
-                ]
+                mensagens: ['Você já está no app, isso é o que importa! 😊','Sorria, você está aqui! 🌟','Que bom te ver por aqui! 👋','O app está feliz com a sua presença! 🎉','Você é bem-vindo sempre! ❤️']
             }
         };
 
-        // Função para escolher mensagem aleatória
         function escolherMensagem(lista, genero) {
             const listaGenero = lista[genero] || lista['neutro'];
             const index = Math.floor(Math.random() * listaGenero.length);
             return listaGenero[index];
         }
 
-        // Escolhe a mensagem baseada na situação
         let mensagemStatus = '';
         let icon = '';
         greeting.classList.remove('work', 'off', 'holiday');
@@ -1541,12 +1440,10 @@
             }
         }
 
-        // Atualiza a interface
         document.getElementById('greet-main').innerText = saudacaoCompleta;
         document.getElementById('greet-status').innerHTML = mensagemStatus;
         document.getElementById('greet-icon').innerText = icon;
 
-        // Transição
         welcome.classList.add('hide');
         setTimeout(() => {
             welcome.style.display = 'none';
@@ -1565,31 +1462,24 @@
     // ==================== FUNÇÃO PARA DETECTAR GÊNERO ====================
     function detectarGenero(nome) {
         if (!nome) return 'neutro';
-
         const terminaisFemininos = ['a', 'ia', 'na', 'ra', 'la', 'sa', 'ta'];
         const terminaisMasculinos = ['o', 'io', 'no', 'ro', 'lo', 'so', 'to'];
-
         const ultimaLetra = nome.toLowerCase().slice(-1);
         const duasUltimas = nome.toLowerCase().slice(-2);
-
         const femininosEspeciais = ['Daniele', 'Gabriele', 'Rafaele', 'Simone', 'Michele', 'Dany'];
         const masculinosEspeciais = ['Lucas', 'André', 'Andrey', 'Matheus', 'Pedro', 'Junior'];
-
         if (femininosEspeciais.some(n => nome.toLowerCase() === n.toLowerCase())) return 'feminino';
         if (masculinosEspeciais.some(n => nome.toLowerCase() === n.toLowerCase())) return 'masculino';
-
         if (terminaisFemininos.includes(ultimaLetra)) return 'feminino';
         if (terminaisMasculinos.includes(ultimaLetra)) return 'masculino';
         if (ultimaLetra === 'e') {
             if (duasUltimas === 'le' || duasUltimas === 'ne') return 'feminino';
             if (duasUltimas === 're' || duasUltimas === 'se') return 'masculino';
         }
-
         return 'neutro';
     }
 
-    // ==================== DEMAIS FUNÇÕES DO APP ====================
-    
+    // ==================== FUNÇÕES DA ESCALA ====================
     function setRegion(r) {
         currentRegion = r;
         setStorageValue('braun_last_region', r);
@@ -1657,7 +1547,6 @@
         const lang = translations[currentRegion];
         const hojeStr = new Date().toDateString();
 
-        // Identifica a turma individual para exibir turno
         const turmaIndividual = getStorageValue('braun_turma_perfil') || 'A';
 
         for (let m = 0; m < 12; m++) {
@@ -1666,7 +1555,6 @@
             const container = document.createElement('div');
             container.className = 'mes-container';
 
-            // 🔹 ANO NA EXTREMIDADE DIREITA 🔹
             let hF = `<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
                             <span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
@@ -1717,7 +1605,6 @@
                     cls += (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
                 }
 
-                // Adiciona indicador de turno (M/N) baseado na turma individual
                 let turnoLabel = '';
                 if (currentRegion === 'BR') {
                     turnoLabel = (turmaIndividual === 'C' || turmaIndividual === 'D') ? ' (N)' : ' (M)';
@@ -1856,7 +1743,10 @@
         if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
     }
 
-    // COPA 2026 DATA
+    // ==============================================================
+    // COPA 2026 - TABELA COMPLETA (GRUPOS E ELIMINATÓRIAS)
+    // ==============================================================
+
     const COPA_GROUPS = {
         A: { teams: [
             { id:'MEX', n:'México',        f:'🇲🇽' }, { id:'RSA', n:'África do Sul', f:'🇿🇦' },
@@ -1903,19 +1793,18 @@
             { id:'D6', h:'PAR', a:'AUS', rd:3, dt:'25/jun 23h00', stadium:'Estádio do Paraguai' }]
         },
         E: { teams: [
-        { id:'GER', n:'Alemanha', f:'🇩🇪' },
-        { id:'CUW', n:'Curaçao', f:'🇨🇼' },
-        { id:'CIV', n:'Costa do Marfim', f:'🇨🇮' },
-        { id:'ECU', n:'Equador', f:'🇪🇨' }
-    ],
-    matches:[
-        { id:'E1', h:'GER', a:'CUW', rd:1, dt:'14/jun 14h00', stadium:'Estádio da Alemanha' },
-        { id:'E2', h:'CIV', a:'ECU', rd:1, dt:'14/jun 17h00', stadium:'Estádio da Costa do Marfim' },
-        { id:'E3', h:'GER', a:'CIV', rd:2, dt:'20/jun 17h00', stadium:'Estádio da Alemanha' },
-        { id:'E4', h:'CUW', a:'ECU', rd:2, dt:'20/jun 20h00', stadium:'Estádio de Curaçao' },
-        { id:'E5', h:'ECU', a:'GER', rd:3, dt:'25/jun 17h00', stadium:'Estádio do Equador' },
-        { id:'E6', h:'CIV', a:'CUW', rd:3, dt:'25/jun 20h00', stadium:'Estádio da Costa do Marfim' }
-    ]},
+            { id:'GER', n:'Alemanha', f:'🇩🇪' },
+            { id:'CUW', n:'Curaçao', f:'🇨🇼' },
+            { id:'CIV', n:'Costa do Marfim', f:'🇨🇮' },
+            { id:'ECU', n:'Equador', f:'🇪🇨' }
+        ], matches:[
+            { id:'E1', h:'GER', a:'CUW', rd:1, dt:'14/jun 14h00', stadium:'Estádio da Alemanha' },
+            { id:'E2', h:'CIV', a:'ECU', rd:1, dt:'14/jun 17h00', stadium:'Estádio da Costa do Marfim' },
+            { id:'E3', h:'GER', a:'CIV', rd:2, dt:'20/jun 17h00', stadium:'Estádio da Alemanha' },
+            { id:'E4', h:'CUW', a:'ECU', rd:2, dt:'20/jun 20h00', stadium:'Estádio de Curaçao' },
+            { id:'E5', h:'ECU', a:'GER', rd:3, dt:'25/jun 17h00', stadium:'Estádio do Equador' },
+            { id:'E6', h:'CIV', a:'CUW', rd:3, dt:'25/jun 20h00', stadium:'Estádio da Costa do Marfim' }
+        ]},
         F: { teams: [
             { id:'NED', n:'Holanda', f:'🇳🇱' }, { id:'JPN', n:'Japão',   f:'🇯🇵' },
             { id:'SWE', n:'Suécia',  f:'🇸🇪' }, { id:'TUN', n:'Tunísia', f:'🇹🇳' }],
@@ -1995,12 +1884,60 @@
         }
     };
 
+    const COPA_KNOCKOUT = {
+        oitavas: [
+            { id:'O1', home:'1A', away:'2B', dt:'28/jun 13h00', stadium:'Estádio A' },
+            { id:'O2', home:'1C', away:'2D', dt:'28/jun 17h00', stadium:'Estádio B' },
+            { id:'O3', home:'1E', away:'2F', dt:'29/jun 13h00', stadium:'Estádio C' },
+            { id:'O4', home:'1G', away:'2H', dt:'29/jun 17h00', stadium:'Estádio D' },
+            { id:'O5', home:'1I', away:'2J', dt:'30/jun 13h00', stadium:'Estádio E' },
+            { id:'O6', home:'1K', away:'2L', dt:'30/jun 17h00', stadium:'Estádio F' },
+            { id:'O7', home:'1B', away:'2A', dt:'01/jul 13h00', stadium:'Estádio G' },
+            { id:'O8', home:'1D', away:'2C', dt:'01/jul 17h00', stadium:'Estádio H' },
+            { id:'O9', home:'1F', away:'2E', dt:'02/jul 13h00', stadium:'Estádio I' },
+            { id:'O10', home:'1H', away:'2G', dt:'02/jul 17h00', stadium:'Estádio J' },
+            { id:'O11', home:'1J', away:'2I', dt:'03/jul 13h00', stadium:'Estádio K' },
+            { id:'O12', home:'1L', away:'2K', dt:'03/jul 17h00', stadium:'Estádio L' },
+            { id:'O13', home:'1M', away:'2N', dt:'04/jul 13h00', stadium:'Estádio M' },
+            { id:'O14', home:'1O', away:'2P', dt:'04/jul 17h00', stadium:'Estádio N' },
+            { id:'O15', home:'1Q', away:'2R', dt:'05/jul 13h00', stadium:'Estádio O' },
+            { id:'O16', home:'1S', away:'2T', dt:'05/jul 17h00', stadium:'Estádio P' }
+        ],
+        quartas: [
+            { id:'Q1', home:'V1', away:'V2', dt:'07/jul 13h00' },
+            { id:'Q2', home:'V3', away:'V4', dt:'07/jul 17h00' },
+            { id:'Q3', home:'V5', away:'V6', dt:'08/jul 13h00' },
+            { id:'Q4', home:'V7', away:'V8', dt:'08/jul 17h00' },
+            { id:'Q5', home:'V9', away:'V10', dt:'09/jul 13h00' },
+            { id:'Q6', home:'V11', away:'V12', dt:'09/jul 17h00' },
+            { id:'Q7', home:'V13', away:'V14', dt:'10/jul 13h00' },
+            { id:'Q8', home:'V15', away:'V16', dt:'10/jul 17h00' }
+        ],
+        semis: [
+            { id:'S1', home:'VQ1', away:'VQ2', dt:'13/jul 15h00' },
+            { id:'S2', home:'VQ3', away:'VQ4', dt:'13/jul 19h00' },
+            { id:'S3', home:'VQ5', away:'VQ6', dt:'14/jul 15h00' },
+            { id:'S4', home:'VQ7', away:'VQ8', dt:'14/jul 19h00' }
+        ],
+        terceiro: [
+            { id:'T1', home:'P1', away:'P2', dt:'17/jul 15h00', stadium:'Estádio da Disputa' }
+        ],
+        final: [
+            { id:'F1', home:'V1', away:'V2', dt:'19/jul 16h00', stadium:'Estádio da Final' }
+        ]
+    };
+
     let copaGrupoAtivo = 'A';
+    let copaFaseAtiva = 'grupos'; // 'grupos' ou 'eliminatorias'
     let scoreEditMatchId = null;
 
     function copaTeam(groupKey, id) {
-        return COPA_GROUPS[groupKey].teams.find(t => t.id === id);
+        if (!COPA_GROUPS[groupKey]) return { f: '?', n: id };
+        const found = COPA_GROUPS[groupKey].teams.find(t => t.id === id);
+        if (found) return found;
+        return { f: '?', n: id };
     }
+
     function getScores() { return JSON.parse(getStorageValue('copa2026_scores') || '{}'); }
     function setScores(s) { setStorageValue('copa2026_scores', JSON.stringify(s)); }
 
@@ -2029,27 +1966,48 @@
 
     function openCopaPanel() {
         renderCopaPills();
-        renderCopaGroup(copaGrupoAtivo);
+        if (copaFaseAtiva === 'eliminatorias') {
+            renderCopaKnockout();
+        } else {
+            renderCopaGroup(copaGrupoAtivo);
+        }
         document.getElementById('copaPanel').classList.add('open');
     }
+
     function closeCopaPanel() {
         document.getElementById('copaPanel').classList.remove('open');
     }
 
     function renderCopaPills() {
         const row = document.getElementById('copa-pills-row');
-        row.innerHTML = Object.keys(COPA_GROUPS).map(k => {
-            const isBr = k === 'C';
-            const active = k === copaGrupoAtivo ? 'active' : '';
-            const br = isBr ? 'brasil-pill' : '';
-            return `<button class="copa-group-pill ${active} ${br}" onclick="selectCopaGroup('${k}')" role="tab" aria-selected="${active === 'active'}">${isBr ? '🇧🇷 ' : ''}Grupo ${k}</button>`;
-        }).join('');
+        row.innerHTML = `
+            ${Object.keys(COPA_GROUPS).map(k => {
+                const isBr = k === 'C';
+                const active = (copaFaseAtiva === 'grupos' && k === copaGrupoAtivo) ? 'active' : '';
+                const br = isBr ? 'brasil-pill' : '';
+                return `<button class="copa-group-pill ${active} ${br}" onclick="selectCopaGroup('${k}')" role="tab" aria-selected="${active === 'active'}">${isBr ? '🇧🇷 ' : ''}Grupo ${k}</button>`;
+            }).join('')}
+            <button class="copa-group-pill ${copaFaseAtiva === 'eliminatorias' ? 'active' : ''}" onclick="selectCopaFase('eliminatorias')" role="tab" aria-selected="${copaFaseAtiva === 'eliminatorias'}">🏆 Eliminatórias</button>
+        `;
     }
 
     function selectCopaGroup(k) {
         copaGrupoAtivo = k;
+        copaFaseAtiva = 'grupos';
         renderCopaPills();
         renderCopaGroup(k);
+    }
+
+    function selectCopaFase(fase) {
+        if (fase === 'eliminatorias') {
+            copaFaseAtiva = 'eliminatorias';
+            renderCopaPills();
+            renderCopaKnockout();
+        } else {
+            copaFaseAtiva = 'grupos';
+            renderCopaPills();
+            renderCopaGroup(copaGrupoAtivo);
+        }
     }
 
     function renderCopaGroup(groupKey) {
@@ -2112,11 +2070,56 @@
         document.getElementById('copa-panel-body').innerHTML = html;
     }
 
+    function renderCopaKnockout() {
+        const sc = getScores();
+        let html = '';
+        const phases = [
+            { label: 'Oitavas de Final', key: 'oitavas' },
+            { label: 'Quartas de Final', key: 'quartas' },
+            { label: 'Semifinais', key: 'semis' },
+            { label: 'Disputa de 3º Lugar', key: 'terceiro' },
+            { label: 'Final', key: 'final' }
+        ];
+
+        phases.forEach(phase => {
+            html += `<div class="copa-round-label">${phase.label}</div>`;
+            COPA_KNOCKOUT[phase.key].forEach(m => {
+                const s = sc[m.id];
+                html += `
+                <div class="copa-match-card ${s ? 'has-score' : ''}" onclick="openScoreModal('eliminatorias','${m.id}')">
+                    <div class="copa-match-team home">${m.home}</div>
+                    <div class="copa-score-box ${s ? 'live' : ''}">
+                        <span class="copa-score-num">${s ? s.h : '–'}</span>
+                        <span class="copa-score-sep">×</span>
+                        <span class="copa-score-num">${s ? s.a : '–'}</span>
+                    </div>
+                    <div class="copa-match-team away">${m.away}</div>
+                    <div style="font-size:0.6em;opacity:0.5;margin-top:5px;">${m.dt || ''}</div>
+                </div>`;
+            });
+        });
+
+        document.getElementById('copa-panel-body').innerHTML = html;
+    }
+
     function openScoreModal(groupKey, matchId) {
-        const g  = COPA_GROUPS[groupKey];
-        const m  = g.matches.find(x => x.id === matchId);
-        const ht = copaTeam(groupKey, m.h);
-        const at = copaTeam(groupKey, m.a);
+        let ht = { f: '?', n: 'Casa' };
+        let at = { f: '?', n: 'Visitante' };
+        if (groupKey === 'eliminatorias') {
+            const allMatches = [...COPA_KNOCKOUT.oitavas, ...COPA_KNOCKOUT.quartas, ...COPA_KNOCKOUT.semis, ...COPA_KNOCKOUT.terceiro, ...COPA_KNOCKOUT.final];
+            const m = allMatches.find(x => x.id === matchId);
+            if (m) {
+                ht = { f: '?', n: m.home };
+                at = { f: '?', n: m.away };
+            }
+        } else {
+            const g = COPA_GROUPS[groupKey];
+            const m = g.matches.find(x => x.id === matchId);
+            if (m) {
+                ht = copaTeam(groupKey, m.h);
+                at = copaTeam(groupKey, m.a);
+            }
+        }
         const sc = getScores();
         const s  = sc[matchId];
         scoreEditMatchId = matchId;
@@ -2142,7 +2145,11 @@
         sc[scoreEditMatchId] = { h, a };
         setScores(sc);
         closeScoreModal();
-        renderCopaGroup(copaGrupoAtivo);
+        if (copaFaseAtiva === 'eliminatorias') {
+            renderCopaKnockout();
+        } else {
+            renderCopaGroup(copaGrupoAtivo);
+        }
     }
 
     function clearScore() {
@@ -2151,15 +2158,24 @@
         delete sc[scoreEditMatchId];
         setScores(sc);
         closeScoreModal();
-        renderCopaGroup(copaGrupoAtivo);
+        if (copaFaseAtiva === 'eliminatorias') {
+            renderCopaKnockout();
+        } else {
+            renderCopaGroup(copaGrupoAtivo);
+        }
     }
+
+    // ==================== FUNÇÕES DOS MODAIS ====================
 
     function openRamais() {
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('ramaisCard').classList.add('show');
     }
 
-    function openPrivacy() { document.getElementById('overlay').style.display = 'block'; document.getElementById('privacyCard').classList.add('show'); }
+    function openPrivacy() {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('privacyCard').classList.add('show');
+    }
 
     function openFerias() {
         document.getElementById('feriasInicio').value = getStorageValue('braun_ferias_inicio') || '';
@@ -2189,17 +2205,12 @@
 
     function openConfig() {
         document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
-        document.getElementById('splashGreetingToggle').checked = (getStorageValue('braun_no_splash_greeting') === 'true');
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('configCard').classList.add('show');
     }
 
     function toggleMinimalGreeting() {
         setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked);
-    }
-
-    function toggleSplashGreeting() {
-        setStorageValue('braun_no_splash_greeting', document.getElementById('splashGreetingToggle').checked);
     }
 
     function openStats() {
@@ -2224,208 +2235,207 @@
                 const res  = (currentRegion === 'BR') ? checkBR(dataTeste, turma).trab : checkMnt(dataTeste, turma).trab;
                 if (res) diasTrabalho++; else diasFolga++;
                 if (feriados[isoS]) {
-                    const statusText = res ? 'TRAB' : 'FOLGA';
-                    const corTexto   = res ? '#A800C4' : '#00A97A';
                     if (res) feriadosTrab++; else feriadosFolga++;
-                    listaFeriadosHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 5px;border-bottom:1px solid var(--border);font-size:0.9em;"><span style="font-weight:600;">${String(d).padStart(2,'0')}/${String(m+1).padStart(2,'0')} - ${feriados[isoS]}</span><span style="font-weight:900;color:${corTexto};">${statusText}</span></div>`;
+                    listaFeriadosHTML += `<div>${feriados[isoS]} (${res ? 'TRABALHA' : 'FOLGA'})</div>`;
                 }
             }
         }
         
-        const statsHTML = `
+        const totalDias = diasTrabalho + diasFolga;
+        const htmlStats = `
             <div class="stat-grid">
-                <div class="stat-card-big"><div class="stat-val-big">${diasTrabalho}d</div><div class="stat-lab-big">Trabalho</div></div>
-                <div class="stat-card-big"><div class="stat-val-big">${diasFolga}d</div><div class="stat-lab-big">Folgas</div></div>
-                <div class="stat-card-big purple"><div class="stat-val-big purple">${feriadosTrab}</div><div class="stat-lab-big">Feriado c/ Trab</div></div>
-                <div class="stat-card-big teal"><div class="stat-val-big teal">${feriadosFolga}</div><div class="stat-lab-big">Feriado de Folga</div></div>
+                <div class="stat-card-big purple"><div class="stat-val-big purple">${diasTrabalho}</div><div class="stat-lab-big">Dias Trabalhados</div></div>
+                <div class="stat-card-big teal"><div class="stat-val-big teal">${diasFolga}</div><div class="stat-lab-big">Dias de Folga</div></div>
             </div>
-            <h3 style="font-size:1.1em;color:var(--primary);margin:25px 0 10px 0;font-weight:800;text-align:left;">Cruzamento de Feriados</h3>
-            <div style="background:var(--bg);border-radius:20px;padding:10px;border:1px solid var(--border);text-align:left;">
-                ${listaFeriadosHTML || '<div style="text-align:center;opacity:0.5;padding:10px;">Nenhum feriado encontrado.</div>'}
-            </div>`;
+            <div style="background:var(--bg);border-radius:15px;padding:15px;border:1px solid var(--border);margin-top:10px;">
+                <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;">
+                    <span>Feriados trabalhados</span><span style="color:var(--accent);">${feriadosTrab}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;">
+                    <span>Feriados de folga</span><span style="color:var(--verde);">${feriadosFolga}</span>
+                </div>
+                ${listaFeriadosHTML ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:0.85em;">${listaFeriadosHTML}</div>` : ''}
+            </div>
+        `;
         
-        cachedStats[cacheKey] = statsHTML;
-        document.getElementById('stats-content').innerHTML = statsHTML;
+        cachedStats[cacheKey] = htmlStats;
+        document.getElementById('stats-content').innerHTML = htmlStats;
         document.getElementById('configCard').classList.remove('show');
         document.getElementById('statsCard').classList.add('show');
     }
 
-    function saveNota() {
-        const msg  = document.getElementById('noteInput').value.trim();
-        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
-        if (msg) logs[dataAtiva] = msg; else delete logs[dataAtiva];
-        setStorageValue('logs_v26', JSON.stringify(logs));
-        closeAllModals(); gerarCalendario();
+    // ==================== FUNÇÕES AUSENTES (IMPLEMENTADAS) ====================
+
+    // Salvar dados do perfil (chamado no modal "Meu Perfil")
+    function salvarDadosPerfil() {
+        const nome = document.getElementById('nomePerfil').value;
+        const matricula = document.getElementById('matriculaPerfil').value;
+        const turma = document.getElementById('turmaPerfil').value;
+        const ano = document.getElementById('anoPerfil').value;
+        const setor = document.getElementById('setorPerfil').value;
+        
+        setStorageValue('braun_nome_completo', nome);
+        setStorageValue('braun_matricula', matricula);
+        setStorageValue('braun_turma_perfil', turma);
+        setStorageValue('braun_ano', ano);
+        setStorageValue('braun_setor', setor);
+        
+        // Atualiza região e turma atual com base na turma selecionada
+        let region, grupo;
+        if (['A','B','C','D'].includes(turma)) {
+            region = 'BR';
+            grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+        } else {
+            region = 'MNT';
+            grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
+        }
+        currentRegion = region;
+        currentTurma = grupo;
+        setStorageValue('braun_last_region', region);
+        setStorageValue(`braun_turma_${region}`, grupo);
+        
+        // Re-renderiza o calendário
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+        
+        // Atualiza dados nos modais de votação e pedidos
+        preencherDadosModais();
     }
 
-    function closeAllModals() {
-        document.querySelectorAll('.bottom-modal').forEach(m => m.classList.remove('show'));
-        document.getElementById('overlay').style.display = 'none';
+    // Preenche dados nos modais de votação e pedidos
+    function preencherDadosModais() {
+        const nome = getStorageValue('braun_nome_completo') || '---';
+        const matricula = getStorageValue('braun_matricula') || '---';
+        const turma = getStorageValue('braun_turma_perfil') || '---';
+        const ano = getStorageValue('braun_ano') || '---';
+        
+        document.getElementById('votacaoNome').innerText = nome;
+        document.getElementById('votacaoMatricula').innerText = matricula;
+        document.getElementById('votacaoAno').innerText = ano;
+        
+        document.getElementById('pedidoNome').innerText = nome;
+        document.getElementById('pedidoMatricula').innerText = matricula;
+        document.getElementById('pedidoTurma').innerText = turma;
+        document.getElementById('pedidoAno').innerText = ano;
     }
 
-    // ==================== NOVAS FUNÇÕES DO MENU ====================
+    // Abrir formulário de votação (Colaborador do Mês)
+    function abrirFormularioVotacao() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        const link = `https://forms.gle/KfS9XFv9UseZYqnS7?entry.1=${encodeURIComponent(nome)}&entry.2=${encodeURIComponent(matricula)}&entry.3=${encodeURIComponent(ano)}`;
+        window.open(link, '_blank');
+    }
 
+    // Enviar pedido por e-mail (Meus Pedidos)
+    function enviarPedidoEmail() {
+        const nome = document.getElementById('pedidoNome').innerText;
+        const matricula = document.getElementById('pedidoMatricula').innerText;
+        const turma = document.getElementById('pedidoTurma').innerText;
+        const ano = document.getElementById('pedidoAno').innerText;
+        const item = document.getElementById('pedidoItem').value;
+        const tamanho = document.getElementById('pedidoTamanho').value;
+        const obs = document.getElementById('pedidoObs').value;
+        
+        const corpo = `
+            Nome: ${nome}
+            Matrícula: ${matricula}
+            Turma: ${turma}
+            Ano: ${ano}
+            
+            Item desejado: ${item}
+            Tamanho: ${tamanho}
+            Observações: ${obs}
+        `;
+        const mailto = `mailto:rh@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
+        window.open(mailto, '_blank');
+    }
+
+    // Abrir modal Meu Perfil
     function openMeuPerfil() {
         closeHamburger();
-        // Carregar dados salvos
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        const setor = getStorageValue('braun_setor') || '';
-        
-        document.getElementById('nomePerfil').value = nome;
-        document.getElementById('matriculaPerfil').value = matricula;
-        if (turma) {
-            const select = document.getElementById('turmaPerfil');
-            select.value = turma;
-        }
-        if (ano) {
-            document.getElementById('anoPerfil').value = ano;
-        }
-        document.getElementById('setorPerfil').value = setor;
-        
+        document.getElementById('nomePerfil').value = getStorageValue('braun_nome_completo') || '';
+        document.getElementById('matriculaPerfil').value = getStorageValue('braun_matricula') || '';
+        document.getElementById('turmaPerfil').value = getStorageValue('braun_turma_perfil') || 'A';
+        document.getElementById('anoPerfil').value = getStorageValue('braun_ano') || '2026';
+        document.getElementById('setorPerfil').value = getStorageValue('braun_setor') || '';
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meuPerfilCard').classList.add('show');
     }
 
-    function salvarDadosPerfil() {
-        const nome = document.getElementById('nomePerfil').value.trim();
-        const matricula = document.getElementById('matriculaPerfil').value.trim();
-        const turma = document.getElementById('turmaPerfil').value;
-        const ano = document.getElementById('anoPerfil').value;
-        const setor = document.getElementById('setorPerfil').value.trim();
-
-        if (nome) setStorageValue('braun_nome_completo', nome);
-        if (matricula) setStorageValue('braun_matricula', matricula);
-        if (turma) setStorageValue('braun_turma_perfil', turma);
-        if (ano) setStorageValue('braun_ano_perfil', ano);
-        if (setor) setStorageValue('braun_setor', setor);
-        
-        // Atualizar a turma atual
-        if (turma) {
-            let region, grupo;
-            if (['A','B','C','D'].includes(turma)) {
-                region = 'BR';
-                grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
-            } else {
-                region = 'MNT';
-                grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
-            }
-            currentRegion = region;
-            currentTurma = grupo;
-            setStorageValue('braun_last_region', region);
-            setStorageValue(`braun_turma_${region}`, grupo);
-        }
-        if (ano) setStorageValue('braun_ano', ano);
-        
-        gerarCalendario();
-        tick();
-        closeAllModals();
-    }
-
+    // Abrir modal Colaborador do Mês
     function openColaboradorDoMes() {
         closeHamburger();
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        
-        document.getElementById('votacaoNome').innerText = nome || 'Não preenchido';
-        document.getElementById('votacaoMatricula').innerText = matricula || 'Não preenchido';
-        document.getElementById('votacaoAno').innerText = ano || 'Não preenchido';
-        
+        preencherDadosModais();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('colaboradorDoMesCard').classList.add('show');
     }
 
-    function abrirFormularioVotacao() {
-        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
-        closeAllModals();
-    }
-
+    // Abrir modal Meus Pedidos
     function openMeusPedidos() {
         closeHamburger();
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        
-        document.getElementById('pedidoNome').innerText = nome || 'Não preenchido';
-        document.getElementById('pedidoMatricula').innerText = matricula || 'Não preenchido';
-        document.getElementById('pedidoTurma').innerText = turma || 'Não preenchido';
-        document.getElementById('pedidoAno').innerText = ano || 'Não preenchido';
-        
+        preencherDadosModais();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('meusPedidosCard').classList.add('show');
     }
 
-    function enviarPedidoEmail() {
-        const nome = getStorageValue('braun_nome_completo') || '';
-        const matricula = getStorageValue('braun_matricula') || '';
-        const turma = getStorageValue('braun_turma_perfil') || '';
-        const ano = getStorageValue('braun_ano_perfil') || '';
-        const item = document.getElementById('pedidoItem').value.trim();
-        const tamanho = document.getElementById('pedidoTamanho').value.trim();
-        const obs = document.getElementById('pedidoObs').value.trim();
-        
-        if (!item || !tamanho) {
-            alert('Por favor, preencha o Item desejado e o Tamanho.');
-            return;
+    // Salvar nota do dia
+    function saveNota() {
+        const log = document.getElementById('noteInput').value;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        if (log.trim() === '') {
+            delete logs[dataAtiva];
+        } else {
+            logs[dataAtiva] = log.trim();
         }
-        
-        const corpo = `Pedido de Uniforme:\n\nNome: ${nome}\nMatrícula: ${matricula}\nTurma: ${turma}\nAno: ${ano}\n\nItem desejado: ${item}\nTamanho: ${tamanho}\nObservações: ${obs}\n\nEnviado via Braun OnLine.`;
-        const mailto = `mailto:uniformes@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
-        window.open(mailto, '_blank');
+        setStorageValue('logs_v26', JSON.stringify(logs));
         closeAllModals();
+        gerarCalendario();
     }
 
-    // ==================== SCROLL PERFEITO - CORREÇÃO DE ESPAÇAMENTO ====================
-    function setupScrollPadding() {
-        const header = document.querySelector('header');
-        const statusPanel = document.querySelector('.status-panel');
-        if (header && statusPanel) {
-            const headerHeight = header.offsetHeight;
-            const statusHeight = statusPanel.offsetHeight;
-            const totalOffset = headerHeight + statusHeight;
-            document.documentElement.style.scrollPaddingTop = totalOffset + 'px';
-        }
+    // Fechar todos os modais
+    function closeAllModals() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.bottom-modal').forEach(el => el.classList.remove('show'));
+        closeScoreModal();
     }
 
-    function scrollToToday() {
-        const hoje = document.querySelector('.hoje');
-        if (hoje) {
-            const mesContainer = hoje.closest('.mes-container');
-            if (mesContainer) {
-                mesContainer.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start'
-                });
-            }
-        }
-    }
-
-    // ==================== DARK MODE ====================
+    // Alternar modo escuro
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
+        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Rolagem para o dia atual
+    function scrollToToday() {
+        setTimeout(() => {
+            const hoje = document.querySelector('.hoje');
+            if (hoje) hoje.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
     }
 
     // ==================== INICIALIZAÇÃO FINAL ====================
+
     document.addEventListener('DOMContentLoaded', function() {
+        if (getStorageValue('braun_dark_mode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        gerarCalendario();
         startClock();
         tick();
-        gerarCalendario();
         gerenciarBotaoVotacao();
-        setupScrollPadding();
-        setTimeout(() => {
-            const visited = getStorageValue('braun_visited');
-            if (visited === 'true') {
-                document.getElementById('welcomeScreen').style.display = 'none';
-                scrollToToday();
-            } else {
-                document.getElementById('welcomeScreen').style.display = 'flex';
-            }
-        }, 100);
+        preencherDadosModais();
+        if (!getStorageValue('braun_visited')) {
+            document.getElementById('welcomeScreen').style.display = 'flex';
+        } else {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('greetingScreen').style.display = 'none';
+            scrollToToday();
+        }
     });
+
 </script>
 </body>
 </html>
