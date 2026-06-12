@@ -1748,141 +1748,104 @@
     // ==============================================================
 
     const COPA_GROUPS = {
-        A: { teams: [
-            { id:'MEX', n:'México',        f:'🇲🇽' }, { id:'RSA', n:'África do Sul', f:'🇿🇦' },
-            { id:'KOR', n:'Coreia do Sul', f:'🇰🇷' }, { id:'CZE', n:'Rep. Tcheca',   f:'🇨🇿' }],
-            matches:[
-            { id:'A1', h:'MEX', a:'RSA', rd:1, dt:'11/jun 15h30', stadium:'Estádio do México' },
-            { id:'A2', h:'KOR', a:'CZE', rd:1, dt:'11/jun 19h00', stadium:'Estádio da Coreia do Sul' },
-            { id:'A3', h:'MEX', a:'KOR', rd:2, dt:'18/jun 15h30', stadium:'Estádio do México' },
-            { id:'A4', h:'RSA', a:'CZE', rd:2, dt:'18/jun 19h00', stadium:'Estádio da África do Sul' },
-            { id:'A5', h:'MEX', a:'CZE', rd:3, dt:'24/jun 15h30', stadium:'Estádio do México' },
-            { id:'A6', h:'RSA', a:'KOR', rd:3, dt:'24/jun 19h00', stadium:'Estádio da África do Sul' }]
-        },
-        B: { teams: [
-            { id:'CAN', n:'Canadá',  f:'🇨🇦' }, { id:'BIH', n:'Bósnia',  f:'🇧🇦' },
-            { id:'QAT', n:'Qatar',   f:'🇶🇦' }, { id:'SUI', n:'Suíça',   f:'🇨🇭' }],
-            matches:[
-            { id:'B1', h:'CAN', a:'BIH', rd:1, dt:'12/jun 14h00', stadium:'Estádio do Canadá' },
-            { id:'B2', h:'QAT', a:'SUI', rd:1, dt:'12/jun 17h00', stadium:'Estádio do Catar' },
-            { id:'B3', h:'CAN', a:'QAT', rd:2, dt:'18/jun 20h00', stadium:'Estádio do Canadá' },
-            { id:'B4', h:'BIH', a:'SUI', rd:2, dt:'18/jun 23h00', stadium:'Estádio da Bósnia' },
-            { id:'B5', h:'CAN', a:'SUI', rd:3, dt:'24/jun 20h00', stadium:'Estádio do Canadá' },
-            { id:'B6', h:'BIH', a:'QAT', rd:3, dt:'24/jun 23h00', stadium:'Estádio da Bósnia' }]
-        },
-        C: { teams: [
-            { id:'BRA', n:'Brasil',  f:'🇧🇷' }, { id:'MAR', n:'Marrocos', f:'🇲🇦' },
-            { id:'HAI', n:'Haiti',   f:'🇭🇹' }, { id:'SCO', n:'Escócia',  f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿' }],
-            matches:[
-            { id:'C1', h:'BRA', a:'MAR', rd:1, dt:'13/jun 19h00', stadium:'Estádio do Brasil' },
-            { id:'C2', h:'HAI', a:'SCO', rd:1, dt:'13/jun 16h00', stadium:'Estádio do Haiti' },
-            { id:'C3', h:'BRA', a:'HAI', rd:2, dt:'18/jun 21h30', stadium:'Estádio do Brasil' },
-            { id:'C4', h:'MAR', a:'SCO', rd:2, dt:'18/jun 23h00', stadium:'Estádio do Marrocos' },
-            { id:'C5', h:'BRA', a:'SCO', rd:3, dt:'24/jun 19h00', stadium:'Estádio do Brasil' },
-            { id:'C6', h:'MAR', a:'HAI', rd:3, dt:'24/jun 23h00', stadium:'Estádio do Marrocos' }]
-        },
-        D: { teams: [
-            { id:'USA', n:'EUA',      f:'🇺🇸' }, { id:'PAR', n:'Paraguai', f:'🇵🇾' },
-            { id:'AUS', n:'Austrália',f:'🇦🇺' }, { id:'TUR', n:'Turquia',  f:'🇹🇷' }],
-            matches:[
-            { id:'D1', h:'USA', a:'AUS', rd:1, dt:'12/jun 20h00', stadium:'Estádio dos EUA' },
-            { id:'D2', h:'PAR', a:'TUR', rd:1, dt:'12/jun 14h00', stadium:'Estádio do Paraguai' },
-            { id:'D3', h:'USA', a:'PAR', rd:2, dt:'19/jun 20h00', stadium:'Estádio dos EUA' },
-            { id:'D4', h:'AUS', a:'TUR', rd:2, dt:'19/jun 23h00', stadium:'Estádio da Austrália' },
-            { id:'D5', h:'USA', a:'TUR', rd:3, dt:'25/jun 20h00', stadium:'Estádio dos EUA' },
-            { id:'D6', h:'PAR', a:'AUS', rd:3, dt:'25/jun 23h00', stadium:'Estádio do Paraguai' }]
-        },
-        E: { teams: [
-            { id:'GER', n:'Alemanha', f:'🇩🇪' },
-            { id:'CUW', n:'Curaçao', f:'🇨🇼' },
-            { id:'CIV', n:'Costa do Marfim', f:'🇨🇮' },
-            { id:'ECU', n:'Equador', f:'🇪🇨' }
-        ], matches:[
-            { id:'E1', h:'GER', a:'CUW', rd:1, dt:'14/jun 14h00', stadium:'Estádio da Alemanha' },
-            { id:'E2', h:'CIV', a:'ECU', rd:1, dt:'14/jun 17h00', stadium:'Estádio da Costa do Marfim' },
-            { id:'E3', h:'GER', a:'CIV', rd:2, dt:'20/jun 17h00', stadium:'Estádio da Alemanha' },
-            { id:'E4', h:'CUW', a:'ECU', rd:2, dt:'20/jun 20h00', stadium:'Estádio de Curaçao' },
-            { id:'E5', h:'ECU', a:'GER', rd:3, dt:'25/jun 17h00', stadium:'Estádio do Equador' },
-            { id:'E6', h:'CIV', a:'CUW', rd:3, dt:'25/jun 20h00', stadium:'Estádio da Costa do Marfim' }
-        ]},
-        F: { teams: [
-            { id:'NED', n:'Holanda', f:'🇳🇱' }, { id:'JPN', n:'Japão',   f:'🇯🇵' },
-            { id:'SWE', n:'Suécia',  f:'🇸🇪' }, { id:'TUN', n:'Tunísia', f:'🇹🇳' }],
-            matches:[
-            { id:'F1', h:'NED', a:'JPN', rd:1, dt:'14/jun 20h00', stadium:'Estádio da Holanda' },
-            { id:'F2', h:'SWE', a:'TUN', rd:1, dt:'14/jun 17h00', stadium:'Estádio da Suécia' },
-            { id:'F3', h:'NED', a:'SWE', rd:2, dt:'21/jun 14h00', stadium:'Estádio da Holanda' },
-            { id:'F4', h:'JPN', a:'TUN', rd:2, dt:'21/jun 17h00', stadium:'Estádio do Japão' },
-            { id:'F5', h:'NED', a:'TUN', rd:3, dt:'25/jun 20h00', stadium:'Estádio da Holanda' },
-            { id:'F6', h:'JPN', a:'SWE', rd:3, dt:'25/jun 17h00', stadium:'Estádio do Japão' }]
-        },
-        G: { teams: [
-            { id:'BEL', n:'Bélgica',       f:'🇧🇪' }, { id:'EGY', n:'Egito',         f:'🇪🇬' },
-            { id:'IRN', n:'Irã',            f:'🇮🇷' }, { id:'NZL', n:'Nova Zelândia', f:'🇳🇿' }],
-            matches:[
-            { id:'G1', h:'BEL', a:'IRN', rd:1, dt:'15/jun 14h00', stadium:'Estádio da Bélgica' },
-            { id:'G2', h:'EGY', a:'NZL', rd:1, dt:'15/jun 17h00', stadium:'Estádio do Egito' },
-            { id:'G3', h:'BEL', a:'EGY', rd:2, dt:'21/jun 20h00', stadium:'Estádio da Bélgica' },
-            { id:'G4', h:'IRN', a:'NZL', rd:2, dt:'21/jun 17h00', stadium:'Estádio do Irã' },
-            { id:'G5', h:'BEL', a:'NZL', rd:3, dt:'26/jun 14h00', stadium:'Estádio da Bélgica' },
-            { id:'G6', h:'EGY', a:'IRN', rd:3, dt:'26/jun 17h00', stadium:'Estádio do Egito' }]
-        },
-        H: { teams: [
-            { id:'ESP', n:'Espanha',       f:'🇪🇸' }, { id:'CPV', n:'Cabo Verde',     f:'🇨🇻' },
-            { id:'KSA', n:'Arábia Saudita',f:'🇸🇦' }, { id:'URU', n:'Uruguai',        f:'🇺🇾' }],
-            matches:[
-            { id:'H1', h:'ESP', a:'URU', rd:1, dt:'15/jun 20h00', stadium:'Estádio da Espanha' },
-            { id:'H2', h:'CPV', a:'KSA', rd:1, dt:'15/jun 17h00', stadium:'Estádio de Cabo Verde' },
-            { id:'H3', h:'ESP', a:'CPV', rd:2, dt:'22/jun 14h00', stadium:'Estádio da Espanha' },
-            { id:'H4', h:'KSA', a:'URU', rd:2, dt:'22/jun 17h00', stadium:'Estádio da Arábia Saudita' },
-            { id:'H5', h:'ESP', a:'KSA', rd:3, dt:'26/jun 20h00', stadium:'Estádio da Espanha' },
-            { id:'H6', h:'CPV', a:'URU', rd:3, dt:'26/jun 17h00', stadium:'Estádio de Cabo Verde' }]
-        },
-        I: { teams: [
-            { id:'FRA', n:'França',  f:'🇫🇷' }, { id:'SEN', n:'Senegal', f:'🇸🇳' },
-            { id:'IRQ', n:'Iraque',  f:'🇮🇶' }, { id:'NOR', n:'Noruega', f:'🇳🇴' }],
-            matches:[
-            { id:'I1', h:'FRA', a:'SEN', rd:1, dt:'16/jun 14h00', stadium:'Estádio da França' },
-            { id:'I2', h:'IRQ', a:'NOR', rd:1, dt:'16/jun 17h00', stadium:'Estádio do Iraque' },
-            { id:'I3', h:'FRA', a:'IRQ', rd:2, dt:'22/jun 20h00', stadium:'Estádio da França' },
-            { id:'I4', h:'SEN', a:'NOR', rd:2, dt:'22/jun 17h00', stadium:'Estádio do Senegal' },
-            { id:'I5', h:'FRA', a:'NOR', rd:3, dt:'26/jun 14h00', stadium:'Estádio da França' },
-            { id:'I6', h:'SEN', a:'IRQ', rd:3, dt:'26/jun 17h00', stadium:'Estádio do Senegal' }]
-        },
-        J: { teams: [
-            { id:'ARG', n:'Argentina', f:'🇦🇷' }, { id:'ALG', n:'Argélia',  f:'🇩🇿' },
-            { id:'AUT', n:'Áustria',   f:'🇦🇹' }, { id:'JOR', n:'Jordânia', f:'🇯🇴' }],
-            matches:[
-            { id:'J1', h:'ARG', a:'AUT', rd:1, dt:'17/jun 14h00', stadium:'Estádio da Argentina' },
-            { id:'J2', h:'ALG', a:'JOR', rd:1, dt:'17/jun 17h00', stadium:'Estádio da Argélia' },
-            { id:'J3', h:'ARG', a:'ALG', rd:2, dt:'23/jun 14h00', stadium:'Estádio da Argentina' },
-            { id:'J4', h:'AUT', a:'JOR', rd:2, dt:'23/jun 17h00', stadium:'Estádio da Áustria' },
-            { id:'J5', h:'ARG', a:'JOR', rd:3, dt:'27/jun 14h00', stadium:'Estádio da Argentina' },
-            { id:'J6', h:'ALG', a:'AUT', rd:3, dt:'27/jun 17h00', stadium:'Estádio da Argélia' }]
-        },
-        K: { teams: [
-            { id:'POR', n:'Portugal',    f:'🇵🇹' }, { id:'COD', n:'RD Congo',     f:'🇨🇩' },
-            { id:'UZB', n:'Uzbequistão', f:'🇺🇿' }, { id:'COL', n:'Colômbia',     f:'🇨🇴' }],
-            matches:[
-            { id:'K1', h:'POR', a:'COL', rd:1, dt:'17/jun 20h00', stadium:'Estádio de Portugal' },
-            { id:'K2', h:'COD', a:'UZB', rd:1, dt:'17/jun 17h00', stadium:'Estádio da RD Congo' },
-            { id:'K3', h:'POR', a:'COD', rd:2, dt:'23/jun 20h00', stadium:'Estádio de Portugal' },
-            { id:'K4', h:'UZB', a:'COL', rd:2, dt:'23/jun 17h00', stadium:'Estádio do Uzbequistão' },
-            { id:'K5', h:'POR', a:'UZB', rd:3, dt:'27/jun 20h00', stadium:'Estádio de Portugal' },
-            { id:'K6', h:'COD', a:'COL', rd:3, dt:'27/jun 17h00', stadium:'Estádio da RD Congo' }]
-        },
-        L: { teams: [
-            { id:'ENG', n:'Inglaterra', f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' }, { id:'CRO', n:'Croácia', f:'🇭🇷' },
-            { id:'GHA', n:'Gana',       f:'🇬🇭' }, { id:'PAN', n:'Panamá',  f:'🇵🇦' }],
-            matches:[
-            { id:'L1', h:'ENG', a:'CRO', rd:1, dt:'18/jun 14h00', stadium:'Estádio da Inglaterra' },
-            { id:'L2', h:'GHA', a:'PAN', rd:1, dt:'18/jun 18h00', stadium:'Estádio de Gana' },
-            { id:'L3', h:'ENG', a:'GHA', rd:2, dt:'24/jun 20h00', stadium:'Estádio da Inglaterra' },
-            { id:'L4', h:'CRO', a:'PAN', rd:2, dt:'24/jun 23h00', stadium:'Estádio da Croácia' },
-            { id:'L5', h:'ENG', a:'PAN', rd:3, dt:'27/jun 20h00', stadium:'Estádio da Inglaterra' },
-            { id:'L6', h:'CRO', a:'GHA', rd:3, dt:'27/jun 23h00', stadium:'Estádio da Croácia' }]
-        }
-    };
+        const COPA_GROUPS = {
+  A: [
+    { id: 'A1', h: 'MEX', a: 'RSA', rd: 1, dt: '11/jun 16h00' },
+    { id: 'A2', h: 'KOR', a: 'CZE', rd: 1, dt: '11/jun 23h00' },
+    { id: 'A3', h: 'CZE', a: 'RSA', rd: 2, dt: '18/jun 13h00' },
+    { id: 'A4', h: 'MEX', a: 'KOR', rd: 2, dt: '18/jun 21h00' },
+    { id: 'A5', h: 'CZE', a: 'MEX', rd: 3, dt: '24/jun 22h00' },
+    { id: 'A6', h: 'RSA', a: 'KOR', rd: 3, dt: '24/jun 22h00' }
+  ],
+  B: [
+    { id: 'B1', h: 'CAN', a: 'BIH', rd: 1, dt: '12/jun 16h00' },
+    { id: 'B2', h: 'QAT', a: 'SUI', rd: 1, dt: '13/jun 16h00' },
+    { id: 'B3', h: 'SUI', a: 'BIH', rd: 2, dt: '18/jun 15h00' },
+    { id: 'B4', h: 'CAN', a: 'QAT', rd: 2, dt: '18/jun 18h00' },
+    { id: 'B5', h: 'SUI', a: 'CAN', rd: 3, dt: '24/jun 19h00' },
+    { id: 'B6', h: 'BIH', a: 'QAT', rd: 3, dt: '24/jun 19h00' }
+  ],
+  C: [
+    { id: 'C1', h: 'BRA', a: 'MAR', rd: 1, dt: '13/jun 19h00' },
+    { id: 'C2', h: 'HAI', a: 'SCO', rd: 1, dt: '13/jun 22h00' },
+    { id: 'C3', h: 'SCO', a: 'MAR', rd: 2, dt: '19/jun 19h00' },
+    { id: 'C4', h: 'BRA', a: 'HAI', rd: 2, dt: '19/jun 21h30' },
+    { id: 'C5', h: 'SCO', a: 'BRA', rd: 3, dt: '24/jun 19h00' },
+    { id: 'C6', h: 'MAR', a: 'HAI', rd: 3, dt: '24/jun 19h00' }
+  ],
+  D: [
+    { id: 'D1', h: 'USA', a: 'PAR', rd: 1, dt: '12/jun 22h00' },
+    { id: 'D2', h: 'AUS', a: 'TUR', rd: 1, dt: '13/jun 22h00' },
+    { id: 'D3', h: 'USA', a: 'AUS', rd: 2, dt: '19/jun 16h00' },
+    { id: 'D4', h: 'TUR', a: 'PAR', rd: 2, dt: '20/jun 18h00' },
+    { id: 'D5', h: 'TUR', a: 'USA', rd: 3, dt: '25/jun 16h00' },
+    { id: 'D6', h: 'PAR', a: 'AUS', rd: 3, dt: '25/jun 16h00' }
+  ],
+  E: [
+    { id: 'E1', h: 'GER', a: 'CUW', rd: 1, dt: '14/jun 14h00' },
+    { id: 'E2', h: 'CIV', a: 'ECU', rd: 1, dt: '14/jun 20h00' },
+    { id: 'E3', h: 'GER', a: 'CIV', rd: 2, dt: '20/jun 17h00' },
+    { id: 'E4', h: 'ECU', a: 'CUW', rd: 2, dt: '21/jun 21h00' },
+    { id: 'E5', h: 'ECU', a: 'GER', rd: 3, dt: '25/jun 17h00' },
+    { id: 'E6', h: 'CUW', a: 'CIV', rd: 3, dt: '25/jun 17h00' }
+  ],
+  F: [
+    { id: 'F1', h: 'NED', a: 'JPN', rd: 1, dt: '14/jun 17h00' },
+    { id: 'F2', h: 'SWE', a: 'TUN', rd: 1, dt: '14/jun 23h00' },
+    { id: 'F3', h: 'NED', a: 'SWE', rd: 2, dt: '20/jun 14h00' },
+    { id: 'F4', h: 'TUN', a: 'JPN', rd: 2, dt: '21/jun 01h00' },
+    { id: 'F5', h: 'JPN', a: 'SWE', rd: 3, dt: '25/jun 20h00' },
+    { id: 'F6', h: 'TUN', a: 'NED', rd: 3, dt: '25/jun 20h00' }
+  ],
+  G: [
+    { id: 'G1', h: 'BEL', a: 'EGY', rd: 1, dt: '15/jun 16h00' },
+    { id: 'G2', h: 'IRN', a: 'NZL', rd: 1, dt: '15/jun 22h00' },
+    { id: 'G3', h: 'BEL', a: 'IRN', rd: 2, dt: '21/jun 15h00' },
+    { id: 'G4', h: 'NZL', a: 'EGY', rd: 2, dt: '21/jun 21h00' },
+    { id: 'G5', h: 'NZL', a: 'BEL', rd: 3, dt: '26/jun 16h00' },
+    { id: 'G6', h: 'EGY', a: 'IRN', rd: 3, dt: '26/jun 16h00' }
+  ],
+  H: [
+    { id: 'H1', h: 'ESP', a: 'CPV', rd: 1, dt: '15/jun 13h00' },
+    { id: 'H2', h: 'KSA', a: 'URU', rd: 1, dt: '15/jun 19h00' },
+    { id: 'H3', h: 'ESP', a: 'KSA', rd: 2, dt: '21/jun 12h00' },
+    { id: 'H4', h: 'URU', a: 'CPV', rd: 2, dt: '22/jun 18h00' },
+    { id: 'H5', h: 'URU', a: 'ESP', rd: 3, dt: '26/jun 20h00' },
+    { id: 'H6', h: 'CPV', a: 'KSA', rd: 3, dt: '26/jun 20h00' }
+  ],
+  I: [
+    { id: 'I1', h: 'FRA', a: 'SEN', rd: 1, dt: '16/jun 16h00' },
+    { id: 'I2', h: 'IRQ', a: 'NOR', rd: 1, dt: '16/jun 19h00' },
+    { id: 'I3', h: 'FRA', a: 'IRQ', rd: 2, dt: '22/jun 18h00' },
+    { id: 'I4', h: 'NOR', a: 'SEN', rd: 2, dt: '22/jun 21h00' },
+    { id: 'I5', h: 'NOR', a: 'FRA', rd: 3, dt: '26/jun 16h00' },
+    { id: 'I6', h: 'SEN', a: 'IRQ', rd: 3, dt: '26/jun 16h00' }
+  ],
+  J: [
+    { id: 'J1', h: 'ARG', a: 'ALG', rd: 1, dt: '16/jun 22h00' },
+    { id: 'J2', h: 'AUT', a: 'JOR', rd: 1, dt: '17/jun 01h00' },
+    { id: 'J3', h: 'ARG', a: 'AUT', rd: 2, dt: '22/jun 15h00' },
+    { id: 'J4', h: 'JOR', a: 'ALG', rd: 2, dt: '23/jun 18h00' },
+    { id: 'J5', h: 'JOR', a: 'ARG', rd: 3, dt: '27/jun 16h00' },
+    { id: 'J6', h: 'ALG', a: 'AUT', rd: 3, dt: '27/jun 16h00' }
+  ],
+  K: [
+    { id: 'K1', h: 'POR', a: 'COD', rd: 1, dt: '17/jun 14h00' },
+    { id: 'K2', h: 'UZB', a: 'COL', rd: 1, dt: '17/jun 23h00' },
+    { id: 'K3', h: 'POR', a: 'UZB', rd: 2, dt: '23/jun 14h00' },
+    { id: 'K4', h: 'COL', a: 'COD', rd: 2, dt: '24/jun 02h00' },
+    { id: 'K5', h: 'COL', a: 'POR', rd: 3, dt: '27/jun 20h30' },
+    { id: 'K6', h: 'COD', a: 'UZB', rd: 3, dt: '27/jun 20h30' }
+  ],
+  L: [
+    { id: 'L1', h: 'ENG', a: 'CRO', rd: 1, dt: '17/jun 17h00' },
+    { id: 'L2', h: 'GHA', a: 'PAN', rd: 1, dt: '17/jun 20h00' },
+    { id: 'L3', h: 'ENG', a: 'GHA', rd: 2, dt: '23/jun 17h00' },
+    { id: 'L4', h: 'PAN', a: 'CRO', rd: 2, dt: '23/jun 20h00' },
+    { id: 'L5', h: 'PAN', a: 'ENG', rd: 3, dt: '27/jun 16h00' },
+    { id: 'L6', h: 'CRO', a: 'GHA', rd: 3, dt: '27/jun 16h00' }
+  ]
+};
 
     const COPA_KNOCKOUT = {
         oitavas: [
