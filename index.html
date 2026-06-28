@@ -1646,11 +1646,7 @@
 
     // ==============================================================
     // COPA 2026 - CHAVEAMENTO COMPLETO (SEM FASE DE GRUPOS)
-    // CONFRONTOS CORRIGIDOS:
-    //   - México × Equador (antes México × Escócia)
-    //   - Inglaterra × Senegal (antes Inglaterra × Equador)
-    //   - Argentina × Cabo Verde (antes Argentina × Uruguai)
-    //   - Brasil × Japão em 29/06 14h (já corrigido)
+    // CONFRONTOS CORRIGIDOS SEGUNDO OS PRINTS DO USUÁRIO
     // ==============================================================
 
     // Definição das 32 seleções
@@ -1660,7 +1656,7 @@
         'KOR': { id:'KOR', n:'Coreia do Sul', f:'🇰🇷' },
         'CZE': { id:'CZE', n:'R. Tcheca', f:'🇨🇿' },
         'CAN': { id:'CAN', n:'Canadá', f:'🇨🇦' },
-        'BIH': { id:'BIH', n:'Bósnia', f:'🇧🇦' },
+        'BIH': { id:'BIH', n:'Bósnia e Herzegovina', f:'🇧🇦' },
         'QAT': { id:'QAT', n:'Qatar', f:'🇶🇦' },
         'SUI': { id:'SUI', n:'Suíça', f:'🇨🇭' },
         'BRA': { id:'BRA', n:'Brasil', f:'🇧🇷' },
@@ -1673,9 +1669,9 @@
         'TUR': { id:'TUR', n:'Turquia', f:'🇹🇷' },
         'GER': { id:'GER', n:'Alemanha', f:'🇩🇪' },
         'CUW': { id:'CUW', n:'Curaçao', f:'🇨🇼' },
-        'CIV': { id:'CIV', n:'C. do Marfim', f:'🇨🇮' },
+        'CIV': { id:'CIV', n:'Costa do Marfim', f:'🇨🇮' },
         'ECU': { id:'ECU', n:'Equador', f:'🇪🇨' },
-        'NED': { id:'NED', n:'Holanda', f:'🇳🇱' },
+        'NED': { id:'NED', n:'Países Baixos', f:'🇳🇱' }, // Corrigido de "Holanda" para "Países Baixos" conforme print
         'JPN': { id:'JPN', n:'Japão', f:'🇯🇵' },
         'SWE': { id:'SWE', n:'Suécia', f:'🇸🇪' },
         'TUN': { id:'TUN', n:'Tunísia', f:'🇹🇳' },
@@ -1705,28 +1701,24 @@
         'PAN': { id:'PAN', n:'Panamá', f:'🇵🇦' }
     };
 
-    // Chaveamento das Oitavas (16 jogos) - CONFRONTOS CORRIGIDOS
+    // Chaveamento das Oitavas (16 jogos) - CONFRONTOS, DATAS E HORÁRIOS CORRIGIDOS
     const OITAVAS = [
-        { id: 'O1',  home: 'GER', away: 'PAR', dt: '28/jun 13h', stage: 'Oitavas' },
-        { id: 'O2',  home: 'FRA', away: 'SWE', dt: '28/jun 17h', stage: 'Oitavas' },
-        { id: 'O3',  home: 'RSA', away: 'CAN', dt: '29/jun 13h', stage: 'Oitavas' },
-        { id: 'O4',  home: 'NED', away: 'MAR', dt: '29/jun 17h', stage: 'Oitavas' },
-        { id: 'O5',  home: 'POR', away: 'GHA', dt: '30/jun 13h', stage: 'Oitavas' },
-        { id: 'O6',  home: 'ESP', away: 'AUT', dt: '30/jun 17h', stage: 'Oitavas' },
-        { id: 'O7',  home: 'USA', away: 'BIH', dt: '01/jul 13h', stage: 'Oitavas' },
-        { id: 'O8',  home: 'EGY', away: 'KOR', dt: '01/jul 17h', stage: 'Oitavas' },
-        // Brasil × Japão - 29/06 14h (CORRIGIDO)
-        { id: 'O9',  home: 'BRA', away: 'JPN', dt: '29/jun 14h', stage: 'Oitavas' },
-        { id: 'O10', home: 'CIV', away: 'NOR', dt: '02/jul 17h', stage: 'Oitavas' },
-        // México × Equador (CORRIGIDO - antes México × Escócia)
-        { id: 'O11', home: 'MEX', away: 'ECU', dt: '03/jul 13h', stage: 'Oitavas' },
-        // Inglaterra × Senegal (CORRIGIDO - antes Inglaterra × Equador)
-        { id: 'O12', home: 'ENG', away: 'SEN', dt: '03/jul 17h', stage: 'Oitavas' },
-        // Argentina × Cabo Verde (CORRIGIDO - antes Argentina × Uruguai)
-        { id: 'O13', home: 'ARG', away: 'CAB', dt: '04/jul 13h', stage: 'Oitavas' },
-        { id: 'O14', home: 'AUS', away: 'IRN', dt: '04/jul 17h', stage: 'Oitavas' },
-        { id: 'O15', home: 'SUI', away: 'AGL', dt: '05/jul 13h', stage: 'Oitavas' },
-        { id: 'O16', home: 'COL', away: 'CRO', dt: '05/jul 17h', stage: 'Oitavas' }
+        { id: 'O1',  home: 'GER', away: 'PAR', dt: 'Amanhã, 17:30', stage: 'Oitavas' },
+        { id: 'O2',  home: 'FRA', away: 'SWE', dt: 'Ter., 30/06, 18:00', stage: 'Oitavas' },
+        { id: 'O3',  home: 'RSA', away: 'CAN', dt: 'Hoje, 16:00', stage: 'Oitavas' },
+        { id: 'O4',  home: 'NED', away: 'MAR', dt: 'Amanhã, 22:00', stage: 'Oitavas' },
+        { id: 'O5',  home: 'POR', away: 'CRO', dt: 'Qui., 02/07, 20:00', stage: 'Oitavas' },
+        { id: 'O6',  home: 'ESP', away: 'AUT', dt: 'Qui., 02/07, 16:00', stage: 'Oitavas' },
+        { id: 'O7',  home: 'USA', away: 'BIH', dt: 'Qua., 01/07, 21:00', stage: 'Oitavas' },
+        { id: 'O8',  home: 'BEL', away: 'SEN', dt: 'Qua., 01/07, 17:00', stage: 'Oitavas' },
+        { id: 'O9',  home: 'BRA', away: 'JPN', dt: 'Amanhã, 14:00', stage: 'Oitavas' },
+        { id: 'O10', home: 'CIV', away: 'NOR', dt: 'Ter., 30/06, 14:00', stage: 'Oitavas' },
+        { id: 'O11', home: 'MEX', away: 'ECU', dt: 'Ter., 30/06, 22:00', stage: 'Oitavas' },
+        { id: 'O12', home: 'ENG', away: 'RDC', dt: 'Qua., 01/07, 13:00', stage: 'Oitavas' },
+        { id: 'O13', home: 'ARG', away: 'CAB', dt: 'Sex., 03/07, 19:00', stage: 'Oitavas' },
+        { id: 'O14', home: 'AUS', away: 'EGY', dt: 'Sex., 03/07, 15:00', stage: 'Oitavas' },
+        { id: 'O15', home: 'SUI', away: 'AGL', dt: 'Sex., 03/07, 00:00', stage: 'Oitavas' },
+        { id: 'O16', home: 'COL', away: 'GHA', dt: 'Sex., 03/07, 22:30', stage: 'Oitavas' }
     ];
 
     // Quartas (8 jogos)
