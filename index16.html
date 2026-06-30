@@ -1,0 +1,2373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>
+  // ========== CORREÇÃO CRÍTICA E DEFINITIVA ==========
+  if ('serviceWorker' in navigator) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    } else {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('PWA pronto para instalação no Android!', reg.scope))
+          .catch(err => console.error('Erro no instalador:', err));
+      });
+    }
+  }
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#00A97A">
+    <title>Braun OnLine 2026/2027</title>
+    <meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC e MANUTENÇÃO">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="maskable_icon_x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Braun OnLine">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQXB043RE1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LQXB043RE1');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;700;900&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+    <style>
+        :root {
+            --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+            --accent: #7030A0; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
+            --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
+        }
+        body.dark-mode {
+            --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
+            --primary: #00C48D; --semana-w: #00C48D;
+        }
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+            margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+        }
+        
+        .welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); color: white; z-index: 3000;
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
+        }
+        .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
+        .welcome-logo { width: 120px; margin-bottom: 25px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        #copaSplashScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); z-index: 5000; display: none;
+            flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 40px 20px; box-sizing: border-box; overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+        }
+        #copaSplashScreen::before {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 380px; height: 380px;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.12) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+        .cs-logo-wrap { 
+            width: 100%; max-width: 260px; margin: 0 auto; 
+            display: flex; justify-content: center; 
+            animation: csFadeDown 0.7s ease both; z-index: 1; 
+        }
+        .cs-logo-wrap svg { width: 100%; height: auto; fill: #FFFFFF; }
+        .cs-trophy-wrap { 
+            flex: 1; width: 100%; padding: 20px 0;
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 1; animation: csFadeIn 0.9s 0.3s ease both; 
+            background-color: transparent !important;
+        }
+        .cs-trophy-wrap img { 
+            width: 80%; max-width: 300px; 
+            max-height: 45vh;
+            height: auto; object-fit: contain; 
+            filter: drop-shadow(0 20px 48px rgba(0,0,0,0.35)); 
+            animation: csFloat 4s ease-in-out infinite; 
+            background: transparent;
+        }
+        .cs-tagline { 
+            z-index: 1; text-align: center; 
+            animation: csFadeUp 0.7s 0.5s ease both; margin-bottom: 25px; 
+        }
+        
+        @keyframes csFadeDown { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes csFadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes csFadeIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        @keyframes csFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+        #install-button {
+            display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
+            font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .hoje {
+            background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
+            border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
+            animation: hoje-pulsar 1.5s infinite ease-in-out;
+        }
+        body.dark-mode .hoje { border-color: #1E1E1E !important; }
+        @keyframes hoje-pulsar {
+            0%   { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+            50%  { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
+            100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+        }
+        .FERIAS {
+            position: relative;
+            border: 2px dashed var(--ferias) !important;
+            box-shadow: inset 0 0 10px rgba(112,48,160,0.2);
+        }
+        .FERIAS::before {
+            content: 'flight'; font-family: 'Material Symbols Outlined';
+            position: absolute; top: -6px; right: -6px; font-size: 16px;
+            color: var(--ferias); background: var(--card); border-radius: 50%;
+            z-index: 5; animation: plane-fly 2s infinite ease-in-out;
+            font-variation-settings: 'FILL' 1;
+        }
+        header {
+            background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
+            justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .brand-logo-svg { height: 35px; width: auto; }
+        .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
+
+        .turma-badge {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .turma-badge:active {
+            background: rgba(255,255,255,0.35);
+            transform: scale(0.96);
+        }
+        .turma-badge .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        .status-panel {
+            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 0px 15px 0px 15px;
+            border: 1px solid var(--border); text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            position: sticky; top: 85px; z-index: 95;
+        }
+        .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
+        .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
+        
+        #calendario-box {
+            margin-top: 0px;
+            padding-top: 0px;
+        }
+        .mes-container { 
+            perspective: 1000px; 
+            margin: 0 10px 25px 10px;
+            min-height: 400px; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 0px;
+            scroll-margin-top: 110px;
+        }
+        #calendario-box > .mes-container:first-child { margin-top: 0px; }
+        
+        .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
+        .mes-inner.flipped { transform: rotateY(180deg); }
+        .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .mes-front { background: var(--card); }
+        .mes-back  { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
+        .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
+        .dia-label-w {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 900;
+            background: linear-gradient(135deg, var(--semana-w), #007d5a); color: #FFFFFF;
+            border-radius: 8px; height: 28px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .dia { 
+            aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
+            border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent; 
+            transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
+        }
+        .AMARELO  { background: var(--amarelo) !important; color: #1a1a1a !important; }
+        .VERDE    { background: var(--verde)   !important; color: #fff     !important; }
+        .AZUL     { background: var(--azul-mnt)!important; color: #fff     !important; }
+        .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
+        .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; height: 75px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.75em; font-weight: 700; background: none; border: none; cursor: pointer; }
+        .tab.active { color: #FFFFFF; }
+        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
+        .bottom-modal { position: fixed; bottom: -110%; left: 0; right: 0; background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px; z-index: 2000; transition: 0.5s; max-height: 85vh; overflow-y: auto; }
+        .bottom-modal.show { bottom: 0; }
+        .select-group { display: flex; gap: 12px; padding: 0 15px 20px 15px; }
+        select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
+        #anoSelect   { width: 95px; flex-shrink: 0; }
+        #turmaSelect { flex-grow: 1; }
+        .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .config-label { font-weight: 600; font-size: 0.95em; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; flex-wrap: wrap; gap: 10px; }
+        .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
+        .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .ramal-badge {
+            background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--primary);
+            text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
+        .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .stat-card-big.purple { border-color: var(--accent); }
+        .stat-card-big.teal   { border-color: var(--verde);  }
+        .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        .stat-val-big.purple { color: var(--accent); }
+        .stat-val-big.teal   { color: var(--verde);  }
+        .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .lote-box { background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; position: relative; }
+        .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+        .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
+        .privacy-link { color: var(--primary); font-weight: 800; text-decoration: none; display: block; margin-top: 10px; cursor: pointer; background: none; border: none; font-size: inherit; }
+        #btn-flutuante-votar {
+            position: fixed; bottom: 95px; right: 20px;
+            background: linear-gradient(135deg, #FFD700, #EBC13D); color: #1A1A1A;
+            border: none; border-radius: 50px; padding: 12px 22px; font-weight: 800;
+            font-size: 0.85em; display: none; align-items: center; gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
+            animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
+            text-decoration: none; cursor: pointer; border: 2px solid white;
+        }
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.5) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .hamburger-btn {
+            background: none; border: none; color: white; cursor: pointer;
+            display: flex; flex-direction: column; gap: 5px; padding: 8px;
+            border-radius: 8px;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2.5px;
+            background: white; border-radius: 3px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        #hamburgerDrawer {
+            position: fixed; top: 0; left: -100%; width: 82%; max-width: 320px; height: 100%;
+            background: var(--card); z-index: 3600; transition: left 0.38s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column; box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+        }
+        #hamburgerDrawer.open { left: 0; }
+        #drawerOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px);
+        }
+        #drawerOverlay.show { display: block; }
+        .drawer-brand {
+            background: var(--primary); padding: 50px 20px 20px 20px;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            position: relative;
+        }
+        .drawer-brand-icon {
+            width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .drawer-brand-text { color: white; font-size: 1em; font-weight: 800; }
+        .drawer-brand-sub  { color: rgba(255,255,255,0.7); font-size: 0.72em; font-weight: 600; margin-top: 2px; }
+        .drawer-close-btn {
+            background: none; border: none; color: white; cursor: pointer;
+            margin-left: auto; padding: 8px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: background 0.2s;
+        }
+        .drawer-close-btn:active { background: rgba(255,255,255,0.2); }
+        .drawer-close-btn span { font-size: 24px; }
+        .drawer-menu { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .drawer-section-label {
+            font-size: 0.65em; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--primary); opacity: 0.5;
+            padding: 15px 20px 5px 20px;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: none;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            border-top: none;
+            margin-bottom: 2px;
+        }
+        .drawer-item:active { background: rgba(0,0,0,0.05); }
+        body.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
+        .drawer-item.highlight {
+            background: rgba(0,169,122,0.08);
+        }
+        body.dark-mode .drawer-item.highlight {
+            background: rgba(0,169,122,0.15);
+        }
+        .drawer-item-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+        .drawer-item-label {
+            flex: 1;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .drawer-item-sub {
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.5;
+            margin-top: 2px;
+            color: var(--text);
+        }
+        .drawer-item-arrow {
+            color: var(--text);
+            opacity: 0.3;
+            font-size: 20px;
+        }
+        .drawer-item.no-arrow .drawer-item-arrow {
+            display: none;
+        }
+        .drawer-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            opacity: 0.6;
+            font-weight: 600;
+        }
+        .qr-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .qr-img {
+            filter: invert(1);
+        }
+        
+        /* ===== NOVO ESTILO DO CHAVEAMENTO DA COPA ===== */
+        #copaPanel {
+            position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
+            background: var(--bg); z-index: 3700; transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        #copaPanel.open { right: 0; }
+        
+        .copa-panel-header {
+            background: linear-gradient(135deg, #005c2b, #003d1c);
+            padding: 48px 16px 14px 16px; flex-shrink: 0; color: white;
+        }
+        .copa-panel-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .copa-back-btn {
+            background: rgba(255,255,255,0.15); border: none; color: white;
+            border-radius: 50%; width: 36px; height: 36px; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+        }
+        .copa-panel-title { font-size: 1.15em; font-weight: 800; }
+        .copa-panel-subtitle { font-size: 0.75em; opacity: 0.75; }
+        
+        .copa-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+        }
+        
+        /* Chaveamento estilo eliminatórias */
+        .bracket-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 20px;
+            min-height: 100%;
+        }
+        
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .bracket-round-label {
+            font-size: 0.75em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            padding: 6px 0 4px 0;
+            border-bottom: 2px solid var(--primary);
+            opacity: 0.7;
+        }
+        
+        .bracket-match {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card);
+            border-radius: 14px;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
+            position: relative;
+            min-height: 60px;
+        }
+        
+        .bracket-match:active {
+            transform: scale(0.98);
+        }
+        
+        .bracket-match.has-score {
+            border-color: var(--primary);
+        }
+        
+        .bracket-match-placeholder {
+            border-color: #ff9800;
+            border-style: dashed;
+            background: rgba(255,152,0,0.05);
+        }
+        
+        .bracket-match-team {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 0;
+        }
+        
+        .bracket-match-team.home {
+            align-items: flex-end;
+            flex: 1.2;
+        }
+        
+        .bracket-match-team.away {
+            align-items: flex-start;
+            flex: 1.2;
+        }
+        
+        .bracket-match-flag {
+            font-size: 1.6em;
+            line-height: 1.2;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bracket-match-flag.empty {
+            opacity: 0.3;
+            font-size: 1.2em;
+        }
+        
+        .bracket-match-name {
+            font-size: 0.7em;
+            font-weight: 700;
+            text-align: center;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px;
+        }
+        
+        .bracket-match-name.empty {
+            opacity: 0.3;
+            font-style: italic;
+        }
+        
+        .bracket-score-box {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 4px 8px;
+            border: 1.5px solid var(--border);
+            min-width: 56px;
+            justify-content: center;
+        }
+        
+        .bracket-score-box.live {
+            border-color: var(--primary);
+            background: rgba(0,169,122,0.08);
+        }
+        
+        .bracket-score-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1em;
+            font-weight: 900;
+            min-width: 16px;
+            text-align: center;
+        }
+        
+        .bracket-score-sep {
+            font-size: 0.8em;
+            font-weight: 700;
+            opacity: 0.3;
+        }
+        
+        .bracket-edit-hint {
+            position: absolute;
+            bottom: 2px;
+            right: 6px;
+            font-size: 0.5em;
+            font-weight: 800;
+            opacity: 0.3;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .bracket-edit-hint .material-symbols-outlined {
+            font-size: 12px;
+        }
+        
+        .bracket-empty-hint {
+            font-size: 0.6em;
+            opacity: 0.4;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        
+        /* Ajustes para tela pequena */
+        @media (max-width: 480px) {
+            .bracket-match {
+                padding: 8px 10px;
+                min-height: 50px;
+                gap: 4px;
+            }
+            .bracket-match-flag {
+                font-size: 1.3em;
+                min-height: 24px;
+            }
+            .bracket-match-name {
+                font-size: 0.6em;
+                max-width: 60px;
+            }
+            .bracket-score-box {
+                min-width: 44px;
+                padding: 2px 6px;
+            }
+            .bracket-score-num {
+                font-size: 0.95em;
+                min-width: 12px;
+            }
+        }
+        
+        /* ===== MODAL DE EDIÇÃO DO TIME ===== */
+        #teamModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 4000; display: none;
+            align-items: center; justify-content: center; backdrop-filter: blur(6px);
+        }
+        #teamModal.show { display: flex; }
+        
+        .team-modal-box {
+            background: var(--card); border-radius: 28px; padding: 28px 24px;
+            width: calc(100% - 48px); max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+        
+        .team-modal-title {
+            font-weight: 800;
+            font-size: 0.95em;
+            opacity: 0.6;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        
+        .team-modal-subtitle {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+        
+        .team-modal-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        
+        .team-modal-label {
+            font-weight: 700;
+            font-size: 0.8em;
+            opacity: 0.6;
+            min-width: 50px;
+        }
+        
+        .team-modal-flag-input {
+            font-size: 2em;
+            width: 50px;
+            text-align: center;
+            background: var(--bg);
+            border: 2.5px solid var(--border);
+            border-radius: 12px;
+            padding: 4px 0;
+            outline: none;
+        }
+        
+        .team-modal-name-input {
+            flex: 1;
+            font-weight: 700;
+            font-size: 1em;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 2.5px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            font-family: inherit;
+        }
+        
+        .team-modal-name-input:focus,
+        .team-modal-flag-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .team-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        
+        .team-save-btn {
+            flex: 1; background: var(--primary); color: white; border: none;
+            padding: 15px; border-radius: 16px; font-weight: 800; font-size: 1em; cursor: pointer;
+        }
+        .team-save-btn:active { opacity: 0.85; }
+        .team-cancel-btn {
+            background: var(--bg); color: var(--text); border: 1px solid var(--border);
+            padding: 15px 18px; border-radius: 16px; font-weight: 800; font-size: 0.9em; cursor: pointer;
+        }
+        .team-clear-btn {
+            background: #ffefef; color: #ff6b6b; border: 1px solid #ff6b6b;
+            padding: 15px 14px; border-radius: 16px; font-weight: 800; font-size: 0.85em; cursor: pointer;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .skip-link:focus {
+            top: 10px;
+            left: 10px;
+            width: auto;
+            height: auto;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            z-index: 9999;
+            border-radius: 8px;
+        }
+        
+        @supports (-webkit-touch-callout: none) {
+            .mes-inner {
+                transform-style: preserve-3d;
+                -webkit-transform-style: preserve-3d;
+            }
+            .mes-face {
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<div id="welcomeScreen" class="welcome-screen">
+    <img src="maskable_icon_x512.png" class="welcome-logo" alt="Logo Braun OnLine">
+    <h1>Braun OnLine</h1>
+    <p>Sua escala na palma da mão.</p>
+    <button class="btn-comecar" onclick="goToGreeting()">ENTRAR NO APP</button>
+    <div style="position:absolute;bottom:40px;font-size:0.75em;opacity:0.7;font-weight:600;letter-spacing:1px;">VERSÃO 3.3 / 2026 / 2027</div>
+</div>
+
+<div id="copaSplashScreen">
+    <div class="cs-logo-wrap">
+        <svg version="1.1" viewBox="0 0 172 42" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Braun Logo">
+            <g>
+                <path class="st-logo-path" d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path class="st-logo-path" d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path class="st-logo-path" d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path class="st-logo-path" d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path class="st-logo-path" d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path class="st-logo-path" d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" class="st-logo-path" width="0.8" height="26.2"/>
+            </g>
+            <g>
+                <path class="st-logo-path" d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon class="st-logo-path" points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path class="st-logo-path" d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path class="st-logo-path" d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" class="st-logo-path" width="1.2" height="10.2"/>
+                <polygon class="st-logo-path" points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path class="st-logo-path" d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon class="st-logo-path" points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon class="st-logo-path" points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path class="st-logo-path" d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon class="st-logo-path" points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path class="st-logo-path" d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon class="st-logo-path" points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" class="st-logo-path" width="1.2" height="10.2"/>
+                <path class="st-logo-path" d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon class="st-logo-path" points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
+        </svg>
+    </div>
+    <div class="cs-trophy-wrap">
+      <img src="logo-cup.png" alt="Logo da Copa">
+    </div>
+    <div class="cs-tagline">
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0; text-transform: uppercase; color: #ffffff;">NA COPA,</p>
+            <p style="font-size: 3.8rem; font-weight: 900; margin: 5px 0 0 0; line-height: 1; color: #ffffff;">2026</p>
+        </div>
+    </div>
+</div>
+
+<button id="install-button" onclick="installPWA()">
+    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+</button>
+
+<header>
+    <div class="brand-container">
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Logo">
+            <title>B|BRAUN Logo Oficial</title>
+            <g fill="#FFFFFF">
+                <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" width="0.8" height="26.2"/>
+            </g>
+            <g fill="#FFFFFF">
+                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
+                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
+                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
+        </svg>
+
+        <span class="turma-badge" id="turmaBadge" onclick="openMeuPerfil()">
+            <span class="material-symbols-outlined">groups</span>
+            <span id="turmaBadgeText">Turma A</span>
+        </span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <button class="hamburger-btn" onclick="openHamburger()" aria-label="Menu principal" aria-expanded="false" id="menuButton">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+    </div>
+</header>
+
+<main id="main-content">
+<div class="status-panel" aria-live="polite">
+    <div id="big-clock" class="clock">00:00:00</div>
+    <div id="status-msg" class="status-msg">---</div>
+</div>
+
+<div id="calendario-box"></div>
+</main>
+
+<div class="tab-bar" role="tablist" aria-label="Selecionar região">
+    <button class="tab" onclick="setRegion('BR')" id="tab-BR" role="tab" aria-selected="true"><span class="material-symbols-outlined" aria-hidden="true">factory</span>ECOFLAC</button>
+    <button class="tab" onclick="setRegion('MNT')" id="tab-MNT" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">engineering</span>MANUTENÇÃO</button>
+</div>
+
+<div id="drawerOverlay" onclick="closeHamburger()" aria-hidden="true"></div>
+
+<div id="hamburgerDrawer" role="dialog" aria-label="Menu lateral" aria-modal="true">
+    <div class="drawer-brand">
+        <div class="drawer-brand-icon">
+            <span class="material-symbols-outlined" aria-hidden="true" style="color:white;font-size:22px;font-variation-settings:'FILL' 1">factory</span>
+        </div>
+        <div>
+            <div class="drawer-brand-text">Braun OnLine</div>
+            <div class="drawer-brand-sub">v3.3· 2026/2027</div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeHamburger()" aria-label="Fechar menu">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+    </div>
+    <div class="drawer-menu">
+        <div class="drawer-section-label">Destaques</div>
+        <button class="drawer-item highlight" onclick="showCopaSplash();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚽</div>
+            <div>
+                <div class="drawer-item-label">Copa do Mundo 2026</div>
+                <div class="drawer-item-sub">Chaveamento · Placar</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Perfil</div>
+        <button class="drawer-item" onclick="openMeuPerfil()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">👤</div>
+            <div>
+                <div class="drawer-item-label">Meu Perfil</div>
+                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Contatos</div>
+        <button class="drawer-item" onclick="closeHamburger(); openRamais();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📞</div>
+            <div>
+                <div class="drawer-item-label">Ramais Úteis</div>
+                <div class="drawer-item-sub">Contatos internos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <div class="drawer-section-label">Colaborador</div>
+        <button class="drawer-item" onclick="openColaboradorDoMes()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🏆</div>
+            <div>
+                <div class="drawer-item-label">Colaborador do Mês</div>
+                <div class="drawer-item-sub">Votação mensal</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <button class="drawer-item" onclick="openMeusPedidos()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📦</div>
+            <div>
+                <div class="drawer-item-label">Meus Pedidos</div>
+                <div class="drawer-item-sub">Uniformes e requisitos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Ferramentas</div>
+        <button class="drawer-item" onclick="closeHamburger(); openConfig();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚙️</div>
+            <div>
+                <div class="drawer-item-label">Configurações</div>
+                <div class="drawer-item-sub">Férias · Tema · Estatísticas · Splash</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item no-arrow" onclick="toggleDarkMode(); closeHamburger();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🌓</div>
+            <div>
+                <div class="drawer-item-label">Modo Escuro</div>
+                <div class="drawer-item-sub">Alterna o tema</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <button class="drawer-item" onclick="closeHamburger(); openPrivacy();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🛡️</div>
+            <div>
+                <div class="drawer-item-label">Privacidade</div>
+                <div class="drawer-item-sub">Política de dados</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <div class="drawer-section-label">Conecte-se</div>
+        <div class="drawer-item" style="cursor:default; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 15px 0;">
+            <img src="qr-code.png" alt="QR Code para acessar o Braun OnLine" class="qr-img" style="width: 120px; height: 120px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;">Escaneie para acessar</div>
+        </div>
+    </div>
+    <div class="drawer-footer">© 2026 Braun OnLine · Todos os direitos reservados</div>
+</div>
+
+<!-- ===== PANEL DA COPA - CHAVEAMENTO ===== -->
+<div id="copaPanel" role="dialog" aria-label="Copa do Mundo 2026 - Chaveamento" aria-modal="true">
+    <div class="copa-panel-header">
+        <div class="copa-panel-nav">
+            <button class="copa-back-btn" onclick="closeCopaPanel()" aria-label="Voltar ao calendário">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            </button>
+            <div>
+                <div class="copa-panel-title">⚽ Copa do Mundo 2026</div>
+                <div class="copa-panel-subtitle">Chaveamento · 11/06 – 19/07</div>
+            </div>
+        </div>
+    </div>
+    <div class="copa-panel-body" id="copa-panel-body"></div>
+</div>
+
+<!-- ===== MODAL DE EDIÇÃO DO TIME ===== -->
+<div id="teamModal" role="dialog" aria-label="Editar time da partida" aria-modal="true">
+    <div class="team-modal-box">
+        <div class="team-modal-title">⚽ EDITAR TIME</div>
+        <div class="team-modal-subtitle" id="team-modal-match">Partida</div>
+        
+        <div class="team-modal-row">
+            <span class="team-modal-label">Casa</span>
+            <input type="text" id="team-flag-home" class="team-modal-flag-input" maxlength="2" placeholder="🇧🇷">
+            <input type="text" id="team-name-home" class="team-modal-name-input" placeholder="Nome do time">
+        </div>
+        
+        <div class="team-modal-row">
+            <span class="team-modal-label">Fora</span>
+            <input type="text" id="team-flag-away" class="team-modal-flag-input" maxlength="2" placeholder="🇦🇷">
+            <input type="text" id="team-name-away" class="team-modal-name-input" placeholder="Nome do time">
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top:4px; margin-bottom:12px;">
+            <span class="team-modal-label" style="min-width:50px;">Placar</span>
+            <input type="number" id="team-score-home" class="team-modal-flag-input" style="width:45px;font-size:1.2em;" min="0" max="99" value="0">
+            <span style="font-weight:900;opacity:0.3;display:flex;align-items:center;">×</span>
+            <input type="number" id="team-score-away" class="team-modal-flag-input" style="width:45px;font-size:1.2em;" min="0" max="99" value="0">
+        </div>
+        
+        <div class="team-btns">
+            <button class="team-clear-btn" onclick="clearTeam()" aria-label="Limpar times e placar">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;vertical-align:middle">delete</span>
+            </button>
+            <button class="team-cancel-btn" onclick="closeTeamModal()">Cancelar</button>
+            <button class="team-save-btn" onclick="saveTeam()">✓ Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div id="overlay" onclick="closeAllModals()" aria-hidden="true"></div>
+
+<button id="btn-flutuante-votar" onclick="registrarVoto()" aria-label="Votar na pesquisa">
+    <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">award_star</span>
+    VOTE AQUI
+</button>
+
+<div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
+    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <button class="material-symbols-outlined lote-copy" onclick="copyLote()" aria-label="Copiar lote">content_copy</button>
+    </div>
+    <label for="noteInput" class="sr-only">Anotação</label>
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
+    <button onclick="saveNota()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">SALVAR</button>
+</div>
+
+<div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
+    <div class="config-item">
+        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
+        <label class="switch">
+            <input type="checkbox" id="minimalGreetingToggle" onchange="toggleMinimalGreeting()" aria-label="Ativar saudação minimalista">
+            <span class="slider" aria-hidden="true"></span>
+        </label>
+    </div>
+    <button onclick="openFerias()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS
+    </button>
+    <button onclick="openStats()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA
+    </button>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">FECHAR</button>
+</div>
+
+<div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Programar Férias</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
+            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
+            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <button onclick="saveFerias()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;">SALVAR PERÍODO</button>
+        <button onclick="clearFerias()" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;">LIMPAR FÉRIAS</button>
+    </div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;">VOLTAR</button>
+</div>
+
+<div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
+    <div id="stats-content"></div>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">VOLTAR</button>
+</div>
+
+<div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
+    <div class="ramal-secao">URGÊNCIAS & SERVIÇOS</div>
+    <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Enfermaria / Emergência</span><div class="ramal-numeros-container"><a href="tel:26023358" class="ramal-badge">3358</a> <a href="tel:26023359" class="ramal-badge">3359</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
+    <div class="ramal-secao">ADMINISTRAÇÃO & RH</div>
+    <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
+    <div class="ramal-secao">ECOFLAC - PRODUÇÃO & QUALIDADE</div>
+    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Esterilização / Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a> <a href="tel:26023408" class="ramal-badge">3408</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
+    <div class="ramal-secao">MANUTENÇÃO & APOIO</div>
+    <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
+    <div class="ramal-secao">CONTATOS NOMINAIS & OUTROS</div>
+    <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">FECHAR</button>
+</div>
+
+<div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.8;">
+        Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.
+        <br><br><b>Coleta de Dados:</b> Não coletamos, não transmitimos e não compartilhamos nenhum dado pessoal ou sensível.
+        <br><br><b>Armazenamento:</b> Todas as suas configurações e anotações pessoais são salvas exclusivamente no seu dispositivo (localStorage).
+    </p>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">ENTENDI</button>
+</div>
+
+<div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label>
+            <input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+        <div>
+            <label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label>
+            <input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+        <div>
+            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
+            <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                <option value="C">Turma C (Noite - ECOFLAC)</option>
+                <option value="D">Turma D (Noite - ECOFLAC)</option>
+                <option value="E">Turma E (Manhã - Manutenção)</option>
+                <option value="F">Turma F (Manhã - Manutenção)</option>
+                <option value="G">Turma G (Noite - Manutenção)</option>
+                <option value="H">Turma H (Noite - Manutenção)</option>
+            </select>
+        </div>
+        <div>
+            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
+            <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
+        <div>
+            <label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label>
+            <input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+    </div>
+    <button onclick="salvarDadosPerfil(); closeAllModals();" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">SALVAR E FECHAR</button>
+</div>
+
+<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="votacaoNome" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="votacaoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="votacaoAno" style="font-weight:800;">---</span></div>
+        </div>
+    </div>
+    <p style="font-size:0.9em;opacity:0.7;margin-bottom:15px;">Seus dados já estão pré-preenchidos. Clique abaixo para votar.</p>
+    <button onclick="abrirFormularioVotacao()" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span>
+        VOTAR AGORA
+    </button>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
+</div>
+
+<div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
+    
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="display:flex;flex-direction:column;gap:5px;">
+            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="pedidoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Turma:</span> <span id="pedidoTurma" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="pedidoAno" style="font-weight:800;">---</span></div>
+        </div>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label>
+        <input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoTamanho" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Tamanho</label>
+        <input type="text" id="pedidoTamanho" placeholder="Ex: M, G, GG..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Observações</label>
+        <textarea id="pedidoObs" placeholder="Digite qualquer observação..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <button onclick="enviarPedidoEmail()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span>
+        ENVIAR POR E-MAIL
+    </button>
+
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
+</div>
+
+<script>
+    // ==============================================================
+    // TODAS AS FUNÇÕES DO APP - VERSÃO COM CHAVEAMENTO
+    // FASE DE 16 AVOS + PROPAGAÇÃO AUTOMÁTICA
+    // ==============================================================
+
+    // ==================== STORAGE ====================
+    function getStorageValue(key) {
+        try { return localStorage.getItem(key); } catch (e) {
+            try { return sessionStorage.getItem(key); } catch (f) { return null; }
+        }
+    }
+    function setStorageValue(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) {
+            try { sessionStorage.setItem(key, value); } catch (f) {}
+        }
+    }
+    function removeStorageValue(key) {
+        try { localStorage.removeItem(key); } catch (e) {
+            try { sessionStorage.removeItem(key); } catch (f) {}
+        }
+    }
+
+    // ==================== SPLASH ====================
+    function showCopaSplash() {
+        closeHamburger();
+        const splash = document.getElementById('copaSplashScreen');
+        splash.style.display = 'flex';
+        setTimeout(() => {
+            splash.style.display = 'none';
+            openCopaPanel();
+        }, 3500);
+    }
+
+    // ==================== OTIMIZAÇÕES ====================
+    let cachedFerias = null;
+    function getFeriasRange() {
+        if (cachedFerias) return cachedFerias;
+        const inicio = getStorageValue('braun_ferias_inicio');
+        const fim = getStorageValue('braun_ferias_fim');
+        cachedFerias = { inicio, fim };
+        return cachedFerias;
+    }
+    function clearFeriasCache() { cachedFerias = null; }
+    
+    let cachedStats = {};
+    function clearStatsCache() { cachedStats = {}; }
+    
+    let feriadosCache = {};
+    function getFeriados(ano) {
+        if (feriadosCache[ano]) return feriadosCache[ano];
+        const f = {
+            '01-01':'Ano Novo','01-10':'Padroeiro SG','04-21':'Tiradentes','04-23':'São Jorge',
+            '05-01':'Trabalho','09-07':'Independência','09-22':'Aniv. SG','10-12':'Aparecida',
+            '11-02':'Finados','11-15':'República','11-20':'Zumbi','12-25':'Natal'
+        };
+        if      (ano === 2026) { f['02-17'] = 'Carnaval'; f['04-03'] = 'Sexta Santa'; }
+        else if (ano === 2027) { f['02-09'] = 'Carnaval'; f['03-26'] = 'Sexta Santa'; }
+        feriadosCache[ano] = f;
+        return f;
+    }
+    
+    let weekNumberCache = new Map();
+    function getWeekNumberCached(d) {
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        if (weekNumberCache.has(key)) return weekNumberCache.get(key);
+        const result = getWeekNumber(d);
+        weekNumberCache.set(key, result);
+        return result;
+    }
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    
+    let clockInterval;
+    function startClock() {
+        if (clockInterval) clearInterval(clockInterval);
+        clockInterval = setInterval(() => {
+            if (document.visibilityState === 'visible') { tick(); }
+        }, 1000);
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            if (clockInterval) clearInterval(clockInterval);
+        } else {
+            startClock(); tick();
+        }
+    });
+
+    // ==================== PWA ====================
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-button');
+    if ('serviceWorker' in navigator) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (!isIOS) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => {
+                        reg.onupdatefound = () => {
+                            const iw = reg.installing;
+                            iw.onstatechange = () => {
+                                if (iw.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('Nova versão pronta.');
+                                }
+                            };
+                        };
+                    })
+                    .catch(err => console.log('Erro SW:', err));
+            });
+        }
+    }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_UPDATED') {
+                console.log('Nova versão detectada. Atualizando...');
+                window.location.reload();
+            }
+        });
+    }
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'flex';
+    });
+    async function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    }
+
+    // ==================== INICIALIZAÇÃO ====================
+    let currentRegion = getStorageValue('braun_last_region') || 'BR';
+    let dataAtiva = '';
+    const _escalaCache = new Map();
+
+    const translations = {
+        BR:  { statusTrab: 'TRABALHANDO', statusFolga: 'DE FOLGA',  days: ['S','T','Q','Q','S','S','D'] },
+        MNT: { statusTrab: 'TRABALHANDO', statusFolga: 'FOLGA MNT', days: ['S','T','Q','Q','S','S','D'] }
+    };
+
+    let currentAno = getStorageValue('braun_ano') || '2026';
+    let currentTurma = getStorageValue(`braun_turma_${currentRegion}`) || 'AC';
+
+    (function init() {
+        const savedTurma = getStorageValue('braun_turma_perfil');
+        if (savedTurma) {
+            let region, grupo;
+            if (['A','B','C','D'].includes(savedTurma)) {
+                region = 'BR';
+                grupo = (savedTurma === 'A' || savedTurma === 'C') ? 'AC' : 'BD';
+            } else {
+                region = 'MNT';
+                grupo = (savedTurma === 'E' || savedTurma === 'G') ? 'EG' : 'FH';
+            }
+            currentRegion = region;
+            currentTurma = grupo;
+            setStorageValue('braun_last_region', region);
+            setStorageValue(`braun_turma_${region}`, grupo);
+        } else {
+            const savedRegion = getStorageValue('braun_last_region') || 'BR';
+            currentRegion = savedRegion;
+            currentTurma = getStorageValue(`braun_turma_${savedRegion}`) || (savedRegion === 'BR' ? 'AC' : 'EG');
+        }
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${currentRegion}`);
+        if (activeTab) { activeTab.classList.add('active'); activeTab.setAttribute('aria-selected', 'true'); }
+    })();
+
+    function goToGreeting() {
+        const welcome = document.getElementById('welcomeScreen');
+        welcome.classList.add('hide');
+        setTimeout(() => {
+            welcome.style.display = 'none';
+            setStorageValue('braun_visited', 'true');
+            scrollToToday();
+        }, 500);
+    }
+
+    function atualizarBadgeTurma() {
+        const turmaLetra = getStorageValue('braun_turma_perfil') || 'A';
+        const badgeText = document.getElementById('turmaBadgeText');
+        if (badgeText) { badgeText.innerText = `Turma ${turmaLetra}`; }
+    }
+
+    // ==================== ESCALA ====================
+    function setRegion(r) {
+        currentRegion = r;
+        setStorageValue('braun_last_region', r);
+        document.querySelectorAll('.tab').forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        const activeTab = document.getElementById(`tab-${r}`);
+        activeTab.classList.add('active');
+        activeTab.setAttribute('aria-selected', 'true');
+
+        const savedTurma = getStorageValue(`braun_turma_${r}`);
+        if (savedTurma) { currentTurma = savedTurma; }
+        else { currentTurma = r === 'BR' ? 'AC' : 'EG'; }
+        
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+    }
+
+    function checkBR(dt, t) {
+        const key = `BR_${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}_${t}`;
+        if (_escalaCache.has(key)) return _escalaCache.get(key);
+        const baseDate = new Date(2026, 0, 18);
+        const diff = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const isA = (((diff % 4) + 4) % 4) < 2;
+        const result = { isA, trab: (t === 'AC' && isA) || (t === 'BD' && !isA) };
+        _escalaCache.set(key, result);
+        return result;
+    }
+
+    function checkMnt(dt, t) {
+        const key = `MNT_${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}_${t}`;
+        if (_escalaCache.has(key)) return _escalaCache.get(key);
+        const baseDate = new Date(2026, 2, 6);
+        const diff = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const ciclo = ((diff % 4) + 4) % 4;
+        const isEG = ciclo < 2;
+        const result = { isEG, trab: (t === 'EG' ? isEG : !isEG) };
+        _escalaCache.set(key, result);
+        return result;
+    }
+
+    function isTrabalhando(dt, region, turma) {
+        return region === 'BR' ? checkBR(dt, turma).trab : checkMnt(dt, turma).trab;
+    }
+
+    function isFerias(dt) {
+        const range = getFeriasRange();
+        if (!range.inicio || !range.fim) return false;
+        const d = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+        return d >= new Date(range.inicio + 'T00:00:00').getTime() && d <= new Date(range.fim + 'T00:00:00').getTime();
+    }
+
+    function gerarCalendario() {
+        const box = document.getElementById('calendario-box');
+        const frag = document.createDocumentFragment();
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        const ano = parseInt(currentAno);
+        const t = currentTurma;
+        const fer = getFeriados(ano);
+        const lang = translations[currentRegion];
+        const hojeStr = new Date().toDateString();
+
+        atualizarBadgeTurma();
+
+        for (let m = 0; m < 12; m++) {
+            const dtM = new Date(ano, m, 1);
+            const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
+            const container = document.createElement('div');
+            container.className = 'mes-container';
+
+            let hF = `<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="color:var(--primary);font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div class="grid">
+                          <div class="dia-label">W</div>
+                          ${lang.days.map(s => `<div class="dia-label">${s}</div>`).join('')}`;
+
+            let hB = `<div class="mes-face mes-back" onclick="this.parentElement.classList.toggle('flipped')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>`;
+
+            let hasEv = false;
+            const diasNoMes = new Date(ano, m + 1, 0).getDate();
+            const diaSemanaInicial = dtM.getDay();
+            const esp = diaSemanaInicial === 0 ? 6 : diaSemanaInicial - 1;
+
+            hF += `<div class="dia-label-w">${getWeekNumberCached(dtM)}</div>`;
+            for (let i = 0; i < esp; i++) hF += `<div></div>`;
+
+            let colAtual = esp;
+
+            for (let d = 1; d <= diasNoMes; d++) {
+                const at = new Date(ano, m, d);
+                const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isoF = `${ano}-${isoS}`;
+                const f = fer[isoS];
+                const nt = logs[isoF];
+
+                if (colAtual === 7) {
+                    colAtual = 0;
+                    hF += `<div class="dia-label-w">${getWeekNumberCached(at)}</div>`;
+                }
+
+                let cls = 'dia ';
+
+                if (currentRegion === 'BR') {
+                    const r = checkBR(at, t);
+                    cls += (r.isA ? 'AMARELO ' : 'VERDE ');
+                    cls += (r.trab ? 'TRABALHO ' : 'FOLGA ');
+                } else {
+                    const mnt = checkMnt(at, t);
+                    cls += (mnt.isEG ? 'AZUL ' : 'VERDE ');
+                    cls += (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
+                }
+
+                if (hojeStr === at.toDateString()) cls += 'hoje ';
+                if (nt) cls += 'HAS_NOTE ';
+                if (isFerias(at)) cls += 'FERIAS ';
+
+                if (f || nt) {
+                    hasEv = true;
+                    hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`;
+                }
+
+                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')">${d}</div>`;
+                colAtual++;
+            }
+
+            hF += `</div></div>`;
+            hB += `${!hasEv ? '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>' : ''}</div>`;
+
+            container.innerHTML = `<div class="mes-inner">${hF}${hB}</div>`;
+            frag.appendChild(container);
+        }
+
+        box.innerHTML = '';
+        box.appendChild(frag);
+    }
+
+    function tick() {
+        const now = new Date();
+        const bigClock = document.getElementById('big-clock');
+        if (bigClock) bigClock.innerText = now.toLocaleTimeString('pt-BR');
+
+        const msg = document.getElementById('status-msg');
+        if (!msg) return;
+
+        if (isFerias(now)) {
+            msg.innerText = 'EM FÉRIAS ✈️';
+            msg.style.color = '#7030A0';
+        } else {
+            const trab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
+            msg.innerText = trab ? translations[currentRegion].statusTrab : translations[currentRegion].statusFolga;
+            msg.style.color = trab ? 'var(--accent)' : 'var(--primary)';
+        }
+    }
+
+    function gerenciarBotaoVotacao() {
+        const btn = document.getElementById('btn-flutuante-votar');
+        const agora = new Date();
+        const chave = `voto_realizado_${agora.getMonth()}_${agora.getFullYear()}`;
+        btn.style.display = getStorageValue(chave) === 'true' ? 'none' : 'flex';
+    }
+
+    function registrarVoto() {
+        const agora = new Date();
+        const chave = `voto_realizado_${agora.getMonth()}_${agora.getFullYear()}`;
+        window.open('https://forms.gle/KfS9XFv9UseZYqnS7', '_blank');
+        setStorageValue(chave, 'true');
+        document.getElementById('btn-flutuante-votar').style.display = 'none';
+    }
+
+    function openCard(iso) {
+        dataAtiva = iso;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        const d = iso.split('-');
+        document.getElementById('card-data').innerText = `${d[2]}/${d[1]}/${d[0]}`;
+        document.getElementById('noteInput').value = logs[iso] || '';
+
+        const dtSel = new Date(d[0], d[1] - 1, d[2]);
+        const yy = dtSel.getFullYear().toString().slice(-2);
+        const ww = String(getWeekNumberCached(dtSel)).padStart(2, '0');
+        let diaSem = dtSel.getDay();
+        diaSem = (diaSem === 0) ? 7 : diaSem;
+        document.getElementById('lote-display').innerText = `${yy}${ww}${diaSem}`;
+
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('infoCard').classList.add('show');
+    }
+
+    function copyLote() {
+        const lote = document.getElementById('lote-display').innerText;
+        navigator.clipboard.writeText(lote).catch(() => {});
+        const disp = document.getElementById('lote-display');
+        const orig = disp.innerText;
+        disp.innerText = 'COPIADO!';
+        setTimeout(() => { disp.innerText = orig; }, 1000);
+    }
+
+    function saveNota() {
+        const log = document.getElementById('noteInput').value;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        if (log.trim() === '') { delete logs[dataAtiva]; }
+        else { logs[dataAtiva] = log.trim(); }
+        setStorageValue('logs_v26', JSON.stringify(logs));
+        closeAllModals();
+        gerarCalendario();
+    }
+
+    function openHamburger() {
+        document.getElementById('hamburgerDrawer').classList.add('open');
+        document.getElementById('drawerOverlay').classList.add('show');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeHamburger() {
+        document.getElementById('hamburgerDrawer').classList.remove('open');
+        document.getElementById('drawerOverlay').classList.remove('show');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    // ==============================================================
+    // COPA 2026 - CHAVEAMENTO COMPLETO (COM 16 AVOS)
+    // ==============================================================
+
+    // Definição das 48 seleções (já existentes, mantidas)
+    const COPA_TEAMS = {
+        'MEX': { id:'MEX', n:'México', f:'🇲🇽' },
+        'RSA': { id:'RSA', n:'África do Sul', f:'🇿🇦' },
+        'KOR': { id:'KOR', n:'Coreia do Sul', f:'🇰🇷' },
+        'CZE': { id:'CZE', n:'R. Tcheca', f:'🇨🇿' },
+        'CAN': { id:'CAN', n:'Canadá', f:'🇨🇦' },
+        'BIH': { id:'BIH', n:'Bósnia e Herzegovina', f:'🇧🇦' },
+        'QAT': { id:'QAT', n:'Qatar', f:'🇶🇦' },
+        'SUI': { id:'SUI', n:'Suíça', f:'🇨🇭' },
+        'BRA': { id:'BRA', n:'Brasil', f:'🇧🇷' },
+        'MAR': { id:'MAR', n:'Marrocos', f:'🇲🇦' },
+        'HAI': { id:'HAI', n:'Haiti', f:'🇭🇹' },
+        'SCO': { id:'SCO', n:'Escócia', f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+        'USA': { id:'USA', n:'EUA', f:'🇺🇸' },
+        'PAR': { id:'PAR', n:'Paraguai', f:'🇵🇾' },
+        'AUS': { id:'AUS', n:'Austrália', f:'🇦🇺' },
+        'TUR': { id:'TUR', n:'Turquia', f:'🇹🇷' },
+        'GER': { id:'GER', n:'Alemanha', f:'🇩🇪' },
+        'CUW': { id:'CUW', n:'Curaçao', f:'🇨🇼' },
+        'CIV': { id:'CIV', n:'Costa do Marfim', f:'🇨🇮' },
+        'ECU': { id:'ECU', n:'Equador', f:'🇪🇨' },
+        'NED': { id:'NED', n:'Países Baixos', f:'🇳🇱' },
+        'JPN': { id:'JPN', n:'Japão', f:'🇯🇵' },
+        'SWE': { id:'SWE', n:'Suécia', f:'🇸🇪' },
+        'TUN': { id:'TUN', n:'Tunísia', f:'🇹🇳' },
+        'BEL': { id:'BEL', n:'Bélgica', f:'🇧🇪' },
+        'EGY': { id:'EGY', n:'Egito', f:'🇪🇬' },
+        'IRN': { id:'IRN', n:'Irã', f:'🇮🇷' },
+        'NZL': { id:'NZL', n:'N. Zelândia', f:'🇳🇿' },
+        'ESP': { id:'ESP', n:'Espanha', f:'🇪🇸' },
+        'CAB': { id:'CAB', n:'Cabo Verde', f:'🇨🇻' },
+        'ARS': { id:'ARS', n:'A. Saudita', f:'🇸🇦' },
+        'URU': { id:'URU', n:'Uruguai', f:'🇺🇾' },
+        'FRA': { id:'FRA', n:'França', f:'🇫🇷' },
+        'SEN': { id:'SEN', n:'Senegal', f:'🇸🇳' },
+        'IRQ': { id:'IRQ', n:'Iraque', f:'🇮🇶' },
+        'NOR': { id:'NOR', n:'Noruega', f:'🇳🇴' },
+        'ARG': { id:'ARG', n:'Argentina', f:'🇦🇷' },
+        'AGL': { id:'AGL', n:'Argélia', f:'🇩🇿' },
+        'AUT': { id:'AUT', n:'Áustria', f:'🇦🇹' },
+        'JOR': { id:'JOR', n:'Jordânia', f:'🇯🇴' },
+        'POR': { id:'POR', n:'Portugal', f:'🇵🇹' },
+        'RDC': { id:'RDC', n:'RD Congo', f:'🇨🇩' },
+        'UZB': { id:'UZB', n:'Uzbequistão', f:'🇺🇿' },
+        'COL': { id:'COL', n:'Colômbia', f:'🇨🇴' },
+        'ENG': { id:'ENG', n:'Inglaterra', f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+        'CRO': { id:'CRO', n:'Croácia', f:'🇭🇷' },
+        'GHA': { id:'GHA', n:'Gana', f:'🇬🇭' },
+        'PAN': { id:'PAN', n:'Panamá', f:'🇵🇦' }
+    };
+
+    // ===== FASE 16 AVOS (Rodada de 32) =====
+const R32 = [
+    { id: 'R32_1', home: 'GER', away: 'PAR', dt: 'Amanhã, 17:30', stage: '16 Avos' },
+    { id: 'R32_2', home: 'FRA', away: 'SWE', dt: 'Ter., 30/06, 18:00', stage: '16 Avos' },
+    { id: 'R32_3', home: 'RSA', away: 'CAN', dt: 'Hoje, 16:00', stage: '16 Avos' },
+    { id: 'R32_4', home: 'NED', away: 'MAR', dt: 'Amanhã, 22:00', stage: '16 Avos' },
+    { id: 'R32_5', home: 'POR', away: 'CRO', dt: 'Qui., 02/07, 20:00', stage: '16 Avos' },
+    { id: 'R32_6', home: 'ESP', away: 'AUT', dt: 'Qui., 02/07, 16:00', stage: '16 Avos' },
+    { id: 'R32_7', home: 'USA', away: 'BIH', dt: 'Qua., 01/07, 21:00', stage: '16 Avos' },
+    { id: 'R32_8', home: 'BEL', away: 'SEN', dt: 'Qua., 01/07, 17:00', stage: '16 Avos' },
+    { id: 'R32_9', home: 'BRA', away: 'JPN', dt: 'Amanhã, 14:00', stage: '16 Avos' },
+    { id: 'R32_10', home: 'CIV', away: 'NOR', dt: 'Ter., 30/06, 14:00', stage: '16 Avos' },
+    { id: 'R32_11', home: 'MEX', away: 'ECU', dt: 'Ter., 30/06, 22:00', stage: '16 Avos' },
+    { id: 'R32_12', home: 'ENG', away: 'RDC', dt: 'Qua., 01/07, 13:00', stage: '16 Avos' },
+    { id: 'R32_13', home: 'ARG', away: 'CAB', dt: 'Sex., 03/07, 19:00', stage: '16 Avos' },
+    { id: 'R32_14', home: 'AUS', away: 'EGY', dt: 'Sex., 03/07, 15:00', stage: '16 Avos' },
+    { id: 'R32_15', home: 'SUI', away: 'AGL', dt: 'Sex., 03/07, 00:00', stage: '16 Avos' },
+    { id: 'R32_16', home: 'COL', away: 'GHA', dt: 'Sex., 03/07, 22:30', stage: '16 Avos' }
+];
+
+    // ===== OITAVAS =====
+    const OITAVAS = [];
+    for (let i = 0; i < 8; i++) {
+        OITAVAS.push({
+            id: `O${i+1}`,
+            home: '',   // será preenchido automaticamente
+            away: '',   // será preenchido automaticamente
+            dt: `${String(28 + i).padStart(2,'0')}/06 16:00`,
+            stage: 'Oitavas'
+        });
+    }
+
+    // ===== QUARTAS =====
+    const QUARTAS = [];
+    for (let i = 0; i < 4; i++) {
+        QUARTAS.push({
+            id: `Q${i+1}`,
+            home: '',
+            away: '',
+            dt: `05/07 16:00`,
+            stage: 'Quartas'
+        });
+    }
+
+    // ===== SEMIFINAIS =====
+    const SEMIS = [
+        { id: 'S1', home: '', away: '', dt: '10/07 16:00', stage: 'Semifinais' },
+        { id: 'S2', home: '', away: '', dt: '11/07 16:00', stage: 'Semifinais' }
+    ];
+
+    // ===== 3º LUGAR =====
+    const TERCEIRO = [
+        { id: 'T1', home: '', away: '', dt: '17/07 15:00', stage: '3º Lugar' }
+    ];
+
+    // ===== FINAL =====
+    const FINAL = [
+        { id: 'F1', home: '', away: '', dt: '19/07 16:00', stage: 'Final' }
+    ];
+
+    // Mapeamento de dependências: de qual jogo sai o vencedor e para qual jogo da fase seguinte (e qual lado)
+    const DEPENDENCIAS = {
+        // 16 avos -> Oitavas
+        'R32_1': { next: 'O1', side: 'home' },
+        'R32_2': { next: 'O1', side: 'away' },
+        'R32_3': { next: 'O2', side: 'home' },
+        'R32_4': { next: 'O2', side: 'away' },
+        'R32_5': { next: 'O3', side: 'home' },
+        'R32_6': { next: 'O3', side: 'away' },
+        'R32_7': { next: 'O4', side: 'home' },
+        'R32_8': { next: 'O4', side: 'away' },
+        'R32_9': { next: 'O5', side: 'home' },
+        'R32_10': { next: 'O5', side: 'away' },
+        'R32_11': { next: 'O6', side: 'home' },
+        'R32_12': { next: 'O6', side: 'away' },
+        'R32_13': { next: 'O7', side: 'home' },
+        'R32_14': { next: 'O7', side: 'away' },
+        'R32_15': { next: 'O8', side: 'home' },
+        'R32_16': { next: 'O8', side: 'away' },
+        // Oitavas -> Quartas
+        'O1': { next: 'Q1', side: 'home' },
+        'O2': { next: 'Q1', side: 'away' },
+        'O3': { next: 'Q2', side: 'home' },
+        'O4': { next: 'Q2', side: 'away' },
+        'O5': { next: 'Q3', side: 'home' },
+        'O6': { next: 'Q3', side: 'away' },
+        'O7': { next: 'Q4', side: 'home' },
+        'O8': { next: 'Q4', side: 'away' },
+        // Quartas -> Semifinais
+        'Q1': { next: 'S1', side: 'home' },
+        'Q2': { next: 'S1', side: 'away' },
+        'Q3': { next: 'S2', side: 'home' },
+        'Q4': { next: 'S2', side: 'away' },
+        // Semifinais -> Final
+        'S1': { next: 'F1', side: 'home' },
+        'S2': { next: 'F1', side: 'away' },
+        // Semifinais -> 3º lugar (perdedores)
+        'S1': { next: 'T1', side: 'home' }, // perdedor S1
+        'S2': { next: 'T1', side: 'away' }  // perdedor S2
+        // Nota: Para o 3º lugar, usamos os perdedores, mas a lógica de vencedor não se aplica diretamente.
+        // Vamos tratar isso separadamente na propagação.
+    };
+
+    // ==================== FUNÇÕES DA COPA ====================
+
+    function getCopaScores() {
+        return JSON.parse(getStorageValue('copa2026_bracket_scores') || '{}');
+    }
+
+    function setCopaScores(s) {
+        setStorageValue('copa2026_bracket_scores', JSON.stringify(s));
+    }
+
+    function getCopaTeams() {
+        return JSON.parse(getStorageValue('copa2026_bracket_teams') || '{}');
+    }
+
+    function setCopaTeams(t) {
+        setStorageValue('copa2026_bracket_teams', JSON.stringify(t));
+    }
+
+    function getTeamData(id) {
+        if (!id || id === '') return { id: '', n: '—', f: '⚪' };
+        const custom = getCopaTeams();
+        if (custom[id]) return custom[id];
+        return COPA_TEAMS[id] || { id: id, n: id, f: '❓' };
+    }
+
+    function getMatchScore(matchId) {
+        const scores = getCopaScores();
+        return scores[matchId] || null;
+    }
+
+    function setMatchScore(matchId, homeScore, awayScore) {
+        const scores = getCopaScores();
+        if (homeScore === null || awayScore === null) {
+            delete scores[matchId];
+        } else {
+            scores[matchId] = { h: homeScore, a: awayScore };
+        }
+        setCopaScores(scores);
+    }
+
+    function setMatchTeam(matchId, side, teamId) {
+        // apenas armazena o ID do time no jogo; o nome/flag vêm do getTeamData
+        const teams = getCopaTeams();
+        // Se o time não existir no custom, não faz nada (usa COPA_TEAMS)
+        if (teamId && !teams[teamId]) {
+            // Se não existir, cria um placeholder com o ID
+            teams[teamId] = { id: teamId, n: teamId, f: '❓' };
+        }
+        setCopaTeams(teams);
+    }
+
+    // Função para obter o vencedor de um jogo (com base no placar)
+    function getWinner(matchId) {
+        const score = getMatchScore(matchId);
+        if (!score) return null;
+        const allMatches = getAllMatches();
+        const match = allMatches.find(m => m.id === matchId);
+        if (!match) return null;
+        const home = match.home;
+        const away = match.away;
+        if (score.h > score.a) return home;
+        if (score.a > score.h) return away;
+        return null; // empate -> sem vencedor (precisa de pênaltis, mas ignoramos)
+    }
+
+    // Retorna todos os jogos de todas as fases
+    function getAllMatches() {
+        return [...R32, ...OITAVAS, ...QUARTAS, ...SEMIS, ...TERCEIRO, ...FINAL];
+    }
+
+    // Atualiza as fases seguintes com base nos vencedores
+    function propagateWinners() {
+        // Para cada jogo que tem um vencedor, atualiza o próximo jogo
+        const allMatches = getAllMatches();
+        for (const match of allMatches) {
+            const winner = getWinner(match.id);
+            if (winner) {
+                const dep = DEPENDENCIAS[match.id];
+                if (dep) {
+                    const nextMatch = allMatches.find(m => m.id === dep.next);
+                    if (nextMatch) {
+                        // Atualiza o lado (home/away) com o ID do vencedor
+                        if (dep.side === 'home') {
+                            nextMatch.home = winner;
+                        } else {
+                            nextMatch.away = winner;
+                        }
+                        // Garante que o time esteja no custom (se não, cria placeholder)
+                        const teams = getCopaTeams();
+                        if (!teams[winner]) {
+                            // Tenta buscar do COPA_TEAMS
+                            const base = COPA_TEAMS[winner];
+                            if (base) {
+                                teams[winner] = { id: winner, n: base.n, f: base.f };
+                            } else {
+                                teams[winner] = { id: winner, n: winner, f: '❓' };
+                            }
+                            setCopaTeams(teams);
+                        }
+                    }
+                }
+            } else {
+                // Se não há vencedor, limpa os próximos jogos que dependem deste
+                const dep = DEPENDENCIAS[match.id];
+                if (dep) {
+                    const nextMatch = allMatches.find(m => m.id === dep.next);
+                    if (nextMatch) {
+                        if (dep.side === 'home') {
+                            nextMatch.home = '';
+                        } else {
+                            nextMatch.away = '';
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Salva o estado das fases (home/away) no storage
+    function saveBracketState() {
+        // Armazenamos os arrays completos
+        const state = {
+            R32, OITAVAS, QUARTAS, SEMIS, TERCEIRO, FINAL
+        };
+        setStorageValue('copa2026_bracket_state', JSON.stringify(state));
+    }
+
+    function loadBracketState() {
+        const saved = getStorageValue('copa2026_bracket_state');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                // Atualiza os arrays globais
+                R32.length = 0; R32.push(...state.R32);
+                OITAVAS.length = 0; OITAVAS.push(...state.OITAVAS);
+                QUARTAS.length = 0; QUARTAS.push(...state.QUARTAS);
+                SEMIS.length = 0; SEMIS.push(...state.SEMIS);
+                TERCEIRO.length = 0; TERCEIRO.push(...state.TERCEIRO);
+                FINAL.length = 0; FINAL.push(...state.FINAL);
+                return true;
+            } catch(e) {}
+        }
+        return false;
+    }
+
+    // ==================== RENDERIZAÇÃO DO BRACKET ====================
+
+    function renderBracket() {
+        // Carrega estado salvo
+        loadBracketState();
+        // Propaga vencedores (atualiza times com base nos placares)
+        propagateWinners();
+        // Salva o estado atualizado
+        saveBracketState();
+
+        const body = document.getElementById('copa-panel-body');
+        const scores = getCopaScores();
+        
+        let html = `<div class="bracket-container">`;
+        
+        // Função auxiliar para renderizar uma rodada
+        function renderRound(matches, label) {
+            html += `<div class="bracket-round">
+                <div class="bracket-round-label">${label}</div>`;
+            matches.forEach(m => {
+                const homeTeam = getTeamData(m.home);
+                const awayTeam = getTeamData(m.away);
+                const score = scores[m.id];
+                const hasScore = !!score;
+                const isPlaceholder = !m.home || !m.away;
+                
+                html += `
+                <div class="bracket-match ${hasScore ? 'has-score' : ''} ${isPlaceholder ? 'bracket-match-placeholder' : ''}" onclick="openTeamModal('${m.id}')">
+                    <div class="bracket-match-team home">
+                        <div class="bracket-match-flag ${!homeTeam.f || homeTeam.f === '❓' ? 'empty' : ''}">${homeTeam.f || '⚪'}</div>
+                        <div class="bracket-match-name ${!m.home ? 'empty' : ''}">${m.home ? homeTeam.n : '—'}</div>
+                    </div>
+                    <div class="bracket-score-box ${hasScore ? 'live' : ''}">
+                        <span class="bracket-score-num">${hasScore ? score.h : '–'}</span>
+                        <span class="bracket-score-sep">×</span>
+                        <span class="bracket-score-num">${hasScore ? score.a : '–'}</span>
+                    </div>
+                    <div class="bracket-match-team away">
+                        <div class="bracket-match-flag ${!awayTeam.f || awayTeam.f === '❓' ? 'empty' : ''}">${awayTeam.f || '⚪'}</div>
+                        <div class="bracket-match-name ${!m.away ? 'empty' : ''}">${m.away ? awayTeam.n : '—'}</div>
+                    </div>
+                    <div class="bracket-edit-hint">
+                        <span class="material-symbols-outlined">edit</span> ${m.dt}
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
+
+        renderRound(R32, '⚽ 16 Avos de Final (Rodada de 32)');
+        renderRound(OITAVAS, '🏆 Oitavas de Final');
+        renderRound(QUARTAS, '🏆 Quartas de Final');
+        renderRound(SEMIS, '🏆 Semifinais');
+        renderRound(TERCEIRO, '🥉 Disputa de 3º Lugar');
+        renderRound(FINAL, '🏆 Final');
+
+        html += `</div>`;
+        body.innerHTML = html;
+    }
+
+    // ==================== MODAL DE EDIÇÃO ====================
+
+    let currentEditMatchId = null;
+
+    function openTeamModal(matchId) {
+        currentEditMatchId = matchId;
+        
+        const allMatches = getAllMatches();
+        const match = allMatches.find(m => m.id === matchId);
+        if (!match) return;
+        
+        const scores = getCopaScores();
+        const score = scores[matchId];
+        
+        const homeTeam = getTeamData(match.home);
+        const awayTeam = getTeamData(match.away);
+        
+        document.getElementById('team-modal-match').textContent = `${match.stage} • ${match.dt}`;
+        document.getElementById('team-flag-home').value = homeTeam.f || '';
+        document.getElementById('team-name-home').value = homeTeam.n || '';
+        document.getElementById('team-flag-away').value = awayTeam.f || '';
+        document.getElementById('team-name-away').value = awayTeam.n || '';
+        document.getElementById('team-score-home').value = score ? score.h : 0;
+        document.getElementById('team-score-away').value = score ? score.a : 0;
+        
+        document.getElementById('teamModal').classList.add('show');
+        setTimeout(() => document.getElementById('team-name-home').focus(), 100);
+    }
+
+    function closeTeamModal() {
+        document.getElementById('teamModal').classList.remove('show');
+        currentEditMatchId = null;
+    }
+
+    function saveTeam() {
+        if (!currentEditMatchId) return;
+        
+        const flagHome = document.getElementById('team-flag-home').value.trim();
+        const nameHome = document.getElementById('team-name-home').value.trim();
+        const flagAway = document.getElementById('team-flag-away').value.trim();
+        const nameAway = document.getElementById('team-name-away').value.trim();
+        const scoreHome = parseInt(document.getElementById('team-score-home').value) || 0;
+        const scoreAway = parseInt(document.getElementById('team-score-away').value) || 0;
+        
+        const allMatches = getAllMatches();
+        const match = allMatches.find(m => m.id === currentEditMatchId);
+        if (!match) return;
+        
+        // Atualiza os times (se o usuário forneceu nome/flag)
+        if (flagHome && nameHome) {
+            const teams = getCopaTeams();
+            teams[match.home] = { id: match.home, n: nameHome, f: flagHome };
+            setCopaTeams(teams);
+        }
+        if (flagAway && nameAway) {
+            const teams = getCopaTeams();
+            teams[match.away] = { id: match.away, n: nameAway, f: flagAway };
+            setCopaTeams(teams);
+        }
+        
+        // Salva o placar
+        setMatchScore(currentEditMatchId, scoreHome, scoreAway);
+        
+        // Propaga vencedores
+        propagateWinners();
+        saveBracketState();
+        
+        closeTeamModal();
+        renderBracket();
+    }
+
+    function clearTeam() {
+        if (!currentEditMatchId) return;
+        
+        // Remove placar
+        setMatchScore(currentEditMatchId, null, null);
+        
+        // Remove times customizados? Melhor não, pois podem ser usados em outros jogos.
+        // Apenas limpa o placar e propaga (isso vai remover os times dos próximos jogos se não houver vencedor)
+        propagateWinners();
+        saveBracketState();
+        
+        closeTeamModal();
+        renderBracket();
+    }
+
+    // ==================== ABRIR/FECHAR PAINEL COPA ====================
+
+    function openCopaPanel() {
+        renderBracket();
+        document.getElementById('copaPanel').classList.add('open');
+    }
+
+    function closeCopaPanel() {
+        document.getElementById('copaPanel').classList.remove('open');
+    }
+
+    // ==================== MODAIS EXISTENTES (não alterados) ====================
+
+    function openRamais() {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('ramaisCard').classList.add('show');
+    }
+
+    function openPrivacy() {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('privacyCard').classList.add('show');
+    }
+
+    function openFerias() {
+        document.getElementById('feriasInicio').value = getStorageValue('braun_ferias_inicio') || '';
+        document.getElementById('feriasFim').value = getStorageValue('braun_ferias_fim') || '';
+        document.getElementById('configCard').classList.remove('show');
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('feriasCard').classList.add('show');
+    }
+
+    function saveFerias() {
+        const ini = document.getElementById('feriasInicio').value;
+        const fim = document.getElementById('feriasFim').value;
+        if (!ini || !fim) { alert('Preencha as duas datas.'); return; }
+        if (ini > fim) { alert('A data de início não pode ser após o término.'); return; }
+        setStorageValue('braun_ferias_inicio', ini);
+        setStorageValue('braun_ferias_fim', fim);
+        clearFeriasCache();
+        closeAllModals(); gerarCalendario(); tick();
+    }
+
+    function clearFerias() {
+        removeStorageValue('braun_ferias_inicio');
+        removeStorageValue('braun_ferias_fim');
+        clearFeriasCache();
+        closeAllModals(); gerarCalendario(); tick();
+    }
+
+    function openConfig() {
+        document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('configCard').classList.add('show');
+    }
+
+    function toggleMinimalGreeting() {
+        setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked);
+    }
+
+    function openStats() {
+        const ano = parseInt(currentAno);
+        const turma = currentTurma;
+        const cacheKey = `${ano}_${turma}_${currentRegion}`;
+        
+        if (cachedStats[cacheKey]) {
+            document.getElementById('stats-content').innerHTML = cachedStats[cacheKey];
+            document.getElementById('configCard').classList.remove('show');
+            document.getElementById('statsCard').classList.add('show');
+            return;
+        }
+        
+        const feriados = getFeriados(ano);
+        let diasTrabalho = 0, diasFolga = 0, feriadosTrab = 0, feriadosFolga = 0, listaFeriadosHTML = '';
+        
+        for (let m = 0; m < 12; m++) {
+            for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {
+                const dataTeste = new Date(ano, m, d);
+                const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const res = (currentRegion === 'BR') ? checkBR(dataTeste, turma).trab : checkMnt(dataTeste, turma).trab;
+                if (res) diasTrabalho++; else diasFolga++;
+                if (feriados[isoS]) {
+                    if (res) feriadosTrab++; else feriadosFolga++;
+                    listaFeriadosHTML += `<div>${feriados[isoS]} (${res ? 'TRABALHA' : 'FOLGA'})</div>`;
+                }
+            }
+        }
+        
+        const totalDias = diasTrabalho + diasFolga;
+        const htmlStats = `
+            <div class="stat-grid">
+                <div class="stat-card-big purple"><div class="stat-val-big purple">${diasTrabalho}</div><div class="stat-lab-big">Dias Trabalhados</div></div>
+                <div class="stat-card-big teal"><div class="stat-val-big teal">${diasFolga}</div><div class="stat-lab-big">Dias de Folga</div></div>
+            </div>
+            <div style="background:var(--bg);border-radius:15px;padding:15px;border:1px solid var(--border);margin-top:10px;">
+                <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;">
+                    <span>Feriados trabalhados</span><span style="color:var(--accent);">${feriadosTrab}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;">
+                    <span>Feriados de folga</span><span style="color:var(--verde);">${feriadosFolga}</span>
+                </div>
+                ${listaFeriadosHTML ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:0.85em;">${listaFeriadosHTML}</div>` : ''}
+            </div>
+        `;
+        
+        cachedStats[cacheKey] = htmlStats;
+        document.getElementById('stats-content').innerHTML = htmlStats;
+        document.getElementById('configCard').classList.remove('show');
+        document.getElementById('statsCard').classList.add('show');
+    }
+
+    function salvarDadosPerfil() {
+        const nome = document.getElementById('nomePerfil').value;
+        const matricula = document.getElementById('matriculaPerfil').value;
+        const turma = document.getElementById('turmaPerfil').value;
+        const ano = document.getElementById('anoPerfil').value;
+        const setor = document.getElementById('setorPerfil').value;
+        
+        setStorageValue('braun_nome_completo', nome);
+        setStorageValue('braun_matricula', matricula);
+        setStorageValue('braun_turma_perfil', turma);
+        setStorageValue('braun_ano', ano);
+        setStorageValue('braun_setor', setor);
+        
+        let region, grupo;
+        if (['A','B','C','D'].includes(turma)) {
+            region = 'BR';
+            grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+        } else {
+            region = 'MNT';
+            grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
+        }
+        currentRegion = region;
+        currentTurma = grupo;
+        setStorageValue('braun_last_region', region);
+        setStorageValue(`braun_turma_${region}`, grupo);
+        
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+        
+        preencherDadosModais();
+    }
+
+    function preencherDadosModais() {
+        const nome = getStorageValue('braun_nome_completo') || '---';
+        const matricula = getStorageValue('braun_matricula') || '---';
+        const turma = getStorageValue('braun_turma_perfil') || '---';
+        const ano = getStorageValue('braun_ano') || '---';
+        
+        document.getElementById('votacaoNome').innerText = nome;
+        document.getElementById('votacaoMatricula').innerText = matricula;
+        document.getElementById('votacaoAno').innerText = ano;
+        
+        document.getElementById('pedidoNome').innerText = nome;
+        document.getElementById('pedidoMatricula').innerText = matricula;
+        document.getElementById('pedidoTurma').innerText = turma;
+        document.getElementById('pedidoAno').innerText = ano;
+    }
+
+    function abrirFormularioVotacao() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        const link = `https://forms.gle/KfS9XFv9UseZYqnS7?entry.1=${encodeURIComponent(nome)}&entry.2=${encodeURIComponent(matricula)}&entry.3=${encodeURIComponent(ano)}`;
+        window.open(link, '_blank');
+    }
+
+    function enviarPedidoEmail() {
+        const nome = document.getElementById('pedidoNome').innerText;
+        const matricula = document.getElementById('pedidoMatricula').innerText;
+        const turma = document.getElementById('pedidoTurma').innerText;
+        const ano = document.getElementById('pedidoAno').innerText;
+        const item = document.getElementById('pedidoItem').value;
+        const tamanho = document.getElementById('pedidoTamanho').value;
+        const obs = document.getElementById('pedidoObs').value;
+        
+        const corpo = `
+            Nome: ${nome}
+            Matrícula: ${matricula}
+            Turma: ${turma}
+            Ano: ${ano}
+            
+            Item desejado: ${item}
+            Tamanho: ${tamanho}
+            Observações: ${obs}
+        `;
+        const mailto = `mailto:em_breve@braun.com.br?subject=Pedido de Uniforme - ${nome}&body=${encodeURIComponent(corpo)}`;
+        window.open(mailto, '_blank');
+    }
+
+    function openMeuPerfil() {
+        closeHamburger();
+        document.getElementById('nomePerfil').value = getStorageValue('braun_nome_completo') || '';
+        document.getElementById('matriculaPerfil').value = getStorageValue('braun_matricula') || '';
+        document.getElementById('turmaPerfil').value = getStorageValue('braun_turma_perfil') || 'A';
+        document.getElementById('anoPerfil').value = getStorageValue('braun_ano') || '2026';
+        document.getElementById('setorPerfil').value = getStorageValue('braun_setor') || '';
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('meuPerfilCard').classList.add('show');
+    }
+
+    function openColaboradorDoMes() {
+        closeHamburger();
+        preencherDadosModais();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('colaboradorDoMesCard').classList.add('show');
+    }
+
+    function openMeusPedidos() {
+        closeHamburger();
+        preencherDadosModais();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('meusPedidosCard').classList.add('show');
+    }
+
+    function closeAllModals() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.bottom-modal').forEach(el => el.classList.remove('show'));
+        closeTeamModal();
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode'));
+    }
+
+    function scrollToToday() {
+        setTimeout(() => {
+            const hoje = document.querySelector('.hoje');
+            if (!hoje) return;
+            
+            const container = hoje.closest('.mes-container');
+            if (!container) return;
+            
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const header = document.querySelector('header');
+                    const statusPanel = document.querySelector('.status-panel');
+                    const headerHeight = header ? header.offsetHeight : 0;
+                    const statusHeight = statusPanel ? statusPanel.offsetHeight : 0;
+                    const gap = 15;
+                    
+                    const rect = container.getBoundingClientRect();
+                    const scrollTarget = window.scrollY + rect.top - (headerHeight + statusHeight + gap);
+                    
+                    window.scrollTo({
+                        top: Math.max(0, scrollTarget),
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        }, 300);
+    }
+
+    // ==================== INICIALIZAÇÃO ====================
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (getStorageValue('braun_dark_mode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        atualizarBadgeTurma();
+        gerarCalendario();
+        startClock();
+        tick();
+        gerenciarBotaoVotacao();
+        preencherDadosModais();
+        if (!getStorageValue('braun_visited')) {
+            document.getElementById('welcomeScreen').style.display = 'flex';
+        } else {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            scrollToToday();
+        }
+    });
+
+</script>
+</body>
+</html>
