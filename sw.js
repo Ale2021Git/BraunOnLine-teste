@@ -1,7 +1,7 @@
-// Nome do cache - Incremente a versão sempre que fizer mudanças grandes
-const CACHE_NAME = 'braun-v2.5';
+// Nome do cache - Versão atualizada para forçar atualização
+const CACHE_NAME = 'braun-v2.6';
 
-// Lista de arquivos essenciais (Incluindo os novos screenshots do manifesto)
+// Lista de arquivos essenciais
 const assets = [
   './',
   './index.html',
@@ -12,19 +12,18 @@ const assets = [
   './screenshot-desktop.png'
 ];
 
-// 1. Instalação: Armazena os arquivos básicos
+// 1. Instalação
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('PWA: Cacheando arquivos essenciais...');
-      // Usamos return para garantir que a instalação só termine após o cache
       return cache.addAll(assets);
     })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Força a ativação imediata
 });
 
-// 2. Ativação: Limpeza de caches antigos
+// 2. Ativação
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -36,20 +35,20 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Toma o controle de todas as páginas abertas
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-// 3. Interceptação (Fetch): Estratégia Stale-While-Revalidate melhorada
+// 3. Interceptação (Fetch) com Stale-While-Revalidate melhorado
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições que não sejam HTTP ou HTTPS (evita erro com extensões do Chrome)
   if (!(event.request.url.indexOf('http') === 0)) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Verifica se a resposta é válida e do tipo "basic" (mesma origem) antes de salvar
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -58,7 +57,6 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // Opcional: retornar uma página de erro offline específica aqui
         return cachedResponse;
       });
 
