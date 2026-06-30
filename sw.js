@@ -1,5 +1,5 @@
 // Nome do cache - Incremente a versão sempre que fizer mudanças grandes
-const CACHE_NAME = 'braun-v2.3';
+const CACHE_NAME = 'braun-v2.5';
 
 // Lista de arquivos essenciais (Incluindo os novos screenshots do manifesto)
 const assets = [
