@@ -1227,11 +1227,10 @@
 
 <script>
     // ==============================================================
-    // TODAS AS FUNÇÕES DO APP - VERSÃO COM CHAVEAMENTO
-    // FASE DE 16 AVOS + PROPAGAÇÃO AUTOMÁTICA
+    // CONTROLE DE VERSÃO - FORÇA ATUALIZAÇÃO
     // ==============================================================
+    const APP_VERSION = '2026.07.01'; // Altere este número a cada atualização
 
-    // ==================== STORAGE ====================
     function getStorageValue(key) {
         try { return localStorage.getItem(key); } catch (e) {
             try { return sessionStorage.getItem(key); } catch (f) { return null; }
@@ -1247,6 +1246,30 @@
             try { sessionStorage.removeItem(key); } catch (f) {}
         }
     }
+
+    // Verifica se a versão mudou
+    const storedVersion = getStorageValue('braun_app_version');
+    if (storedVersion !== APP_VERSION) {
+        console.log('🔄 Nova versão detectada. Atualizando...');
+        // Limpa o cache do Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let reg of registrations) {
+                    reg.unregister();
+                    console.log('✅ Service Worker desregistrado.');
+                }
+            });
+        }
+        // Salva a nova versão
+        setStorageValue('braun_app_version', APP_VERSION);
+        // Recarrega a página forçadamente (ignorando cache)
+        window.location.reload(true);
+    }
+
+    // ==============================================================
+    // TODAS AS FUNÇÕES DO APP - VERSÃO COM CHAVEAMENTO
+    // FASE DE 16 AVOS + PROPAGAÇÃO AUTOMÁTICA
+    // ==============================================================
 
     // ==================== SPLASH ====================
     function showCopaSplash() {
@@ -1701,32 +1724,32 @@
     };
 
     // ===== FASE 16 AVOS (Rodada de 32) =====
-const R32 = [
-    { id: 'R32_1', home: 'GER', away: 'PAR', dt: 'Amanhã, 17:30', stage: '16 Avos' },
-    { id: 'R32_2', home: 'FRA', away: 'SWE', dt: 'Ter., 30/06, 18:00', stage: '16 Avos' },
-    { id: 'R32_3', home: 'RSA', away: 'CAN', dt: 'Hoje, 16:00', stage: '16 Avos' },
-    { id: 'R32_4', home: 'NED', away: 'MAR', dt: 'Amanhã, 22:00', stage: '16 Avos' },
-    { id: 'R32_5', home: 'POR', away: 'CRO', dt: 'Qui., 02/07, 20:00', stage: '16 Avos' },
-    { id: 'R32_6', home: 'ESP', away: 'AUT', dt: 'Qui., 02/07, 16:00', stage: '16 Avos' },
-    { id: 'R32_7', home: 'USA', away: 'BIH', dt: 'Qua., 01/07, 21:00', stage: '16 Avos' },
-    { id: 'R32_8', home: 'BEL', away: 'SEN', dt: 'Qua., 01/07, 17:00', stage: '16 Avos' },
-    { id: 'R32_9', home: 'BRA', away: 'JPN', dt: 'Amanhã, 14:00', stage: '16 Avos' },
-    { id: 'R32_10', home: 'CIV', away: 'NOR', dt: 'Ter., 30/06, 14:00', stage: '16 Avos' },
-    { id: 'R32_11', home: 'MEX', away: 'ECU', dt: 'Ter., 30/06, 22:00', stage: '16 Avos' },
-    { id: 'R32_12', home: 'ENG', away: 'RDC', dt: 'Qua., 01/07, 13:00', stage: '16 Avos' },
-    { id: 'R32_13', home: 'ARG', away: 'CAB', dt: 'Sex., 03/07, 19:00', stage: '16 Avos' },
-    { id: 'R32_14', home: 'AUS', away: 'EGY', dt: 'Sex., 03/07, 15:00', stage: '16 Avos' },
-    { id: 'R32_15', home: 'SUI', away: 'AGL', dt: 'Sex., 03/07, 00:00', stage: '16 Avos' },
-    { id: 'R32_16', home: 'COL', away: 'GHA', dt: 'Sex., 03/07, 22:30', stage: '16 Avos' }
-];
+    const R32 = [
+        { id: 'R32_1', home: 'GER', away: 'PAR', dt: 'Amanhã, 17:30', stage: '16 Avos' },
+        { id: 'R32_2', home: 'FRA', away: 'SWE', dt: 'Ter., 30/06, 18:00', stage: '16 Avos' },
+        { id: 'R32_3', home: 'RSA', away: 'CAN', dt: 'Hoje, 16:00', stage: '16 Avos' },
+        { id: 'R32_4', home: 'NED', away: 'MAR', dt: 'Amanhã, 22:00', stage: '16 Avos' },
+        { id: 'R32_5', home: 'POR', away: 'CRO', dt: 'Qui., 02/07, 20:00', stage: '16 Avos' },
+        { id: 'R32_6', home: 'ESP', away: 'AUT', dt: 'Qui., 02/07, 16:00', stage: '16 Avos' },
+        { id: 'R32_7', home: 'USA', away: 'BIH', dt: 'Qua., 01/07, 21:00', stage: '16 Avos' },
+        { id: 'R32_8', home: 'BEL', away: 'SEN', dt: 'Qua., 01/07, 17:00', stage: '16 Avos' },
+        { id: 'R32_9', home: 'BRA', away: 'JPN', dt: 'Amanhã, 14:00', stage: '16 Avos' },
+        { id: 'R32_10', home: 'CIV', away: 'NOR', dt: 'Ter., 30/06, 14:00', stage: '16 Avos' },
+        { id: 'R32_11', home: 'MEX', away: 'ECU', dt: 'Ter., 30/06, 22:00', stage: '16 Avos' },
+        { id: 'R32_12', home: 'ENG', away: 'RDC', dt: 'Qua., 01/07, 13:00', stage: '16 Avos' },
+        { id: 'R32_13', home: 'ARG', away: 'CAB', dt: 'Sex., 03/07, 19:00', stage: '16 Avos' },
+        { id: 'R32_14', home: 'AUS', away: 'EGY', dt: 'Sex., 03/07, 15:00', stage: '16 Avos' },
+        { id: 'R32_15', home: 'SUI', away: 'AGL', dt: 'Sex., 03/07, 00:00', stage: '16 Avos' },
+        { id: 'R32_16', home: 'COL', away: 'GHA', dt: 'Sex., 03/07, 22:30', stage: '16 Avos' }
+    ];
 
     // ===== OITAVAS =====
     const OITAVAS = [];
     for (let i = 0; i < 8; i++) {
         OITAVAS.push({
             id: `O${i+1}`,
-            home: '',   // será preenchido automaticamente
-            away: '',   // será preenchido automaticamente
+            home: '',
+            away: '',
             dt: `${String(28 + i).padStart(2,'0')}/06 16:00`,
             stage: 'Oitavas'
         });
@@ -1797,10 +1820,8 @@ const R32 = [
         'S1': { next: 'F1', side: 'home' },
         'S2': { next: 'F1', side: 'away' },
         // Semifinais -> 3º lugar (perdedores)
-        'S1': { next: 'T1', side: 'home' }, // perdedor S1
-        'S2': { next: 'T1', side: 'away' }  // perdedor S2
-        // Nota: Para o 3º lugar, usamos os perdedores, mas a lógica de vencedor não se aplica diretamente.
-        // Vamos tratar isso separadamente na propagação.
+        'S1': { next: 'T1', side: 'home' },
+        'S2': { next: 'T1', side: 'away' }
     };
 
     // ==================== FUNÇÕES DA COPA ====================
@@ -1844,17 +1865,13 @@ const R32 = [
     }
 
     function setMatchTeam(matchId, side, teamId) {
-        // apenas armazena o ID do time no jogo; o nome/flag vêm do getTeamData
         const teams = getCopaTeams();
-        // Se o time não existir no custom, não faz nada (usa COPA_TEAMS)
         if (teamId && !teams[teamId]) {
-            // Se não existir, cria um placeholder com o ID
             teams[teamId] = { id: teamId, n: teamId, f: '❓' };
         }
         setCopaTeams(teams);
     }
 
-    // Função para obter o vencedor de um jogo (com base no placar)
     function getWinner(matchId) {
         const score = getMatchScore(matchId);
         if (!score) return null;
@@ -1865,35 +1882,29 @@ const R32 = [
         const away = match.away;
         if (score.h > score.a) return home;
         if (score.a > score.h) return away;
-        return null; // empate -> sem vencedor (precisa de pênaltis, mas ignoramos)
+        return null;
     }
 
-    // Retorna todos os jogos de todas as fases
     function getAllMatches() {
         return [...R32, ...OITAVAS, ...QUARTAS, ...SEMIS, ...TERCEIRO, ...FINAL];
     }
 
-    // Atualiza as fases seguintes com base nos vencedores
     function propagateWinners() {
-        // Para cada jogo que tem um vencedor, atualiza o próximo jogo
         const allMatches = getAllMatches();
         for (const match of allMatches) {
             const winner = getWinner(match.id);
-            if (winner) {
-                const dep = DEPENDENCIAS[match.id];
-                if (dep) {
-                    const nextMatch = allMatches.find(m => m.id === dep.next);
-                    if (nextMatch) {
-                        // Atualiza o lado (home/away) com o ID do vencedor
+            const dep = DEPENDENCIAS[match.id];
+            if (dep) {
+                const nextMatch = allMatches.find(m => m.id === dep.next);
+                if (nextMatch) {
+                    if (winner) {
                         if (dep.side === 'home') {
                             nextMatch.home = winner;
                         } else {
                             nextMatch.away = winner;
                         }
-                        // Garante que o time esteja no custom (se não, cria placeholder)
                         const teams = getCopaTeams();
                         if (!teams[winner]) {
-                            // Tenta buscar do COPA_TEAMS
                             const base = COPA_TEAMS[winner];
                             if (base) {
                                 teams[winner] = { id: winner, n: base.n, f: base.f };
@@ -1902,14 +1913,7 @@ const R32 = [
                             }
                             setCopaTeams(teams);
                         }
-                    }
-                }
-            } else {
-                // Se não há vencedor, limpa os próximos jogos que dependem deste
-                const dep = DEPENDENCIAS[match.id];
-                if (dep) {
-                    const nextMatch = allMatches.find(m => m.id === dep.next);
-                    if (nextMatch) {
+                    } else {
                         if (dep.side === 'home') {
                             nextMatch.home = '';
                         } else {
@@ -1921,12 +1925,8 @@ const R32 = [
         }
     }
 
-    // Salva o estado das fases (home/away) no storage
     function saveBracketState() {
-        // Armazenamos os arrays completos
-        const state = {
-            R32, OITAVAS, QUARTAS, SEMIS, TERCEIRO, FINAL
-        };
+        const state = { R32, OITAVAS, QUARTAS, SEMIS, TERCEIRO, FINAL };
         setStorageValue('copa2026_bracket_state', JSON.stringify(state));
     }
 
@@ -1935,7 +1935,6 @@ const R32 = [
         if (saved) {
             try {
                 const state = JSON.parse(saved);
-                // Atualiza os arrays globais
                 R32.length = 0; R32.push(...state.R32);
                 OITAVAS.length = 0; OITAVAS.push(...state.OITAVAS);
                 QUARTAS.length = 0; QUARTAS.push(...state.QUARTAS);
@@ -1951,11 +1950,8 @@ const R32 = [
     // ==================== RENDERIZAÇÃO DO BRACKET ====================
 
     function renderBracket() {
-        // Carrega estado salvo
         loadBracketState();
-        // Propaga vencedores (atualiza times com base nos placares)
         propagateWinners();
-        // Salva o estado atualizado
         saveBracketState();
 
         const body = document.getElementById('copa-panel-body');
@@ -1963,7 +1959,6 @@ const R32 = [
         
         let html = `<div class="bracket-container">`;
         
-        // Função auxiliar para renderizar uma rodada
         function renderRound(matches, label) {
             html += `<div class="bracket-round">
                 <div class="bracket-round-label">${label}</div>`;
@@ -2056,7 +2051,6 @@ const R32 = [
         const match = allMatches.find(m => m.id === currentEditMatchId);
         if (!match) return;
         
-        // Atualiza os times (se o usuário forneceu nome/flag)
         if (flagHome && nameHome) {
             const teams = getCopaTeams();
             teams[match.home] = { id: match.home, n: nameHome, f: flagHome };
@@ -2068,10 +2062,7 @@ const R32 = [
             setCopaTeams(teams);
         }
         
-        // Salva o placar
         setMatchScore(currentEditMatchId, scoreHome, scoreAway);
-        
-        // Propaga vencedores
         propagateWinners();
         saveBracketState();
         
@@ -2081,15 +2072,9 @@ const R32 = [
 
     function clearTeam() {
         if (!currentEditMatchId) return;
-        
-        // Remove placar
         setMatchScore(currentEditMatchId, null, null);
-        
-        // Remove times customizados? Melhor não, pois podem ser usados em outros jogos.
-        // Apenas limpa o placar e propaga (isso vai remover os times dos próximos jogos se não houver vencedor)
         propagateWinners();
         saveBracketState();
-        
         closeTeamModal();
         renderBracket();
     }
