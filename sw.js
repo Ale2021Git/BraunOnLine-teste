@@ -1,7 +1,7 @@
-// Nome do cache - Versão atualizada para forçar atualização
-const CACHE_NAME = 'braun-v2.6';
+// Nome do cache - Incremente a versão sempre que fizer mudanças grandes
+const CACHE_NAME = 'braun-v2.5';
 
-// Lista de arquivos essenciais
+// Lista de arquivos essenciais (Incluindo os novos screenshots do manifesto)
 const assets = [
   './',
   './index.html',
@@ -12,7 +12,7 @@ const assets = [
   './screenshot-desktop.png'
 ];
 
-// 1. Instalação
+// 1. Instalação: Armazena os arquivos básicos
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -20,10 +20,10 @@ self.addEventListener('install', (event) => {
       return cache.addAll(assets);
     })
   );
-  self.skipWaiting(); // Força a ativação imediata
+  self.skipWaiting();
 });
 
-// 2. Ativação
+// 2. Ativação: Limpeza de caches antigos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -35,14 +35,12 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => {
-      // Toma o controle de todas as páginas abertas
-      return self.clients.claim();
     })
   );
+  self.clients.claim();
 });
 
-// 3. Interceptação (Fetch) com Stale-While-Revalidate melhorado
+// 3. Interceptação (Fetch): Estratégia Stale-While-Revalidate melhorada
 self.addEventListener('fetch', (event) => {
   if (!(event.request.url.indexOf('http') === 0)) return;
 

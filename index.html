@@ -6,13 +6,11 @@
   if ('serviceWorker' in navigator) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
-    if (!isIOS) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=20260702')
-      .then(reg => console.log('PWA pronto para instalação no Android!', reg.scope))
-      .catch(err => console.error('Erro no instalador:', err));
-  });
-}
+    if (isIOS) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
       });
     } else {
       window.addEventListener('load', () => {
@@ -148,6 +146,24 @@
             z-index: 5; animation: plane-fly 2s infinite ease-in-out;
             font-variation-settings: 'FILL' 1;
         }
+        
+        /* ===== BOLA ANIMADA NO DIA DO JOGO ===== */
+        .match-day-indicator {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            font-size: 1.4rem;
+            animation: bounce-ball 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            z-index: 15;
+            pointer-events: none;
+            transform-origin: center;
+        }
+        @keyframes bounce-ball {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.1); }
+        }
+
         header {
             background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
             justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
@@ -1231,7 +1247,7 @@
     // ==============================================================
     // CONTROLE DE VERSÃO - FORÇA ATUALIZAÇÃO
     // ==============================================================
-    const APP_VERSION = '2026.07.01'; // Altere este número a cada atualização
+    const APP_VERSION = '2026.07.02'; // Altere este número a cada atualização
 
     function getStorageValue(key) {
         try { return localStorage.getItem(key); } catch (e) {
@@ -1538,12 +1554,16 @@
 
             let colAtual = esp;
 
+            // ===== JOGOS DA COPA =====
+            const jogosCopa = getJogosCopa();
+
             for (let d = 1; d <= diasNoMes; d++) {
                 const at = new Date(ano, m, d);
                 const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const isoF = `${ano}-${isoS}`;
                 const f = fer[isoS];
                 const nt = logs[isoF];
+                const jogo = jogosCopa[isoF];
 
                 if (colAtual === 7) {
                     colAtual = 0;
@@ -1566,12 +1586,22 @@
                 if (nt) cls += 'HAS_NOTE ';
                 if (isFerias(at)) cls += 'FERIAS ';
 
-                if (f || nt) {
+                if (f || nt || jogo) {
                     hasEv = true;
-                    hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`;
+                    let evText = '';
+                    if (f) evText += `${f}`;
+                    if (jogo) evText += (evText ? ' · ' : '') + `${jogo}`;
+                    if (nt) evText += (evText ? ' · ' : '') + `📝 ${nt}`;
+                    hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${evText}</div>`;
                 }
 
-                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')">${d}</div>`;
+                // ===== BOLA ANIMADA NO DIA DO JOGO =====
+                let extraHTML = '';
+                if (at.getFullYear() === 2026 && at.getMonth() === 6 && at.getDate() === 5) {
+                    extraHTML = '<span class="match-day-indicator">⚽</span>';
+                }
+                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')">${d}${extraHTML}</div>`;
+                
                 colAtual++;
             }
 
@@ -1584,6 +1614,13 @@
 
         box.innerHTML = '';
         box.appendChild(frag);
+    }
+
+    // ===== JOGOS DA COPA 2026 =====
+    function getJogosCopa() {
+        return {
+            '2026-07-05': '⚽ 🇧🇷 Brasil x Noruega 🇳🇴 · 17:00'
+        };
     }
 
     function tick() {
@@ -1623,7 +1660,17 @@
         dataAtiva = iso;
         const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
         const d = iso.split('-');
-        document.getElementById('card-data').innerText = `${d[2]}/${d[1]}/${d[0]}`;
+        
+        // ===== EXIBIR JOGO DA COPA NO MODAL =====
+        const jogos = getJogosCopa();
+        const jogo = jogos[iso];
+        const cardData = document.getElementById('card-data');
+        if (jogo) {
+            cardData.innerHTML = `${d[2]}/${d[1]}/${d[0]}<br><span style="font-size:0.65em;background:var(--bg);color:var(--text);padding:5px 12px;border-radius:20px;border:1px solid var(--primary);display:inline-block;margin-top:6px;">${jogo}</span>`;
+        } else {
+            cardData.innerText = `${d[2]}/${d[1]}/${d[0]}`;
+        }
+
         document.getElementById('noteInput').value = logs[iso] || '';
 
         const dtSel = new Date(d[0], d[1] - 1, d[2]);
@@ -1727,17 +1774,17 @@
 
     // ===== FASE 16 AVOS (Rodada de 32) =====
     const R32 = [
-        { id: 'R32_1', home: 'GER', away: 'PAR', dt: 'Amanhã, 17:30', stage: '16 Avos' },
-        { id: 'R32_2', home: 'FRA', away: 'SWE', dt: 'Ter., 30/06, 18:00', stage: '16 Avos' },
-        { id: 'R32_3', home: 'RSA', away: 'CAN', dt: 'Hoje, 16:00', stage: '16 Avos' },
-        { id: 'R32_4', home: 'NED', away: 'MAR', dt: 'Amanhã, 22:00', stage: '16 Avos' },
-        { id: 'R32_5', home: 'POR', away: 'CRO', dt: 'Qui., 02/07, 20:00', stage: '16 Avos' },
-        { id: 'R32_6', home: 'ESP', away: 'AUT', dt: 'Qui., 02/07, 16:00', stage: '16 Avos' },
+        { id: 'R32_1', home: 'RSA', away: 'CAN', dt: 'Hoje, 16:00', stage: '16 Avos' },
+        { id: 'R32_2', home: 'NED', away: 'MAR', dt: 'Amanhã, 22:00', stage: '16 Avos' },
+        { id: 'R32_3', home: 'PAR', away: 'JPN', dt: 'Amanhã, 17:30', stage: '16 Avos' },
+        { id: 'R32_4', home: 'FRA', away: 'SWE', dt: 'Ter., 30/06, 18:00', stage: '16 Avos' },
+        { id: 'R32_5', home: 'BRA', away: 'SCO', dt: 'Qui., 02/07, 20:00', stage: '16 Avos' },
+        { id: 'R32_6', home: 'NOR', away: 'CRO', dt: 'Qui., 02/07, 16:00', stage: '16 Avos' },
         { id: 'R32_7', home: 'USA', away: 'BIH', dt: 'Qua., 01/07, 21:00', stage: '16 Avos' },
         { id: 'R32_8', home: 'BEL', away: 'SEN', dt: 'Qua., 01/07, 17:00', stage: '16 Avos' },
-        { id: 'R32_9', home: 'BRA', away: 'JPN', dt: 'Amanhã, 14:00', stage: '16 Avos' },
+        { id: 'R32_9', home: 'MEX', away: 'ECU', dt: 'Ter., 30/06, 22:00', stage: '16 Avos' },
         { id: 'R32_10', home: 'CIV', away: 'NOR', dt: 'Ter., 30/06, 14:00', stage: '16 Avos' },
-        { id: 'R32_11', home: 'MEX', away: 'ECU', dt: 'Ter., 30/06, 22:00', stage: '16 Avos' },
+        { id: 'R32_11', home: 'GER', away: 'PAR', dt: 'Amanhã, 17:30', stage: '16 Avos' },
         { id: 'R32_12', home: 'ENG', away: 'RDC', dt: 'Qua., 01/07, 13:00', stage: '16 Avos' },
         { id: 'R32_13', home: 'ARG', away: 'CAB', dt: 'Sex., 03/07, 19:00', stage: '16 Avos' },
         { id: 'R32_14', home: 'AUS', away: 'EGY', dt: 'Sex., 03/07, 15:00', stage: '16 Avos' },
@@ -1745,17 +1792,17 @@
         { id: 'R32_16', home: 'COL', away: 'GHA', dt: 'Sex., 03/07, 22:30', stage: '16 Avos' }
     ];
 
-    // ===== OITAVAS =====
-    const OITAVAS = [];
-    for (let i = 0; i < 8; i++) {
-        OITAVAS.push({
-            id: `O${i+1}`,
-            home: '',
-            away: '',
-            dt: `${String(28 + i).padStart(2,'0')}/07 17:00`,
-            stage: 'Oitavas'
-        });
-    }
+    // ===== OITAVAS DE FINAL (CORRIGIDO COM SEU PRINT) =====
+    const OITAVAS = [
+        { id: 'O1', home: 'CAN', away: 'MAR', dt: 'Sáb., 04/07, 14:00', stage: 'Oitavas de final' },
+        { id: 'O2', home: 'PAR', away: 'FRA', dt: 'Sáb., 04/07, 18:00', stage: 'Oitavas de final' },
+        { id: 'O3', home: 'BRA', away: 'NOR', dt: 'Dom., 05/07, 17:00', stage: 'Oitavas de final' },
+        { id: 'O4', home: '',    away: '',    dt: 'Dom., 05/07, 21:00', stage: 'Oitavas de final' },
+        { id: 'O5', home: '',    away: '',    dt: 'Seg., 06/07, 17:00', stage: 'Oitavas de final' },
+        { id: 'O6', home: '',    away: '',    dt: 'Seg., 06/07, 21:00', stage: 'Oitavas de final' },
+        { id: 'O7', home: '',    away: '',    dt: 'Ter., 07/07, 17:00', stage: 'Oitavas de final' },
+        { id: 'O8', home: '',    away: '',    dt: 'Ter., 07/07, 21:00', stage: 'Oitavas de final' }
+    ];
 
     // ===== QUARTAS =====
     const QUARTAS = [];
@@ -1785,7 +1832,9 @@
         { id: 'F1', home: '', away: '', dt: '19/07 16:00', stage: 'Final' }
     ];
 
-    // Mapeamento de dependências: de qual jogo sai o vencedor e para qual jogo da fase seguinte (e qual lado)
+    // =======================================================================================
+    // CORREÇÃO APLICADA AQUI: DEPENDENCIAS AGORA USA ARRAYS PARA OS JOGOS DAS SEMIFINAIS (S1 e S2)
+    // =======================================================================================
     const DEPENDENCIAS = {
         // 16 avos -> Oitavas
         'R32_1': { next: 'O1', side: 'home' },
@@ -1804,6 +1853,7 @@
         'R32_14': { next: 'O7', side: 'away' },
         'R32_15': { next: 'O8', side: 'home' },
         'R32_16': { next: 'O8', side: 'away' },
+        
         // Oitavas -> Quartas
         'O1': { next: 'Q1', side: 'home' },
         'O2': { next: 'Q1', side: 'away' },
@@ -1813,17 +1863,22 @@
         'O6': { next: 'Q3', side: 'away' },
         'O7': { next: 'Q4', side: 'home' },
         'O8': { next: 'Q4', side: 'away' },
+        
         // Quartas -> Semifinais
         'Q1': { next: 'S1', side: 'home' },
         'Q2': { next: 'S1', side: 'away' },
         'Q3': { next: 'S2', side: 'home' },
         'Q4': { next: 'S2', side: 'away' },
-        // Semifinais -> Final
-        'S1': { next: 'F1', side: 'home' },
-        'S2': { next: 'F1', side: 'away' },
-        // Semifinais -> 3º lugar (perdedores)
-        'S1': { next: 'T1', side: 'home' },
-        'S2': { next: 'T1', side: 'away' }
+        
+        // Semifinais -> Final e 3º Lugar
+        'S1': [
+            { next: 'F1', side: 'home' },
+            { next: 'T1', side: 'home' } 
+        ],
+        'S2': [
+            { next: 'F1', side: 'away' },
+            { next: 'T1', side: 'away' } 
+        ]
     };
 
     // ==================== FUNÇÕES DA COPA ====================
@@ -1891,38 +1946,44 @@
         return [...R32, ...OITAVAS, ...QUARTAS, ...SEMIS, ...TERCEIRO, ...FINAL];
     }
 
+    // ==================== FUNÇÃO CORRIGIDA ====================
     function propagateWinners() {
         const allMatches = getAllMatches();
         for (const match of allMatches) {
             const winner = getWinner(match.id);
             const dep = DEPENDENCIAS[match.id];
             if (dep) {
-                const nextMatch = allMatches.find(m => m.id === dep.next);
-                if (nextMatch) {
-                    if (winner) {
-                        if (dep.side === 'home') {
-                            nextMatch.home = winner;
-                        } else {
-                            nextMatch.away = winner;
-                        }
-                        const teams = getCopaTeams();
-                        if (!teams[winner]) {
-                            const base = COPA_TEAMS[winner];
-                            if (base) {
-                                teams[winner] = { id: winner, n: base.n, f: base.f };
+                // Se for um array (caso das Semifinais), itera sobre ele
+                const dependencies = Array.isArray(dep) ? dep : [dep];
+                
+                dependencies.forEach(d => {
+                    const nextMatch = allMatches.find(m => m.id === d.next);
+                    if (nextMatch) {
+                        if (winner) {
+                            if (d.side === 'home') {
+                                nextMatch.home = winner;
                             } else {
-                                teams[winner] = { id: winner, n: winner, f: '❓' };
+                                nextMatch.away = winner;
                             }
-                            setCopaTeams(teams);
-                        }
-                    } else {
-                        if (dep.side === 'home') {
-                            nextMatch.home = '';
+                            const teams = getCopaTeams();
+                            if (!teams[winner]) {
+                                const base = COPA_TEAMS[winner];
+                                if (base) {
+                                    teams[winner] = { id: winner, n: base.n, f: base.f };
+                                } else {
+                                    teams[winner] = { id: winner, n: winner, f: '❓' };
+                                }
+                                setCopaTeams(teams);
+                            }
                         } else {
-                            nextMatch.away = '';
+                            if (d.side === 'home') {
+                                nextMatch.home = '';
+                            } else {
+                                nextMatch.away = '';
+                            }
                         }
                     }
-                }
+                });
             }
         }
     }
