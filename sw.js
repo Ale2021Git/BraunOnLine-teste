@@ -1,64 +1,71 @@
-// Nome do cache - Incremente a versão sempre que fizer mudanças grandes
-const CACHE_NAME = 'braun-v2.5';
+const CACHE_NAME = 'braun-online-v3.8-20260831';
+const OFFLINE_URL = './offline.html';
 
-// Lista de arquivos essenciais (Incluindo os novos screenshots do manifesto)
-const assets = [
+const PRECACHE = [
   './',
   './index.html',
+  './offline.html',
   './manifest.json',
   './maskable_icon_x192.png',
   './maskable_icon_x512.png',
-  './screenshot-mobile.png',
-  './screenshot-desktop.png'
+  './qr-code.png'
 ];
 
-// 1. Instalação: Armazena os arquivos básicos
+// Instalação
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('PWA: Cacheando arquivos essenciais...');
-      return cache.addAll(assets);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// 2. Ativação: Limpeza de caches antigos
+// Ativação - limpa caches antigos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('PWA: Removendo cache obsoleto:', cache);
-            return caches.delete(cache);
-          }
-        })
+        keys.filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// 3. Interceptação (Fetch): Estratégia Stale-While-Revalidate melhorada
+// Estratégia: Network First com fallback para cache + offline page
 self.addEventListener('fetch', (event) => {
-  if (!(event.request.url.indexOf('http') === 0)) return;
+  if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const responseToCache = networkResponse.clone();
+    fetch(event.request)
+      .then((response) => {
+        // Cacheia respostas válidas
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
-        return networkResponse;
-      }).catch(() => {
-        return cachedResponse;
-      });
-
-      return cachedResponse || fetchPromise;
-    })
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          
+          // Se for navegação e não tiver no cache → página offline
+          if (event.request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
+          
+          return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+        });
+      })
   );
+});
+
+// Recebe mensagens do app (para forçar atualização)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

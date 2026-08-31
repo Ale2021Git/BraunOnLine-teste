@@ -1,0 +1,3100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://www.google.com https://analytics.google.com;">
+<script>
+  // ========== SERVICE WORKER ==========
+  if ('serviceWorker' in navigator) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!isIOS) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=20260831')
+          .then(reg => {
+            console.log('PWA pronto!', reg.scope);
+            reg.onupdatefound = () => {
+              const iw = reg.installing;
+              iw.onstatechange = () => {
+                if (iw.state === 'installed' && navigator.serviceWorker.controller) {
+                  if (confirm('Nova versão do Braun OnLine disponível! Deseja atualizar agora?')) {
+                    window.location.reload();
+                  }
+                }
+              };
+            };
+          })
+          .catch(err => console.error('Erro no SW:', err));
+      });
+    }
+  }
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#00A97A">
+    <title>Braun OnLine 2026/2027</title>
+    <meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC e MANUTENÇÃO">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="maskable_icon_x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Braun OnLine">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQXB043RE1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LQXB043RE1');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;700;900&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+    <style>
+        :root {
+            --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+            --accent: #7030A0; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
+            --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
+        }
+        body.dark-mode {
+            --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
+            --primary: #00C48D; --semana-w: #00C48D;
+        }
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+            margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+        }
+        
+        .welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); color: white; z-index: 3000;
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
+        }
+        .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
+        .welcome-logo { width: 120px; margin-bottom: 25px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        #install-button {
+            display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
+            font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .hoje {
+            background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
+            border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
+            animation: hoje-pulsar 1.5s infinite ease-in-out;
+        }
+        body.dark-mode .hoje { border-color: #1E1E1E !important; }
+        @keyframes hoje-pulsar {
+            0%   { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+            50%  { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
+            100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+        }
+        .FERIAS {
+            position: relative;
+            border: 2px dashed var(--ferias) !important;
+            box-shadow: inset 0 0 10px rgba(112,48,160,0.2);
+        }
+        .FERIAS::before {
+            content: 'flight'; font-family: 'Material Symbols Outlined';
+            position: absolute; top: -6px; right: -6px; font-size: 16px;
+            color: var(--ferias); background: var(--card); border-radius: 50%;
+            z-index: 5; animation: plane-fly 2s infinite ease-in-out;
+            font-variation-settings: 'FILL' 1;
+        }
+        header {
+            background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
+            justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .brand-logo-svg { height: 35px; width: auto; }
+        .st-logo-path { fill: #FFFFFF; transition: fill 0.3s; }
+
+        .turma-badge {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .turma-badge:active {
+            background: rgba(255,255,255,0.35);
+            transform: scale(0.96);
+        }
+        .turma-badge .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        .status-panel {
+            background: var(--card); border-radius: 25px; padding: 15px 10px; margin: 0px 15px 0px 15px;
+            border: 1px solid var(--border); text-align: center; box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            position: sticky; top: 85px; z-index: 95;
+        }
+        .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
+        .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
+        
+        #calendario-box {
+            margin-top: 0px;
+            padding-top: 0px;
+        }
+        .mes-container { 
+            perspective: 1000px; 
+            margin: 0 10px 25px 10px;
+            min-height: 400px; 
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 0px;
+            scroll-margin-top: 110px;
+        }
+        #calendario-box > .mes-container:first-child { margin-top: 0px; }
+        
+        .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
+        .mes-inner.flipped { transform: rotateY(180deg); }
+        .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .mes-front { background: var(--card); }
+        .mes-back  { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
+        .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
+        .dia-label-w {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 900;
+            background: linear-gradient(135deg, var(--semana-w), #007d5a); color: #FFFFFF;
+            border-radius: 8px; height: 28px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .dia { 
+            aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
+            border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent; 
+            transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
+        }
+        .AMARELO  { background: var(--amarelo) !important; color: #1a1a1a !important; }
+        .VERDE    { background: var(--verde)   !important; color: #fff     !important; }
+        .AZUL     { background: var(--azul-mnt)!important; color: #fff     !important; }
+        .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
+        .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; height: 75px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.75em; font-weight: 700; background: none; border: none; cursor: pointer; }
+        .tab.active { color: #FFFFFF; }
+        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
+        .bottom-modal { position: fixed; bottom: -110%; left: 0; right: 0; background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px; z-index: 2000; transition: 0.5s; max-height: 85vh; overflow-y: auto; }
+        .bottom-modal.show { bottom: 0; }
+        .select-group { display: flex; gap: 12px; padding: 0 15px 20px 15px; }
+        select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
+        #anoSelect   { width: 95px; flex-shrink: 0; }
+        #turmaSelect { flex-grow: 1; }
+        .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .config-label { font-weight: 600; font-size: 0.95em; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; flex-wrap: wrap; gap: 10px; }
+        .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
+        .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .ramal-badge {
+            background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--primary);
+            text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
+        .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .stat-card-big.purple { border-color: var(--accent); }
+        .stat-card-big.teal   { border-color: var(--verde);  }
+        .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        .stat-val-big.purple { color: var(--accent); }
+        .stat-val-big.teal   { color: var(--verde);  }
+        .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .lote-box { background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; position: relative; }
+        .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+        .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
+        .privacy-link { color: var(--primary); font-weight: 800; text-decoration: none; display: block; margin-top: 10px; cursor: pointer; background: none; border: none; font-size: inherit; }
+        /* Botão flutuante de Novidades - aparece apenas se houver novidades não lidas */
+        #btn-flutuante-novidades {
+            position: fixed; bottom: 95px; right: 20px;
+            background: var(--primary); color: white;
+            border: none; border-radius: 50px; padding: 12px 22px;
+            font-weight: 800; font-size: 0.85em;
+            display: none; /* Oculto por padrão, JS mostra se houver novidades */
+            align-items: center; gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
+            animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.4);
+            transition: 0.2s;
+        }
+        #btn-flutuante-novidades .badge {
+            background: #7030A0; /* Roxo Braun */
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7em;
+            font-weight: 900;
+            padding: 2px 8px;
+            margin-left: 4px;
+        }
+
+        /* ===== BOTÃO DE PESQUISA (LUPA) NO RODAPÉ - AGORA SEM FUNDO, IGUAL AOS OUTROS ===== */
+        #tab-SEARCH {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.75em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        #tab-SEARCH.active { color: #FFFFFF; }
+        #tab-SEARCH .search-icon {
+            font-size: 28px; /* mesmo tamanho dos outros ícones */
+            transition: transform 0.2s;
+        }
+        #tab-SEARCH:active .search-icon {
+            transform: scale(0.9);
+        }
+
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.5) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        /* Animação do sininho */
+        @keyframes shake-bell {
+            0%, 100% { transform: rotate(0deg); }
+            10% { transform: rotate(15deg); }
+            20% { transform: rotate(-15deg); }
+            30% { transform: rotate(10deg); }
+            40% { transform: rotate(-10deg); }
+            50% { transform: rotate(5deg); }
+            60% { transform: rotate(-5deg); }
+            70% { transform: rotate(2deg); }
+            80% { transform: rotate(-2deg); }
+            90% { transform: rotate(0deg); }
+        }
+        #btn-flutuante-novidades .animar-sino {
+            display: inline-block;
+            animation: shake-bell 1.2s ease-in-out infinite;
+            transform-origin: top center;
+        }
+        .hamburger-btn {
+            background: none; border: none; color: white; cursor: pointer;
+            display: flex; flex-direction: column; gap: 5px; padding: 8px;
+            border-radius: 8px;
+        }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 2.5px;
+            background: white; border-radius: 3px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        #hamburgerDrawer {
+            position: fixed; top: 0; left: -100%; width: 82%; max-width: 320px; height: 100%;
+            background: var(--card); z-index: 3600; transition: left 0.38s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column; box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+        }
+        #hamburgerDrawer.open { left: 0; }
+        #drawerOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px);
+        }
+        #drawerOverlay.show { display: block; }
+        .drawer-brand {
+            background: var(--primary); padding: 50px 20px 20px 20px;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            position: relative;
+        }
+        .drawer-brand-icon {
+            width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .drawer-brand-text { color: white; font-size: 1em; font-weight: 800; }
+        .drawer-brand-sub  { color: rgba(255,255,255,0.7); font-size: 0.72em; font-weight: 600; margin-top: 2px; }
+        .drawer-close-btn {
+            background: none; border: none; color: white; cursor: pointer;
+            margin-left: auto; padding: 8px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: background 0.2s;
+        }
+        .drawer-close-btn:active { background: rgba(255,255,255,0.2); }
+        .drawer-close-btn span { font-size: 24px; }
+        .drawer-menu { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .drawer-section-label {
+            font-size: 0.65em; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--primary); opacity: 0.5;
+            padding: 15px 20px 5px 20px;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: none;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            border-top: none;
+            margin-bottom: 2px;
+        }
+        .drawer-item:active { background: rgba(0,0,0,0.05); }
+        body.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
+        .drawer-item.highlight {
+            background: rgba(0,169,122,0.08);
+        }
+        body.dark-mode .drawer-item.highlight {
+            background: rgba(0,169,122,0.15);
+        }
+        .drawer-item-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+        .drawer-item-label {
+            flex: 1;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .drawer-item-sub {
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.5;
+            margin-top: 2px;
+            color: var(--text);
+        }
+        .drawer-item-arrow {
+            color: var(--text);
+            opacity: 0.3;
+            font-size: 20px;
+        }
+        .drawer-item.no-arrow .drawer-item-arrow {
+            display: none;
+        }
+        .drawer-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            opacity: 0.6;
+            font-weight: 600;
+        }
+        .qr-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .qr-img {
+            filter: invert(1);
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .skip-link:focus {
+            top: 10px;
+            left: 10px;
+            width: auto;
+            height: auto;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            z-index: 9999;
+            border-radius: 8px;
+        }
+        
+        @supports (-webkit-touch-callout: none) {
+            .mes-inner {
+                transform-style: preserve-3d;
+                -webkit-transform-style: preserve-3d;
+            }
+            .mes-face {
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+            }
+        }
+
+        /* ===== ESTILOS DA SEÇÃO CARTILHAS ===== */
+        .cartilha-titulo {
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 1.5em;
+            margin: 0 0 6px 0;
+        }
+        .cartilha-sub {
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+        .cartilha-conteudo {
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+        .cartilha-conteudo strong {
+            color: var(--primary);
+        }
+        .cartilha-conteudo ul {
+            padding-left: 20px;
+        }
+        .cartilha-conteudo li {
+            margin-bottom: 8px;
+        }
+        .cartilha-destaque {
+            background: var(--bg);
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .cartilha-exemplo {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px dashed var(--border);
+        }
+        .cartilha-progresso {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .cartilha-progresso-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            min-width: 80px;
+        }
+        .cartilha-progresso-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width 0.5s;
+        }
+        .cartilha-progresso-text {
+            font-weight: 700;
+            font-size: 0.9em;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .cartilha-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .cartilha-tab-btn {
+            background: var(--bg);
+            border: 2px solid transparent;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.8em;
+            color: var(--text);
+            opacity: 0.7;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .cartilha-tab-btn.active {
+            opacity: 1;
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .cartilha-tab-btn .material-symbols-outlined {
+            font-size: 18px;
+        }
+        .cartilha-tab-btn.lida {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+        .cartilha-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .cartilha-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .cartilha-btn-marcar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 18px;
+            font-weight: 800;
+            font-size: 1em;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .cartilha-btn-marcar:active {
+            transform: scale(0.97);
+        }
+        .cartilha-btn-marcar.marcado {
+            background: var(--border);
+            color: var(--text);
+        }
+        .cartilha-btn-marcar .material-symbols-outlined {
+            font-size: 22px;
+        }
+        .cartilha-quiz {
+            margin-top: 25px;
+            border-top: 2px solid var(--border);
+            padding-top: 20px;
+        }
+        .cartilha-quiz h4 {
+            color: var(--primary);
+            margin: 0 0 15px 0;
+            font-size: 1.1em;
+        }
+        .quiz-pergunta {
+            font-weight: 700;
+            margin: 12px 0 6px 0;
+        }
+        .quiz-opcoes {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .quiz-opcao {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .quiz-opcao:active {
+            transform: scale(0.97);
+        }
+        .quiz-opcao.certa {
+            border-color: var(--primary);
+            background: rgba(0,169,122,0.15);
+        }
+        .quiz-opcao.errada {
+            border-color: #e74c3c;
+            background: rgba(231,76,60,0.15);
+        }
+        .quiz-opcao.desabilitada {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .quiz-feedback {
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .quiz-feedback.certo { color: var(--primary); }
+        .quiz-feedback.errado { color: #e74c3c; }
+
+        /* ===== ESTILOS DAS NOVIDADES ===== */
+        .novidades-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 10px;
+        }
+        .novidade-card {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .novidade-card:active {
+            transform: scale(0.98);
+        }
+        .novidade-card.lida {
+            opacity: 0.6;
+        }
+        .novidade-card .novidade-titulo {
+            font-weight: 800;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .novidade-card .novidade-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .novidade-card .novidade-data {
+            font-size: 0.7em;
+            opacity: 0.5;
+            margin-top: 8px;
+            display: block;
+        }
+        .novidade-card .badge-novo {
+            background: var(--primary);
+            color: white;
+            font-size: 0.6em;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+        .novidade-card .link-cartilha {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        /* ===== ESTILOS DO MODAL DE PESQUISA ===== */
+        #resultadoPesquisa {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+        }
+        #resultadoTexto {
+            font-weight: 800;
+            font-size: 1.2em;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        /* ===== ÍCONES ANIMADOS ===== */
+        .icone-folga {
+            font-size: 3.5rem;
+            display: inline-block;
+            animation: onda 2.5s ease-in-out infinite;
+        }
+        .icone-trabalho {
+            font-size: 3.5rem;
+            display: inline-block;
+            animation: girar 3s linear infinite;
+        }
+        .icone-ferias {
+            font-size: 3.5rem;
+            display: inline-block;
+            animation: voar 2s ease-in-out infinite;
+        }
+        @keyframes onda {
+            0%   { transform: translateX(0px) rotate(0deg); }
+            25%  { transform: translateX(8px) rotate(3deg); }
+            75%  { transform: translateX(-8px) rotate(-3deg); }
+            100% { transform: translateX(0px) rotate(0deg); }
+        }
+        @keyframes girar {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes voar {
+            0%   { transform: translateX(0px) rotate(0deg); }
+            25%  { transform: translateX(8px) rotate(-5deg); }
+            75%  { transform: translateX(-8px) rotate(5deg); }
+            100% { transform: translateX(0px) rotate(0deg); }
+        }
+        #resultadoDetalhe {
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+        .btn-ouvir {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .btn-ouvir:active {
+            transform: scale(0.96);
+        }
+        /* Botão microfone na pesquisa - TAMANHO FIXO */
+        .btn-mic {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 54px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-mic:active {
+            transform: scale(0.92);
+        }
+        .btn-mic .material-symbols-outlined {
+            font-size: 28px;
+        }
+
+        /* ===== NAVEGAÇÃO DE MÊS ===== */
+        .mes-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card);
+            margin: 12px 15px 8px 15px;
+            padding: 10px 14px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            position: sticky;
+            top: 155px;
+            z-index: 90;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .mes-nav-btn {
+            background: var(--bg);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary);
+            transition: 0.2s;
+        }
+        .mes-nav-btn:active {
+            transform: scale(0.92);
+            background: var(--primary);
+            color: white;
+        }
+        .mes-nav-title {
+            font-weight: 800;
+            font-size: 1.05em;
+            color: var(--text);
+            text-transform: capitalize;
+            flex: 1;
+            text-align: center;
+        }
+        .btn-hoje {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        .btn-hoje:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== MICRO-INTERAÇÕES E POLISH ===== */
+        button, .tab, .drawer-item, .dia, .turma-badge, .ramal-badge {
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+        button:active, .tab:active, .drawer-item:active, .dia:active {
+            transform: scale(0.96);
+        }
+        .status-panel {
+            transition: box-shadow 0.3s ease;
+        }
+        .turma-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        .turma-badge::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: rotate(45deg);
+            animation: shine 4s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            20%, 100% { transform: translateX(100%) rotate(45deg); }
+        }
+        .hoje {
+            box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important;
+        }
+        .cartilha-btn-marcar.marcado {
+            background: linear-gradient(135deg, var(--primary), #007d5a);
+        }
+        .cartilha-progresso-bar-fill {
+            background: linear-gradient(90deg, var(--primary), var(--verde));
+            box-shadow: 0 0 10px rgba(0,169,122,0.4);
+        }
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .success-feedback {
+            animation: successPulse 0.4s ease;
+        }
+        .bottom-modal {
+            transition: bottom 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<div id="welcomeScreen" class="welcome-screen">
+    <img src="maskable_icon_x512.png" class="welcome-logo" alt="Logo Braun OnLine">
+    <h1>Braun OnLine</h1>
+    <p>Sua escala na palma da mão.</p>
+    <button class="btn-comecar" onclick="goToGreeting()">ENTRAR NO APP</button>
+    <div style="position:absolute;bottom:40px;font-size:0.75em;opacity:0.7;font-weight:600;letter-spacing:1px;">VERSÃO 3.8 / 2026 / 2027</div>
+</div>
+
+<button id="install-button" onclick="installPWA()">
+    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+</button>
+
+<header>
+    <div class="brand-container">
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Logo">
+            <title>B|BRAUN Logo Oficial</title>
+            <g fill="#FFFFFF">
+                <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" width="0.8" height="26.2"/>
+            </g>
+            <g fill="#FFFFFF">
+                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
+                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
+                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
+        </svg>
+
+        <span class="turma-badge" id="turmaBadge" onclick="openMeuPerfil()">
+            <span class="material-symbols-outlined">groups</span>
+            <span id="turmaBadgeText">Turma A</span>
+        </span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <button class="hamburger-btn" onclick="openHamburger()" aria-label="Menu principal" aria-expanded="false" id="menuButton">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+    </div>
+</header>
+
+<main id="main-content">
+    <h1 class="sr-only">Escala Braun OnLine</h1>
+<div class="status-panel" aria-live="polite">
+    <div id="big-clock" class="clock">00:00:00</div>
+    <div id="status-msg" class="status-msg">---</div>
+</div>
+
+<div class="mes-nav" id="mesNav">
+    <button class="mes-nav-btn" onclick="mudarMes(-1)" aria-label="Mês anterior">
+        <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    
+    <div class="mes-nav-title" id="mesNavTitle">Janeiro 2026</div>
+    
+    <button class="btn-hoje" onclick="irParaHoje()">
+        <span class="material-symbols-outlined" style="font-size:18px;">today</span>
+        HOJE
+    </button>
+    
+    <button class="mes-nav-btn" onclick="mudarMes(1)" aria-label="Próximo mês">
+        <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+</div>
+
+<div id="calendario-box"></div>
+</main>
+
+<div class="tab-bar" role="tablist" aria-label="Selecionar região">
+    <button class="tab" onclick="setRegion('BR')" id="tab-BR" role="tab" aria-selected="true"><span class="material-symbols-outlined" aria-hidden="true">factory</span>ECOFLAC</button>
+    <button class="tab" onclick="setRegion('MNT')" id="tab-MNT" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">engineering</span>MANUTENÇÃO</button>
+    
+    <!-- Botão de PESQUISAR (lupa) - agora sem fundo, igual aos outros -->
+    <button class="tab" onclick="openPesquisa()" id="tab-SEARCH" role="tab" aria-selected="false">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <span>BUSCAR</span>
+    </button>
+</div>
+
+<div id="drawerOverlay" onclick="closeHamburger()" aria-hidden="true"></div>
+
+<div id="hamburgerDrawer" role="dialog" aria-label="Menu lateral" aria-modal="true">
+    <div class="drawer-brand">
+        <div class="drawer-brand-icon">
+            <span class="material-symbols-outlined" aria-hidden="true" style="color:white;font-size:22px;font-variation-settings:'FILL' 1">factory</span>
+        </div>
+        <div>
+            <div class="drawer-brand-text">Braun OnLine</div>
+            <div class="drawer-brand-sub">v3.8 · 2026/2027</div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeHamburger()" aria-label="Fechar menu">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+    </div>
+    <div class="drawer-menu">
+        <div class="drawer-section-label">Perfil</div>
+        <button class="drawer-item" onclick="openMeuPerfil()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">👤</div>
+            <div>
+                <div class="drawer-item-label">Meu Perfil</div>
+                <div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Contatos</div>
+        <button class="drawer-item" onclick="closeHamburger(); openRamais();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📞</div>
+            <div>
+                <div class="drawer-item-label">Ramais Úteis</div>
+                <div class="drawer-item-sub">Contatos internos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <div class="drawer-section-label">Colaborador</div>
+        <button class="drawer-item" onclick="openColaboradorDoMes()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🏆</div>
+            <div>
+                <div class="drawer-item-label">Colaborador do Mês</div>
+                <div class="drawer-item-sub">Votação mensal</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <button class="drawer-item" onclick="openMeusPedidos()">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📦</div>
+            <div>
+                <div class="drawer-item-label">Meus Pedidos</div>
+                <div class="drawer-item-sub">Uniformes e requisitos</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Aprendizado</div>
+        <button class="drawer-item highlight" onclick="closeHamburger(); openCartilhas();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">📘</div>
+            <div>
+                <div class="drawer-item-label">Cartilhas</div>
+                <div class="drawer-item-sub">Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Conquistas</div>
+        <button class="drawer-item" onclick="closeHamburger(); openConquistas();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🏅</div>
+            <div>
+                <div class="drawer-item-label">Minhas Conquistas</div>
+                <div class="drawer-item-sub">Selos e progresso</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+
+        <div class="drawer-section-label">Ferramentas</div>
+        <button class="drawer-item" onclick="closeHamburger(); openConfig();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">⚙️</div>
+            <div>
+                <div class="drawer-item-label">Configurações</div>
+                <div class="drawer-item-sub">Férias · Tema · Estatísticas · Splash</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item no-arrow" onclick="toggleDarkMode(); closeHamburger();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🌓</div>
+            <div>
+                <div class="drawer-item-label">Modo Escuro</div>
+                <div class="drawer-item-sub">Alterna o tema</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <button class="drawer-item" onclick="closeHamburger(); openPrivacy();">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">🛡️</div>
+            <div>
+                <div class="drawer-item-label">Privacidade</div>
+                <div class="drawer-item-sub">Política de dados</div>
+            </div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        
+        <div class="drawer-section-label">Conecte-se</div>
+        <div class="drawer-item" style="cursor:default; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 15px 0;">
+            <img src="qr-code.png" alt="QR Code para acessar o Braun OnLine" class="qr-img" style="width: 120px; height: 120px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;">Escaneie para acessar</div>
+        </div>
+    </div>
+    <div class="drawer-footer">© 2026 Braun OnLine · Todos os direitos reservados</div>
+</div>
+
+<div id="overlay" onclick="closeAllModals()" aria-hidden="true"></div>
+
+<!-- BOTÃO FLUTUANTE DE NOVIDADES com sininho animado -->
+<button id="btn-flutuante-novidades" onclick="openNovidades()" aria-label="Novidades">
+    <span class="material-symbols-outlined animar-sino" id="sinoIcon">notifications</span>
+    Novidades
+    <span class="badge" id="novidadesBadge" style="display:none;">0</span>
+</button>
+
+<!-- ============ MODAL NOVIDADES ============ -->
+<div id="novidadesCard" class="bottom-modal" role="dialog" aria-label="Novidades" aria-modal="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h2 style="font-weight:800;color:var(--primary);margin:0;">🔔 Novidades</h2>
+        <button onclick="marcarTodasNovidadesLidas()" style="background:none;border:none;color:var(--primary);font-weight:700;font-size:0.8em;cursor:pointer;">Marcar todas como lidas</button>
+    </div>
+    <div class="cartilha-sub">Fique por dentro das últimas atualizações e conteúdos.</div>
+    <div id="novidadesLista" class="novidades-timeline">
+        <!-- renderizado via JS -->
+    </div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">FECHAR</button>
+</div>
+
+<!-- ============ MODAL CARTILHAS ============ -->
+<div id="cartilhasCard" class="bottom-modal" role="dialog" aria-label="Cartilhas" aria-modal="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h2 style="font-weight:800;color:var(--primary);margin:0;">📘 Cartilhas</h2>
+        <span style="font-size:0.75em; opacity:0.5; font-weight:600;" id="cartilhaVersao">v1.0</span>
+    </div>
+    <div class="cartilha-sub">Aprenda sobre melhorias contínuas, qualidade, segurança, compliance, incêndio e muito mais.</div>
+
+    <!-- Progresso -->
+    <div class="cartilha-progresso">
+        <span style="font-weight:600; font-size:0.85em;">Progresso</span>
+        <div class="cartilha-progresso-bar">
+            <div class="cartilha-progresso-bar-fill" id="progressoFill" style="width:0%;"></div>
+        </div>
+        <span class="cartilha-progresso-text" id="progressoTexto">0/9</span>
+    </div>
+
+    <!-- Abas -->
+    <div class="cartilha-tabs" id="cartilhaTabs">
+        <!-- Gerado via JS -->
+    </div>
+
+    <!-- Painéis -->
+    <div id="cartilhaPanels">
+        <!-- Gerado via JS -->
+    </div>
+
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">FECHAR</button>
+</div>
+
+<!-- ============ MODAIS EXISTENTES (mantidos) ============ -->
+<div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
+    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <button class="material-symbols-outlined lote-copy" onclick="copyLote()" aria-label="Copiar lote">content_copy</button>
+    </div>
+    <label for="noteInput" class="sr-only">Anotação</label>
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
+    <button onclick="saveNota()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">SALVAR</button>
+</div>
+
+<div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
+    <div class="config-item">
+        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
+        <label class="switch">
+            <input type="checkbox" id="minimalGreetingToggle" onchange="toggleMinimalGreeting()" aria-label="Ativar saudação minimalista">
+            <span class="slider" aria-hidden="true"></span>
+        </label>
+    </div>
+    <div class="config-item">
+        <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
+        <label class="switch">
+            <input type="checkbox" id="voiceResponseToggle" onchange="toggleVoiceResponse()" aria-label="Ativar resposta por voz" checked>
+            <span class="slider" aria-hidden="true"></span>
+        </label>
+    </div>
+    <button onclick="openFerias()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS
+    </button>
+    <button onclick="openStats()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA
+    </button>
+    <button onclick="exportarEscalaICS()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)
+    </button>
+    <button onclick="iniciarNotificacoes()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span class="material-symbols-outlined" aria-hidden="true">notifications</span> ATIVAR LEMBRETES DE TURNO
+    </button>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">FECHAR</button>
+</div>
+
+<div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Programar Férias</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
+            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
+            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <button onclick="saveFerias()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;">SALVAR PERÍODO</button>
+        <button onclick="clearFerias()" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;">LIMPAR FÉRIAS</button>
+    </div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;">VOLTAR</button>
+</div>
+
+<div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
+    <div id="stats-content"></div>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">VOLTAR</button>
+</div>
+
+<div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
+    <div class="ramal-secao">URGÊNCIAS & SERVIÇOS</div>
+    <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Enfermaria / Emergência</span><div class="ramal-numeros-container"><a href="tel:26023358" class="ramal-badge">3358</a> <a href="tel:26023359" class="ramal-badge">3359</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
+    <div class="ramal-secao">ADMINISTRAÇÃO & RH</div>
+    <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
+    <div class="ramal-secao">ECOFLAC - PRODUÇÃO & QUALIDADE</div>
+    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Esterilização / Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a> <a href="tel:26023408" class="ramal-badge">3408</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
+    <div class="ramal-secao">MANUTENÇÃO & APOIO</div>
+    <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
+    <div class="ramal-secao">CONTATOS NOMINAIS & OUTROS</div>
+    <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">FECHAR</button>
+</div>
+
+<div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.8;">
+        Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.
+        <br><br><b>Coleta de Dados:</b> Não coletamos, não transmitimos e não compartilhamos nenhum dado pessoal ou sensível.
+        <br><br><b>Armazenamento:</b> Todas as suas configurações e anotações pessoais são salvas exclusivamente no seu dispositivo (localStorage).
+    </p>
+    <button onclick="closeAllModals()" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">ENTENDI</button>
+</div>
+
+<div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label>
+            <input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+        <div>
+            <label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label>
+            <input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+        <div>
+            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma</label>
+            <select id="turmaPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                <option value="C">Turma C (Noite - ECOFLAC)</option>
+                <option value="D">Turma D (Noite - ECOFLAC)</option>
+                <option value="E">Turma E (Manhã - Manutenção)</option>
+                <option value="F">Turma F (Manhã - Manutenção)</option>
+                <option value="G">Turma G (Noite - Manutenção)</option>
+                <option value="H">Turma H (Noite - Manutenção)</option>
+            </select>
+        </div>
+        <div>
+            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
+            <select id="anoPerfil" onchange="salvarDadosPerfil()" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
+        <div>
+            <label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label>
+            <input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+    </div>
+    <button onclick="salvarDadosPerfil(); closeAllModals();" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;">SALVAR E FECHAR</button>
+</div>
+
+<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="votacaoNome" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="votacaoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="votacaoAno" style="font-weight:800;">---</span></div>
+        </div>
+    </div>
+    <p style="font-size:0.9em;opacity:0.7;margin-bottom:15px;">Seus dados já estão pré-preenchidos. Clique abaixo para votar.</p>
+    <button onclick="abrirFormularioVotacao()" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span>
+        VOTAR AGORA
+    </button>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
+</div>
+
+<div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">📦 Meus Pedidos</h2>
+    
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="display:flex;flex-direction:column;gap:5px;">
+            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="pedidoMatricula" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Turma:</span> <span id="pedidoTurma" style="font-weight:800;">---</span></div>
+            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="pedidoAno" style="font-weight:800;">---</span></div>
+        </div>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label>
+        <input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoTamanho" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Tamanho</label>
+        <input type="text" id="pedidoTamanho" placeholder="Ex: M, G, GG..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Observações</label>
+        <textarea id="pedidoObs" placeholder="Digite qualquer observação..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <button onclick="enviarPedidoEmail()" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span>
+        ENVIAR POR E-MAIL
+    </button>
+
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;">FECHAR</button>
+</div>
+
+<!-- ============ MODAL DE PESQUISA ============ -->
+<div id="pesquisaCard" class="bottom-modal" role="dialog" aria-label="Pesquisar escala" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🔍 Pesquisar data</h2>
+    
+    <div style="display:flex;flex-direction:column;gap:14px;">
+        <!-- Linha 1: Seletor de data ocupa 100% -->
+        <div style="width:100%;">
+            <input type="date" id="pesquisaData" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+
+        <!-- Linha 2: Campo de texto + Botões com tamanhos fixos -->
+        <div style="display:flex;gap:10px;align-items:center;width:100%;">
+            <input type="text" id="pesquisaDataTexto" placeholder="dd/mm/aaaa ou fale a data" 
+                   style="flex:1;min-width:60px;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;font-size:0.9em;">
+            
+            <button onclick="iniciarReconhecimentoVoz()" class="btn-mic" aria-label="Pesquisar por voz">
+                <span class="material-symbols-outlined">mic</span>
+            </button>
+            
+            <button onclick="pesquisarData()" 
+                    style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;height:54px;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:20px;">search</span> Buscar
+            </button>
+        </div>
+    </div>
+
+    <!-- Resultado (mantido igual) -->
+    <div id="resultadoPesquisa" style="background:var(--bg);border-radius:16px;padding:15px;border:1px solid var(--border);min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;margin-top:15px;">
+        <div id="resultadoTexto" style="font-weight:800;font-size:1.2em;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:8px;">
+            Nenhuma pesquisa realizada.
+        </div>
+        <div id="resultadoDetalhe" style="font-size:0.85em;opacity:0.7;"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:15px;">
+        <button onclick="lerResultado()" id="btnOuvirResultado" style="background:var(--primary);color:white;border:none;padding:12px 16px;border-radius:18px;font-weight:800;display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;">
+            <span class="material-symbols-outlined">volume_up</span> Ouvir resposta
+        </button>
+        <button onclick="fecharPesquisa()" style="background:var(--border);color:var(--text);border:none;padding:12px 16px;border-radius:18px;font-weight:800;cursor:pointer;flex:1;">Fechar</button>
+    </div>
+</div>
+
+<!-- ============ MODAL CONQUISTAS ============ -->
+<div id="conquistasCard" class="bottom-modal" role="dialog" aria-label="Conquistas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">🏅 Minhas Conquistas</h2>
+    <div id="listaConquistas" style="display:flex;flex-direction:column;gap:12px;margin-top:15px;"></div>
+    <button onclick="closeAllModals()" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;">FECHAR</button>
+</div>
+
+<script>
+    // ==============================================================
+    // CONTROLE DE VERSÃO - FORÇA ATUALIZAÇÃO
+    // ==============================================================
+    const APP_VERSION = '2026.08.31';
+
+    function getStorageValue(key) {
+        try { return localStorage.getItem(key); } catch (e) {
+            try { return sessionStorage.getItem(key); } catch (f) { return null; }
+        }
+    }
+    function setStorageValue(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) {
+            try { sessionStorage.setItem(key, value); } catch (f) {}
+        }
+    }
+    function removeStorageValue(key) {
+        try { localStorage.removeItem(key); } catch (e) {
+            try { sessionStorage.removeItem(key); } catch (f) {}
+        }
+    }
+
+    const storedVersion = getStorageValue('braun_app_version');
+    if (storedVersion !== APP_VERSION) {
+        console.log('🔄 Nova versão detectada. Atualizando...');
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let reg of registrations) {
+                    reg.unregister();
+                    console.log('✅ Service Worker desregistrado.');
+                }
+            });
+        }
+        setStorageValue('braun_app_version', APP_VERSION);
+        window.location.reload();
+    }
+
+    // ==============================================================
+    // ACESSIBILIDADE E DEMAIS FUNÇÕES
+    // ==============================================================
+    let activeModalElement = null;
+    let lastFocusedElement = null;
+    const focusableElementsSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    function trapFocus(e) {
+        if (!activeModalElement) return;
+        const focusable = activeModalElement.querySelectorAll(focusableElementsSelector);
+        const firstFocusable = focusable[0];
+        const lastFocusable = focusable[focusable.length - 1];
+        const isTabPressed = e.key === 'Tab' || e.keyCode === 9;
+        if (!isTabPressed) return;
+
+        if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+                e.preventDefault();
+                lastFocusable.focus();
+            }
+        } else {
+            if (document.activeElement === lastFocusable) {
+                e.preventDefault();
+                firstFocusable.focus();
+            }
+        }
+    }
+
+    function focusModal(modalId) {
+        const overlay = document.getElementById('overlay');
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        lastFocusedElement = document.activeElement;
+        overlay.style.display = 'block';
+        modal.classList.add('show');
+
+        if (activeModalElement) {
+            document.removeEventListener('keydown', trapFocus);
+        }
+        activeModalElement = modal;
+        document.addEventListener('keydown', trapFocus);
+
+        const firstFocusable = modal.querySelector(focusableElementsSelector);
+        if (firstFocusable) {
+            setTimeout(() => firstFocusable.focus(), 50);
+        }
+    }
+
+    // ==================== OTIMIZAÇÕES ====================
+    let cachedFerias = null;
+    function getFeriasRange() {
+        if (cachedFerias) return cachedFerias;
+        const inicio = getStorageValue('braun_ferias_inicio');
+        const fim = getStorageValue('braun_ferias_fim');
+        cachedFerias = { inicio, fim };
+        return cachedFerias;
+    }
+    function clearFeriasCache() { cachedFerias = null; }
+    
+    let cachedStats = {};
+    function clearStatsCache() { cachedStats = {}; }
+    
+    let feriadosCache = {};
+
+    // ==================== CÁLCULO DA PÁSCOA (para feriados móveis) ====================
+    function calculaPascoa(ano) {
+        const a = ano % 19;
+        const b = Math.floor(ano / 100);
+        const c = ano % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const mes = Math.floor((h + l - 7 * m + 114) / 31);
+        const dia = ((h + l - 7 * m + 114) % 31) + 1;
+        return new Date(ano, mes - 1, dia);
+    }
+
+    function getFeriados(ano) {
+        if (feriadosCache[ano]) return feriadosCache[ano];
+
+        const f = {
+            '01-01':'Ano Novo',
+            '04-21':'Tiradentes',
+            '04-23':'São Jorge',
+            '05-01':'Dia do Trabalho',
+            '09-07':'Independência',
+            '09-22':'Aniv. São Gonçalo',
+            '10-12':'N. S. Aparecida',
+            '11-02':'Finados',
+            '11-15':'Proclamação da República',
+            '12-25':'Natal'
+        };
+
+        const pascoa = calculaPascoa(ano);
+        const carnaval = new Date(pascoa.getTime() - (47 * 86400000));
+        const sextaSanta = new Date(pascoa.getTime() - (2 * 86400000));
+
+        const chaveCarnaval = `${String(carnaval.getMonth()+1).padStart(2,'0')}-${String(carnaval.getDate()).padStart(2,'0')}`;
+        const chaveSexta = `${String(sextaSanta.getMonth()+1).padStart(2,'0')}-${String(sextaSanta.getDate()).padStart(2,'0')}`;
+
+        if (!f[chaveCarnaval]) f[chaveCarnaval] = 'Carnaval';
+        if (!f[chaveSexta])    f[chaveSexta]    = 'Sexta‑Feira Santa';
+
+        feriadosCache[ano] = f;
+        return f;
+    }
+    
+    let weekNumberCache = new Map();
+    function getWeekNumberCached(d) {
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        if (weekNumberCache.has(key)) return weekNumberCache.get(key);
+        const result = getWeekNumber(d);
+        weekNumberCache.set(key, result);
+        return result;
+    }
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    
+    let clockInterval;
+    function startClock() {
+        if (clockInterval) clearInterval(clockInterval);
+        clockInterval = setInterval(() => {
+            if (document.visibilityState === 'visible') { tick(); }
+        }, 1000);
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            if (clockInterval) clearInterval(clockInterval);
+        } else {
+            startClock(); tick();
+        }
+    });
+
+    // ==================== PWA ====================
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-button');
+    if ('serviceWorker' in navigator) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (!isIOS) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION)
+                    .then(reg => {
+                        reg.onupdatefound = () => {
+                            const iw = reg.installing;
+                            iw.onstatechange = () => {
+                                if (iw.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('Nova versão pronta.');
+                                }
+                            };
+                        };
+                    })
+                    .catch(err => console.log('Erro SW:', err));
+            });
+        }
+    }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_UPDATED') {
+                console.log('Nova versão detectada. Atualizando...');
+                window.location.reload();
+            }
+        });
+    }
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'flex';
+    });
+    async function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    }
+
+    // ==================== ESCALA ====================
+    let currentRegion = getStorageValue('braun_last_region') || 'BR';
+    let dataAtiva = '';
+    const _escalaCache = new Map();
+
+    const translations = {
+        BR:  { statusTrab: 'TRABALHANDO', statusFolga: 'DE FOLGA',  days: ['S','T','Q','Q','S','S','D'] },
+        MNT: { statusTrab: 'TRABALHANDO', statusFolga: 'FOLGA MNT', days: ['S','T','Q','Q','S','S','D'] }
+    };
+
+    let currentAno = getStorageValue('braun_ano') || '2026';
+    let currentTurma = getStorageValue(`braun_turma_${currentRegion}`) || 'AC';
+
+    (function init() {
+        const savedTurma = getStorageValue('braun_turma_perfil');
+        if (savedTurma) {
+            let region, grupo;
+            if (['A','B','C','D'].includes(savedTurma)) {
+                region = 'BR';
+                grupo = (savedTurma === 'A' || savedTurma === 'C') ? 'AC' : 'BD';
+            } else {
+                region = 'MNT';
+                grupo = (savedTurma === 'E' || savedTurma === 'G') ? 'EG' : 'FH';
+            }
+            currentRegion = region;
+            currentTurma = grupo;
+            setStorageValue('braun_last_region', region);
+            setStorageValue(`braun_turma_${region}`, grupo);
+        } else {
+            const savedRegion = getStorageValue('braun_last_region') || 'BR';
+            currentRegion = savedRegion;
+            currentTurma = getStorageValue(`braun_turma_${savedRegion}`) || (savedRegion === 'BR' ? 'AC' : 'EG');
+        }
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${currentRegion}`);
+        if (activeTab) { activeTab.classList.add('active'); activeTab.setAttribute('aria-selected', 'true'); }
+    })();
+
+    function goToGreeting() {
+        const welcome = document.getElementById('welcomeScreen');
+        welcome.classList.add('hide');
+        setTimeout(() => {
+            welcome.style.display = 'none';
+            setStorageValue('braun_visited', 'true');
+            scrollToToday('auto');
+        }, 500);
+    }
+
+    function atualizarBadgeTurma() {
+        const turmaLetra = getStorageValue('braun_turma_perfil') || 'A';
+        const badgeText = document.getElementById('turmaBadgeText');
+        if (badgeText) { badgeText.innerText = `Turma ${turmaLetra}`; }
+    }
+
+    function setRegion(r) {
+        currentRegion = r;
+        setStorageValue('braun_last_region', r);
+        document.querySelectorAll('.tab').forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        const activeTab = document.getElementById(`tab-${r}`);
+        activeTab.classList.add('active');
+        activeTab.setAttribute('aria-selected', 'true');
+
+        const savedTurma = getStorageValue(`braun_turma_${r}`);
+        if (savedTurma) { currentTurma = savedTurma; }
+        else { currentTurma = r === 'BR' ? 'AC' : 'EG'; }
+        
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+    }
+
+    function checkBR(dt, t) {
+        const key = `BR_${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}_${t}`;
+        if (_escalaCache.has(key)) return _escalaCache.get(key);
+        const baseDate = new Date(2026, 0, 18);
+        const diff = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const isA = (((diff % 4) + 4) % 4) < 2;
+        const result = { isA, trab: (t === 'AC' && isA) || (t === 'BD' && !isA) };
+        _escalaCache.set(key, result);
+        return result;
+    }
+
+    function checkMnt(dt, t) {
+        const key = `MNT_${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}_${t}`;
+        if (_escalaCache.has(key)) return _escalaCache.get(key);
+        const baseDate = new Date(2026, 2, 6);
+        const diff = Math.floor((dt.getTime() - baseDate.getTime()) / 86400000);
+        const ciclo = ((diff % 4) + 4) % 4;
+        const isEG = ciclo < 2;
+        const result = { isEG, trab: (t === 'EG' ? isEG : !isEG) };
+        _escalaCache.set(key, result);
+        return result;
+    }
+
+    function isTrabalhando(dt, region, turma) {
+        return region === 'BR' ? checkBR(dt, turma).trab : checkMnt(dt, turma).trab;
+    }
+
+    function isFerias(dt) {
+        const range = getFeriasRange();
+        if (!range.inicio || !range.fim) return false;
+        const d = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+        return d >= new Date(range.inicio + 'T00:00:00').getTime() && d <= new Date(range.fim + 'T00:00:00').getTime();
+    }
+
+    // ================= FUNÇÃO DE RENDERIZAÇÃO DO CALENDÁRIO =================
+    function gerarCalendario() {
+        const box = document.getElementById('calendario-box');
+        box.innerHTML = '';
+        let currentMonth = 0;
+        const totalMonths = 12;
+
+        function construirProximoMes() {
+            if (currentMonth >= totalMonths) {
+                setTimeout(() => scrollToToday('smooth'), 300);
+                return;
+            }
+
+            const m = currentMonth;
+            const ano = parseInt(currentAno);
+            const t = currentTurma;
+            const fer = getFeriados(ano);
+            const lang = translations[currentRegion];
+            const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+            const hojeStr = new Date().toDateString();
+
+            const dtM = new Date(ano, m, 1);
+            const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
+            const container = document.createElement('div');
+            container.className = 'mes-container';
+
+            let hF = `<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="color:var(--primary);font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div class="grid">
+                          <div class="dia-label">W</div>
+                          ${lang.days.map(s => `<div class="dia-label">${s}</div>`).join('')}`;
+
+            let hB = `<div class="mes-face mes-back" onclick="this.parentElement.classList.toggle('flipped')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
+                            <span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">${nomeM}</span>
+                            <span style="font-weight:800;font-size:1.1em;">${ano}</span>
+                        </div>
+                        <div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>`;
+
+            let hasEv = false;
+            const diasNoMes = new Date(ano, m + 1, 0).getDate();
+            const diaSemanaInicial = dtM.getDay();
+            const esp = diaSemanaInicial === 0 ? 6 : diaSemanaInicial - 1;
+
+            hF += `<div class="dia-label-w">${getWeekNumberCached(dtM)}</div>`;
+            for (let i = 0; i < esp; i++) hF += `<div></div>`;
+
+            let colAtual = esp;
+            for (let d = 1; d <= diasNoMes; d++) {
+                const at = new Date(ano, m, d);
+                const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isoF = `${ano}-${isoS}`;
+                const f = fer[isoS];
+                const nt = logs[isoF];
+
+                if (colAtual === 7) { colAtual = 0; hF += `<div class="dia-label-w">${getWeekNumberCached(at)}</div>`; }
+                
+                let cls = 'dia ';
+                if (currentRegion === 'BR') {
+                    const r = checkBR(at, t);
+                    cls += (r.isA ? 'AMARELO ' : 'VERDE ');
+                    cls += (r.trab ? 'TRABALHO ' : 'FOLGA ');
+                } else {
+                    const mnt = checkMnt(at, t);
+                    cls += (mnt.isEG ? 'AZUL ' : 'VERDE ');
+                    cls += (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
+                }
+                if (hojeStr === at.toDateString()) cls += 'hoje ';
+                if (nt) cls += 'HAS_NOTE ';
+                if (isFerias(at)) cls += 'FERIAS ';
+                if (f || nt) { hasEv = true; hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`; }
+                
+                hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')">${d}</div>`;
+                colAtual++;
+            }
+
+            hF += `</div></div>`;
+            hB += `${!hasEv ? '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>' : ''}</div>`;
+            container.innerHTML = `<div class="mes-inner">${hF}${hB}</div>`;
+
+            box.appendChild(container);
+            currentMonth++;
+            
+            requestAnimationFrame(() => setTimeout(construirProximoMes, 0));
+        }
+
+        construirProximoMes();
+    }
+
+    function tick() {
+        const now = new Date();
+        const bigClock = document.getElementById('big-clock');
+        if (bigClock) bigClock.innerText = now.toLocaleTimeString('pt-BR');
+
+        const msg = document.getElementById('status-msg');
+        if (!msg) return;
+
+        if (isFerias(now)) {
+            msg.innerText = 'EM FÉRIAS ✈️';
+            msg.style.color = '#7030A0';
+        } else {
+            const trab = (currentRegion === 'BR') ? checkBR(now, currentTurma).trab : checkMnt(now, currentTurma).trab;
+            msg.innerText = trab ? translations[currentRegion].statusTrab : translations[currentRegion].statusFolga;
+            msg.style.color = trab ? 'var(--accent)' : 'var(--primary)';
+        }
+    }
+
+    // ==================== FUNÇÕES DE APOIO ====================
+    function abrirFormularioVotacao() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || '2026';
+        const link = `https://forms.gle/KfS9XFv9UseZyqnS7?entry.1=${encodeURIComponent(nome)}&entry.2=${encodeURIComponent(matricula)}&entry.3=${encodeURIComponent(ano)}`;
+        window.open(link, '_blank');
+    }
+
+    function openCard(iso) {
+        dataAtiva = iso;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        const d = iso.split('-');
+        document.getElementById('card-data').innerText = `${d[2]}/${d[1]}/${d[0]}`;
+        document.getElementById('noteInput').value = logs[iso] || '';
+
+        const dtSel = new Date(d[0], d[1] - 1, d[2]);
+        const yy = dtSel.getFullYear().toString().slice(-2);
+        const ww = String(getWeekNumberCached(dtSel)).padStart(2, '0');
+        let diaSem = dtSel.getDay();
+        diaSem = (diaSem === 0) ? 7 : diaSem;
+        document.getElementById('lote-display').innerText = `${yy}${ww}${diaSem}`;
+
+        focusModal('infoCard');
+    }
+
+    function copyLote() {
+        const lote = document.getElementById('lote-display').innerText;
+        const disp = document.getElementById('lote-display');
+        const orig = disp.innerText;
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(lote).catch(() => {});
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = lote;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.warn('Não foi possível copiar o texto.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        disp.innerText = 'COPIADO!';
+        setTimeout(() => { disp.innerText = orig; }, 1000);
+    }
+
+    function saveNota() {
+        const log = document.getElementById('noteInput').value;
+        const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
+        if (log.trim() === '') { delete logs[dataAtiva]; }
+        else { logs[dataAtiva] = log.trim(); }
+        setStorageValue('logs_v26', JSON.stringify(logs));
+        closeAllModals();
+        gerarCalendario();
+    }
+
+    function openHamburger() {
+        document.getElementById('hamburgerDrawer').classList.add('open');
+        document.getElementById('drawerOverlay').classList.add('show');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+        setTimeout(() => document.querySelector('#hamburgerDrawer .drawer-close-btn').focus(), 100);
+    }
+    function closeHamburger() {
+        document.getElementById('hamburgerDrawer').classList.remove('open');
+        document.getElementById('drawerOverlay').classList.remove('show');
+        const menuBtn = document.getElementById('menuButton');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+        document.getElementById('menuButton').focus();
+    }
+
+    // ==================== MODAIS ====================
+    function openRamais() { focusModal('ramaisCard'); }
+    function openPrivacy() { focusModal('privacyCard'); }
+    function openFerias() {
+        document.getElementById('feriasInicio').value = getStorageValue('braun_ferias_inicio') || '';
+        document.getElementById('feriasFim').value = getStorageValue('braun_ferias_fim') || '';
+        document.getElementById('configCard').classList.remove('show');
+        focusModal('feriasCard');
+    }
+    function saveFerias() {
+        const ini = document.getElementById('feriasInicio').value;
+        const fim = document.getElementById('feriasFim').value;
+        if (!ini || !fim) { alert('Preencha as duas datas.'); return; }
+        if (ini > fim) { alert('A data de início não pode ser após o término.'); return; }
+        setStorageValue('braun_ferias_inicio', ini);
+        setStorageValue('braun_ferias_fim', fim);
+        clearFeriasCache();
+        closeAllModals(); gerarCalendario(); tick();
+    }
+    function clearFerias() {
+        removeStorageValue('braun_ferias_inicio');
+        removeStorageValue('braun_ferias_fim');
+        clearFeriasCache();
+        closeAllModals(); gerarCalendario(); tick();
+    }
+    function openConfig() {
+        document.getElementById('minimalGreetingToggle').checked = (getStorageValue('braun_minimal_greeting') === 'true');
+        const voiceResponse = getStorageValue('braun_voice_response');
+        document.getElementById('voiceResponseToggle').checked = (voiceResponse !== 'false'); // default true
+        focusModal('configCard');
+    }
+    function toggleMinimalGreeting() {
+        setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked);
+    }
+    function toggleVoiceResponse() {
+        const checked = document.getElementById('voiceResponseToggle').checked;
+        setStorageValue('braun_voice_response', checked ? 'true' : 'false');
+    }
+    function openStats() {
+        const ano = parseInt(currentAno);
+        const turma = currentTurma;
+        const cacheKey = `${ano}_${turma}_${currentRegion}`;
+        
+        if (cachedStats[cacheKey]) {
+            document.getElementById('stats-content').innerHTML = cachedStats[cacheKey];
+            document.getElementById('configCard').classList.remove('show');
+            focusModal('statsCard');
+            return;
+        }
+        
+        const feriados = getFeriados(ano);
+        let diasTrabalho = 0, diasFolga = 0, feriadosTrab = 0, feriadosFolga = 0, listaFeriadosHTML = '';
+        
+        for (let m = 0; m < 12; m++) {
+            for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {
+                const dataTeste = new Date(ano, m, d);
+                const isoS = `${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const res = (currentRegion === 'BR') ? checkBR(dataTeste, turma).trab : checkMnt(dataTeste, turma).trab;
+                if (res) diasTrabalho++; else diasFolga++;
+                if (feriados[isoS]) {
+                    if (res) feriadosTrab++; else feriadosFolga++;
+                    listaFeriadosHTML += `<div>${feriados[isoS]} (${res ? 'TRABALHA' : 'FOLGA'})</div>`;
+                }
+            }
+        }
+        
+        const totalDias = diasTrabalho + diasFolga;
+        const htmlStats = `
+            <div class="stat-grid">
+                <div class="stat-card-big purple"><div class="stat-val-big purple">${diasTrabalho}</div><div class="stat-lab-big">Dias Trabalhados</div></div>
+                <div class="stat-card-big teal"><div class="stat-val-big teal">${diasFolga}</div><div class="stat-lab-big">Dias de Folga</div></div>
+            </div>
+            <div style="background:var(--bg);border-radius:15px;padding:15px;border:1px solid var(--border);margin-top:10px;">
+                <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;">
+                    <span>Feriados trabalhados</span><span style="color:var(--accent);">${feriadosTrab}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;">
+                    <span>Feriados de folga</span><span style="color:var(--verde);">${feriadosFolga}</span>
+                </div>
+                ${listaFeriadosHTML ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:0.85em;">${listaFeriadosHTML}</div>` : ''}
+            </div>
+        `;
+        
+        cachedStats[cacheKey] = htmlStats;
+        document.getElementById('stats-content').innerHTML = htmlStats;
+        document.getElementById('configCard').classList.remove('show');
+        focusModal('statsCard');
+    }
+
+    function salvarDadosPerfil() {
+        const nome = document.getElementById('nomePerfil').value;
+        const matricula = document.getElementById('matriculaPerfil').value;
+        const turma = document.getElementById('turmaPerfil').value;
+        const ano = document.getElementById('anoPerfil').value;
+        const setor = document.getElementById('setorPerfil').value;
+        
+        setStorageValue('braun_nome_completo', nome);
+        setStorageValue('braun_matricula', matricula);
+        setStorageValue('braun_turma_perfil', turma);
+        setStorageValue('braun_ano', ano);
+        setStorageValue('braun_setor', setor);
+        
+        let region, grupo;
+        if (['A','B','C','D'].includes(turma)) {
+            region = 'BR';
+            grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD';
+        } else {
+            region = 'MNT';
+            grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH';
+        }
+        currentRegion = region;
+        currentTurma = grupo;
+        setStorageValue('braun_last_region', region);
+        setStorageValue(`braun_turma_${region}`, grupo);
+        
+        _escalaCache.clear();
+        gerarCalendario();
+        tick();
+        
+        preencherDadosModais();
+    }
+
+    function preencherDadosModais() {
+        const nome = getStorageValue('braun_nome_completo') || '---';
+        const matricula = getStorageValue('braun_matricula') || '---';
+        const turma = getStorageValue('braun_turma_perfil') || '---';
+        const ano = getStorageValue('braun_ano') || '---';
+        
+        document.getElementById('votacaoNome').innerText = nome;
+        document.getElementById('votacaoMatricula').innerText = matricula;
+        document.getElementById('votacaoAno').innerText = ano;
+        
+        document.getElementById('pedidoNome').innerText = nome;
+        document.getElementById('pedidoMatricula').innerText = matricula;
+        document.getElementById('pedidoTurma').innerText = turma;
+        document.getElementById('pedidoAno').innerText = ano;
+    }
+
+    function openMeuPerfil() {
+        closeHamburger();
+        document.getElementById('nomePerfil').value = getStorageValue('braun_nome_completo') || '';
+        document.getElementById('matriculaPerfil').value = getStorageValue('braun_matricula') || '';
+        document.getElementById('turmaPerfil').value = getStorageValue('braun_turma_perfil') || 'A';
+        document.getElementById('anoPerfil').value = getStorageValue('braun_ano') || '2026';
+        document.getElementById('setorPerfil').value = getStorageValue('braun_setor') || '';
+        focusModal('meuPerfilCard');
+    }
+
+    function openColaboradorDoMes() {
+        closeHamburger();
+        preencherDadosModais();
+        focusModal('colaboradorDoMesCard');
+    }
+
+    function openMeusPedidos() {
+        closeHamburger();
+        preencherDadosModais();
+        focusModal('meusPedidosCard');
+    }
+
+    function closeAllModals() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.bottom-modal').forEach(el => el.classList.remove('show'));
+        document.removeEventListener('keydown', trapFocus);
+        activeModalElement = null;
+        if (lastFocusedElement && lastFocusedElement.focus) {
+            lastFocusedElement.focus();
+            lastFocusedElement = null;
+        }
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        setStorageValue('braun_dark_mode', document.body.classList.contains('dark-mode'));
+    }
+
+    function scrollToToday(behavior = 'auto') {
+        setTimeout(() => {
+            const hoje = document.querySelector('.hoje');
+            if (!hoje) return;
+            
+            const container = hoje.closest('.mes-container');
+            if (!container) return;
+            
+            requestAnimationFrame(() => {
+                const header = document.querySelector('header');
+                const statusPanel = document.querySelector('.status-panel');
+                const headerHeight = header ? header.offsetHeight : 0;
+                const statusHeight = statusPanel ? statusPanel.offsetHeight : 0;
+                const gap = 15;
+                
+                const rect = container.getBoundingClientRect();
+                const scrollTarget = window.scrollY + rect.top - (headerHeight + statusHeight + gap);
+                
+                window.scrollTo({
+                    top: Math.max(0, scrollTarget),
+                    behavior: behavior
+                });
+            });
+        }, 100);
+    }
+
+    // ==============================================================
+    // ==================== DADOS DAS CARTILHAS =====================
+    // ==============================================================
+    const cartilhasData = [
+        {
+            id: 'kaizen',
+            icone: 'trending_up',
+            titulo: 'Kaizen – Melhoria Contínua',
+            conteudo: `<p><strong>Kaizen</strong> é uma filosofia japonesa que significa "mudança para melhor". No ambiente industrial, ela se traduz em <strong>pequenas melhorias diárias</strong> realizadas por todos os colaboradores.</p>
+            <div class="cartilha-destaque"><strong>Princípios do Kaizen:</strong><br> • Eliminar desperdícios (Muda)<br> • Padronizar processos<br> • Envolver todos os níveis hierárquicos<br> • Focar em dados e fatos</div>
+            <div class="cartilha-exemplo"><strong>Exemplo prático:</strong> Um operador percebe que a troca de ferramenta em uma máquina demora 15 minutos. Ele sugere uma nova disposição das ferramentas, reduzindo o tempo para 8 minutos – uma melhoria simples, mas que gera ganho de produtividade.</div>
+            <p><strong>Benefícios:</strong> Aumento da eficiência, redução de custos, maior engajamento da equipe e melhoria da qualidade.</p>`,
+            quiz: [
+                { pergunta: 'O que significa a palavra Kaizen?', opcoes: ['Grande revolução', 'Mudança para melhor', 'Padronização total', 'Controle de qualidade'], certa: 1 },
+                { pergunta: 'Qual é um dos princípios do Kaizen?', opcoes: ['Focar apenas em grandes mudanças', 'Eliminar desperdícios', 'Centralizar decisões na diretoria', 'Ignorar dados'], certa: 1 },
+                { pergunta: 'O Kaizen busca melhorias:', opcoes: ['Apenas na produção', 'Somente na gestão', 'Pequenas e diárias', 'Apenas em crises'], certa: 2 }
+            ]
+        },
+        {
+            id: '5s',
+            icone: 'cleaning_services',
+            titulo: 'Os 5S – Organização e Limpeza',
+            conteudo: `<p>Os <strong>5S</strong> são cinco sensos que promovem um ambiente de trabalho organizado, limpo e seguro. Eles são a base para a qualidade e produtividade.</p>
+            <div class="cartilha-destaque"><strong>Os 5S:</strong><br><b>1. Seiri (Utilização):</b> Separar o que é útil do que não é.<br><b>2. Seiton (Ordenação):</b> Organizar cada coisa em seu lugar.<br><b>3. Seiso (Limpeza):</b> Manter o ambiente limpo.<br><b>4. Seiketsu (Padronização):</b> Criar regras para manter os três primeiros.<br><b>5. Shitsuke (Disciplina):</b> Seguir os padrões com disciplina.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Na área de produção, aplicar o 5S significa que ferramentas têm lugar fixo, pisos estão sempre limpos e todos sabem onde encontrar o que precisam.</div>
+            <p><strong>Resultado:</strong> Menos acidentes, maior qualidade, melhor clima organizacional e eficiência operacional.</p>`,
+            quiz: [
+                { pergunta: 'Quantos sensos compõem os 5S?', opcoes: ['3', '5', '7', '10'], certa: 1 },
+                { pergunta: 'O Seiri (Utilização) consiste em:', opcoes: ['Limpar o ambiente', 'Organizar ferramentas', 'Separar o útil do inútil', 'Criar padrões'], certa: 2 },
+                { pergunta: 'Qual senso trata da "Disciplina" para manter os padrões?', opcoes: ['Seiso', 'Seiketsu', 'Shitsuke', 'Seiton'], certa: 2 }
+            ]
+        },
+        {
+            id: 'pdca',
+            icone: 'cycle',
+            titulo: 'PDCA – Planejar, Fazer, Checar, Agir',
+            conteudo: `<p>O <strong>PDCA</strong> é um método de gestão para resolver problemas e implementar melhorias de forma estruturada. É um ciclo contínuo.</p>
+            <div class="cartilha-destaque"><strong>Etapas do PDCA:</strong><br><b>P (Plan – Planejar):</b> Definir metas e plano de ação.<br><b>D (Do – Fazer):</b> Executar o plano.<br><b>C (Check – Checar):</b> Verificar os resultados.<br><b>A (Act – Agir):</b> Padronizar ou corrigir.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Uma linha de envase apresenta variação de peso. A equipe planeja ajustar a máquina (P), executa (D), mede os pesos (C) e, se o resultado for bom, padroniza o ajuste (A).</div>
+            <p><strong>Uso:</strong> O PDCA é usado em projetos de melhoria, auditorias, gestão de qualidade e rotinas operacionais.</p>`,
+            quiz: [
+                { pergunta: 'O que significa a sigla PDCA?', opcoes: ['Planejar, Definir, Controlar, Aplicar', 'Planejar, Fazer, Checar, Agir', 'Produzir, Distribuir, Controlar, Avaliar', 'Padronizar, Dirigir, Controlar, Ajustar'], certa: 1 },
+                { pergunta: 'Na etapa "C" (Check), o que deve ser feito?', opcoes: ['Executar o plano', 'Verificar os resultados', 'Padronizar a solução', 'Definir metas'], certa: 1 },
+                { pergunta: 'O PDCA é um ciclo:', opcoes: ['Linear', 'Contínuo', 'Apenas para gestores', 'Somente para produção'], certa: 1 }
+            ]
+        },
+        {
+            id: 'ferramentas',
+            icone: 'build',
+            titulo: 'Ferramentas da Qualidade',
+            conteudo: `<p>Existem diversas ferramentas para identificar e resolver problemas de qualidade. As mais conhecidas são:</p>
+            <div class="cartilha-destaque"><strong>Principais ferramentas:</strong><br> • <b>Diagrama de Ishikawa</b> – causas raiz.<br> • <b>5 Porquês</b> – perguntar sucessivamente.<br> • <b>Fluxograma</b> – mapeia o processo.<br> • <b>Gráfico de Pareto</b> – prioriza problemas.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Um produto apresenta defeito. Usando o Diagrama de Ishikawa, a equipe lista possíveis causas (máquina, material, método, mão de obra, meio ambiente) e encontra que o material estava fora da especificação.</div>
+            <p><strong>Benefícios:</strong> Resolução mais rápida, redução de retrabalho e maior satisfação do cliente.</p>`,
+            quiz: [
+                { pergunta: 'Qual ferramenta é usada para encontrar causas raiz?', opcoes: ['Gráfico de Pareto', 'Diagrama de Ishikawa', 'Fluxograma', '5 Porquês'], certa: 1 },
+                { pergunta: 'O Diagrama de Ishikawa também é chamado de:', opcoes: ['Diagrama de Causa e Efeito', 'Diagrama de Pareto', 'Gráfico de Controle', 'Fluxograma'], certa: 0 },
+                { pergunta: 'Para priorizar problemas, qual ferramenta é recomendada?', opcoes: ['5 Porquês', 'Fluxograma', 'Gráfico de Pareto', 'Ishikawa'], certa: 2 }
+            ]
+        },
+        {
+            id: 'seguranca',
+            icone: 'security',
+            titulo: 'Segurança do Trabalho',
+            conteudo: `<p>A segurança é prioridade na Braun. Todos devem conhecer e aplicar as normas de prevenção.</p>
+            <div class="cartilha-destaque"><strong>Pilares da Segurança:</strong><br> • Usar <b>EPIs</b> corretamente.<br> • Manter a área organizada (5S).<br> • Conhecer os <b>procedimentos de emergência</b>.<br> • Reportar qualquer <b>condição insegura</b>.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Um colaborador percebe um piso escorregadio. Ele sinaliza o local, comunica a liderança e a equipe de manutenção resolve o problema antes que ocorra um acidente.</div>
+            <p><strong>Compromisso:</strong> Segurança é responsabilidade de todos.</p>`,
+            quiz: [
+                { pergunta: 'Qual a primeira ação ao identificar um risco?', opcoes: ['Ignorar', 'Sinalizar e comunicar', 'Continuar trabalhando', 'Aguardar o supervisor'], certa: 1 },
+                { pergunta: 'EPI significa:', opcoes: ['Equipamento de Proteção Individual', 'Equipamento de Produção Interna', 'Estação de Proteção Integrada', 'Equipamento Preventivo Industrial'], certa: 0 },
+                { pergunta: 'O que deve ser feito em caso de emergência?', opcoes: ['Correr para a saída', 'Seguir o plano de emergência', 'Aguardar instruções', 'Filmar o ocorrido'], certa: 1 }
+            ]
+        },
+        {
+            id: 'bpf',
+            icone: 'medication',
+            titulo: 'Boas Práticas de Fabricação (BPF)',
+            conteudo: `<p>As <strong>BPF</strong> garantem a qualidade e segurança dos produtos na indústria farmacêutica.</p>
+            <div class="cartilha-destaque"><strong>Princípios das BPF:</strong><br> • <b>Higiene</b> – manter-se limpo.<br> • <b>Controle de processos</b> – monitorar cada etapa.<br> • <b>Rastreabilidade</b> – identificar materiais e produtos.<br> • <b>Documentação</b> – registrar atividades.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Na área de envase, os operadores seguem um checklist de limpeza, registram temperaturas e umidade, e todo lote é identificado com código de rastreabilidade.</div>
+            <p><strong>Importância:</strong> BPF evitam contaminações e atendem às exigências da ANVISA.</p>`,
+            quiz: [
+                { pergunta: 'O que as BPF garantem?', opcoes: ['Apenas a produtividade', 'Qualidade e segurança do produto', 'Redução de custos', 'Aumento de vendas'], certa: 1 },
+                { pergunta: 'Um princípio fundamental das BPF é:', opcoes: ['Usar qualquer roupa', 'Não registrar atividades', 'Manter a higiene pessoal', 'Trabalhar sem supervisão'], certa: 2 },
+                { pergunta: 'A rastreabilidade permite:', opcoes: ['Aumentar a velocidade', 'Identificar a origem de um lote', 'Reduzir colaboradores', 'Eliminar a documentação'], certa: 1 }
+            ]
+        },
+        {
+            id: 'sustentabilidade',
+            icone: 'eco',
+            titulo: 'Sustentabilidade e Redução de Desperdícios',
+            conteudo: `<p>A Braun está comprometida com a sustentabilidade. Todos podemos contribuir.</p>
+            <div class="cartilha-destaque"><strong>Ações sustentáveis:</strong><br> • <b>Economia de energia</b> – apagar luzes e desligar máquinas.<br> • <b>Uso racional de água</b> – evitar vazamentos.<br> • <b>Separação de resíduos</b> – reciclar.<br> • <b>Redução de materiais</b> – evitar impressões.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Ao final do turno, verifique se as máquinas estão desligadas, as luzes apagadas e os resíduos foram descartados nos coletores adequados.</div>
+            <p><strong>Impacto:</strong> Preserva o meio ambiente, gera economia e fortalece a imagem da empresa.</p>`,
+            quiz: [
+                { pergunta: 'Qual atitude contribui para a sustentabilidade?', opcoes: ['Deixar luzes acesas', 'Descartar resíduos corretamente', 'Usar água em excesso', 'Imprimir documentos desnecessários'], certa: 1 },
+                { pergunta: 'A redução de desperdícios beneficia:', opcoes: ['Apenas o meio ambiente', 'Apenas a empresa', 'Todos', 'Nenhum'], certa: 2 },
+                { pergunta: 'Qual atitude NÃO é sustentável?', opcoes: ['Desligar equipamentos', 'Reciclar materiais', 'Deixar torneira pingando', 'Reutilizar papel'], certa: 2 }
+            ]
+        },
+        {
+            id: 'compliance',
+            icone: 'gavel',
+            titulo: 'Compliance – Ética e Integridade',
+            conteudo: `<p><strong>Compliance</strong> significa agir de acordo com as leis e princípios éticos da empresa.</p>
+            <div class="cartilha-destaque"><strong>Pilares do Compliance na Braun:</strong><br> • <b>Código de Conduta</b><br> • <b>Conflito de Interesses</b> – evitar situações pessoais.<br> • <b>Anticorrupção</b> – não oferecer ou receber vantagens.<br> • <b>Proteção de Dados (LGPD)</b><br> • <b>Canal de Denúncia</b> – reportar irregularidades.</div>
+            <div class="cartilha-exemplo"><strong>Exemplo:</strong> Um fornecedor oferece um presente de alto valor para agilizar um contrato. A conduta correta é recusar e reportar ao Canal de Denúncia.</div>
+            <p><strong>Compromisso:</strong> Todos são responsáveis pela ética e transparência.</p>`,
+            quiz: [
+                { pergunta: 'O que é Compliance?', opcoes: ['Um cargo na diretoria', 'Regras para garantir ética e conformidade', 'Treinamento técnico', 'Ferramenta de produção'], certa: 1 },
+                { pergunta: 'Ao receber um presente de um fornecedor, o correto é:', opcoes: ['Aceitar normalmente', 'Recusar e reportar', 'Aceitar se for pequeno', 'Dividir com a equipe'], certa: 1 },
+                { pergunta: 'Quem deve seguir as regras de Compliance?', opcoes: ['Apenas a diretoria', 'Apenas o RH', 'Todos os colaboradores', 'Apenas fornecedores'], certa: 2 }
+            ]
+        },
+        {
+            id: 'incendio',
+            icone: 'local_fire_department',
+            titulo: 'Prevenção de Incêndios e Uso de Extintores',
+            conteudo: `<p>Em uma indústria farmacêutica, os riscos de incêndio são elevados devido a <strong>solventes inflamáveis</strong>, <strong>produtos oxidantes</strong> e <strong>materiais combustíveis</strong>.</p>
+            <div class="cartilha-destaque"><strong>Classes de Incêndio:</strong><br> • <b>Classe A</b> – sólidos (papel, madeira) – Água ou Pó.<br> • <b>Classe B</b> – líquidos inflamáveis – CO₂ ou Pó.<br> • <b>Classe C</b> – elétricos – CO₂ ou Pó (NUNCA água).<br> • <b>Classe D</b> – metais – Pó especial.<br> • <b>Classe K</b> – gorduras – Espuma ou K.</div>
+            <div class="cartilha-exemplo"><strong>Método PASS:</strong><br> <b>P</b> – Puxar o pino.<br> <b>A</b> – Apontar para a base do fogo.<br> <b>S</b> – Apertar a alavanca.<br> <b>S</b> – Varrer a base do fogo.</div>
+            <p><strong>Cuidados em áreas farmacêuticas:</strong> Em salas limpas, prefira CO₂ em vez de pó químico. Inspecione extintores mensalmente. Mantenha rotas de fuga desobstruídas.</p>
+            <p><strong>Conduta:</strong> Acione o alarme, use o extintor se treinado, abandone a área se o fogo se espalhar, chame os bombeiros (193).</p>`,
+            quiz: [
+                { pergunta: 'Qual extintor NUNCA deve ser usado em incêndios elétricos (Classe C)?', opcoes: ['CO₂', 'Pó Químico', 'Água', 'Pó Especial'], certa: 2 },
+                { pergunta: 'O que significa a sigla PASS?', opcoes: ['Puxar, Apontar, Apertar, Varrer', 'Parar, Avaliar, Segurar, Sair', 'Prevenir, Atuar, Salvar, Sinalizar', 'Pegar, Arremessar, Soprar, Seguir'], certa: 0 },
+                { pergunta: 'Em uma área estéril, qual extintor é mais recomendado?', opcoes: ['Pó Químico', 'Água', 'CO₂', 'Espuma'], certa: 2 }
+            ]
+        }
+    ];
+
+    // ==============================================================
+    // ==================== SEÇÃO CARTILHAS =========================
+    // ==============================================================
+
+    let cartilhaAtiva = 'kaizen';
+    let cartilhasLidas = JSON.parse(getStorageValue('braun_cartilhas_lidas') || '[]');
+
+    function openCartilhas() {
+        closeHamburger();
+        renderCartilhas();
+        focusModal('cartilhasCard');
+    }
+
+    function renderCartilhas() {
+        const tabsContainer = document.getElementById('cartilhaTabs');
+        const panelsContainer = document.getElementById('cartilhaPanels');
+        tabsContainer.innerHTML = '';
+        panelsContainer.innerHTML = '';
+
+        const sorted = [...cartilhasData].sort((a, b) => {
+            const aLida = cartilhasLidas.includes(a.id) ? 1 : 0;
+            const bLida = cartilhasLidas.includes(b.id) ? 1 : 0;
+            return aLida - bLida;
+        });
+
+        sorted.forEach((cart) => {
+            const isActive = cart.id === cartilhaAtiva;
+            const estaLida = cartilhasLidas.includes(cart.id);
+
+            const btn = document.createElement('button');
+            btn.className = `cartilha-tab-btn${isActive ? ' active' : ''}${estaLida ? ' lida' : ''}`;
+            btn.setAttribute('data-target', cart.id);
+            const tituloCurto = cart.titulo.split('–')[0].trim() || cart.titulo.split('-')[0].trim() || cart.titulo;
+            btn.innerHTML = `<span class="material-symbols-outlined">${cart.icone}</span> ${tituloCurto}`;
+            btn.onclick = () => {
+                cartilhaAtiva = cart.id;
+                renderCartilhas();
+            };
+            tabsContainer.appendChild(btn);
+
+            const panel = document.createElement('div');
+            panel.className = `cartilha-panel${isActive ? ' active' : ''}`;
+            panel.id = `panel-${cart.id}`;
+            panel.innerHTML = `
+                <div class="cartilha-titulo">${cart.icone ? `<span class="material-symbols-outlined" style="font-size:28px;vertical-align:middle;">${cart.icone}</span>` : ''} ${cart.titulo}</div>
+                <div class="cartilha-conteudo">${cart.conteudo}</div>
+                <button class="cartilha-btn-marcar ${estaLida ? 'marcado' : ''}" onclick="toggleCartilhaLida('${cart.id}')">
+                    <span class="material-symbols-outlined">${estaLida ? 'check_circle' : 'circle'}</span>
+                    ${estaLida ? 'MARCADA COMO LIDA' : 'MARCAR COMO LIDA'}
+                </button>
+                <div class="cartilha-quiz">
+                    <h4>📝 Teste seu conhecimento</h4>
+                    ${cart.quiz.map((q, qi) => `
+                        <div class="quiz-pergunta">${qi+1}. ${q.pergunta}</div>
+                        <div class="quiz-opcoes" id="quiz-${cart.id}-${qi}">
+                            ${q.opcoes.map((op, oi) => `
+                                <div class="quiz-opcao" onclick="responderQuiz('${cart.id}', ${qi}, ${oi})">${op}</div>
+                            `).join('')}
+                        </div>
+                        <div class="quiz-feedback" id="feedback-${cart.id}-${qi}"></div>
+                    `).join('')}
+                </div>
+            `;
+            panelsContainer.appendChild(panel);
+        });
+
+        atualizarProgresso();
+    }
+
+    function toggleCartilhaLida(id) {
+        const index = cartilhasLidas.indexOf(id);
+        if (index > -1) {
+            cartilhasLidas.splice(index, 1);
+        } else {
+            cartilhasLidas.push(id);
+            // Gamificação
+            if (cartilhasLidas.length === 1) salvarConquista('primeiro_passo');
+            if (cartilhasLidas.length === 5) salvarConquista('leitor_dedicado');
+            if (cartilhasLidas.length === cartilhasData.length) salvarConquista('expert_braun');
+        }
+        setStorageValue('braun_cartilhas_lidas', JSON.stringify(cartilhasLidas));
+        renderCartilhas();
+        atualizarNovidadesUI();
+    }
+
+    function atualizarProgresso() {
+        const total = cartilhasData.length;
+        const lidas = cartilhasLidas.length;
+        const pct = Math.round((lidas / total) * 100);
+        document.getElementById('progressoFill').style.width = pct + '%';
+        document.getElementById('progressoTexto').innerText = `${lidas}/${total}`;
+    }
+
+    function responderQuiz(cartId, qIndex, opIndex) {
+        const cart = cartilhasData.find(c => c.id === cartId);
+        if (!cart) return;
+        const q = cart.quiz[qIndex];
+        const opcoesDiv = document.getElementById(`quiz-${cartId}-${qIndex}`);
+        const feedback = document.getElementById(`feedback-${cartId}-${qIndex}`);
+
+        // Evita responder duas vezes
+        if (opcoesDiv.querySelector('.desabilitada')) return;
+
+        opcoesDiv.querySelectorAll('.quiz-opcao').forEach(el => el.classList.add('desabilitada'));
+        const opEls = opcoesDiv.querySelectorAll('.quiz-opcao');
+        opEls.forEach((el, i) => {
+            if (i === q.certa) el.classList.add('certa');
+            else if (i === opIndex && opIndex !== q.certa) el.classList.add('errada');
+        });
+
+        if (opIndex === q.certa) {
+            feedback.innerHTML = '✅ Correto!';
+            feedback.className = 'quiz-feedback certo';
+            quizzesAcertados++;
+            setStorageValue('braun_quizzes_acertados', quizzesAcertados);
+            if (quizzesAcertados === 10) {
+                salvarConquista('quiz_master');
+            }
+        } else {
+            feedback.innerHTML = '❌ Incorreto. A resposta certa é: ' + q.opcoes[q.certa];
+            feedback.className = 'quiz-feedback errado';
+        }
+    }
+
+    // ==============================================================
+    // ==================== SEÇÃO NOVIDADES =========================
+    // ==============================================================
+
+    const novidadesData = [
+        {
+            id: 'nov6',
+            titulo: '🌊 Nova animação para dias de folga!',
+            descricao: 'Substituímos a palmeira 🌴 por uma onda 🌊 com movimento suave. A engrenagem ⚙️ do trabalho continua girando nota 10!',
+            data: '2026-08-23',
+            cartilhaId: null
+        },
+        {
+            id: 'nov7',
+            titulo: '🔍 Nova lupa de pesquisa no rodapé',
+            descricao: 'O microfone foi substituído por uma lupa 🔍 para facilitar o acesso à pesquisa. O microfone continua disponível dentro do modal de pesquisa para buscar por voz.',
+            data: '2026-08-23',
+            cartilhaId: null
+        },
+        {
+            id: 'nov5',
+            titulo: '🧯 Nova Cartilha: Prevenção de Incêndios e Extintores',
+            descricao: 'Aprenda sobre classes de incêndio, método PASS, cuidados em áreas farmacêuticas e muito mais. Disponível na seção Cartilhas.',
+            data: '2026-07-05',
+            cartilhaId: 'incendio'
+        },
+        {
+            id: 'nov1',
+            titulo: '📘 Nova Cartilha: Compliance',
+            descricao: 'Aprenda sobre Ética, Código de Conduta, Conflito de Interesses, Anticorrupção, LGPD e Canal de Denúncia.',
+            data: '2026-07-04',
+            cartilhaId: 'compliance'
+        },
+        {
+            id: 'nov2',
+            titulo: '📘 Conheça as 9 Cartilhas de Melhorias',
+            descricao: 'Kaizen, 5S, PDCA, Ferramentas da Qualidade, Segurança, BPF, Sustentabilidade, Compliance e Incêndio. Acesse todas na seção Cartilhas.',
+            data: '2026-07-03',
+            cartilhaId: null
+        },
+        {
+            id: 'nov3',
+            titulo: '🔔 App atualizado para versão 3.7',
+            descricao: 'Novo sistema de Novidades e melhorias na navegação. Atualize seu app para a versão mais recente.',
+            data: '2026-08-02',
+            cartilhaId: null
+        }
+    ];
+
+    let novidadesLidas = JSON.parse(getStorageValue('braun_novidades_lidas') || '[]');
+
+    function openNovidades() {
+        closeAllModals();
+        renderNovidades();
+        focusModal('novidadesCard');
+    }
+
+    function renderNovidades() {
+        const container = document.getElementById('novidadesLista');
+        container.innerHTML = '';
+
+        const sorted = [...novidadesData].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+        sorted.forEach(nov => {
+            const lida = novidadesLidas.includes(nov.id);
+            const card = document.createElement('div');
+            card.className = `novidade-card ${lida ? 'lida' : ''}`;
+            card.setAttribute('data-id', nov.id);
+
+            let badgeHtml = '';
+            if (!lida) badgeHtml = `<span class="badge-novo">NOVO</span>`;
+            let linkHtml = '';
+            if (nov.cartilhaId) {
+                linkHtml = `<span class="link-cartilha" onclick="event.stopPropagation(); abrirCartilhaPorId('${nov.cartilhaId}')">Abrir cartilha →</span>`;
+            } else if (nov.id === 'nov2') {
+                linkHtml = `<span class="link-cartilha" onclick="event.stopPropagation(); abrirListaCartilhas()">Ver todas →</span>`;
+            }
+
+            card.innerHTML = `
+                <div class="novidade-titulo">${nov.titulo} ${badgeHtml}</div>
+                <div class="novidade-desc">${nov.descricao}</div>
+                ${linkHtml}
+                <span class="novidade-data">${formatarData(nov.data)}</span>
+            `;
+
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.link-cartilha')) return;
+                marcarNovidadeLida(nov.id);
+                if (nov.cartilhaId) {
+                    abrirCartilhaPorId(nov.cartilhaId);
+                } else if (nov.id === 'nov2') {
+                    abrirListaCartilhas();
+                } else {
+                    renderNovidades();
+                    atualizarNovidadesUI();
+                }
+            });
+
+            container.appendChild(card);
+        });
+
+        atualizarNovidadesUI();
+    }
+
+    function marcarNovidadeLida(id) {
+        if (!novidadesLidas.includes(id)) {
+            novidadesLidas.push(id);
+            setStorageValue('braun_novidades_lidas', JSON.stringify(novidadesLidas));
+        }
+        renderNovidades();
+        atualizarNovidadesUI();
+    }
+
+    function marcarTodasNovidadesLidas() {
+        const ids = novidadesData.map(n => n.id);
+        ids.forEach(id => {
+            if (!novidadesLidas.includes(id)) {
+                novidadesLidas.push(id);
+            }
+        });
+        setStorageValue('braun_novidades_lidas', JSON.stringify(novidadesLidas));
+        renderNovidades();
+        atualizarNovidadesUI();
+    }
+
+    function atualizarNovidadesUI() {
+        const total = novidadesData.length;
+        const lidas = novidadesLidas.length;
+        const naoLidas = total - lidas;
+        const badge = document.getElementById('novidadesBadge');
+        const btn = document.getElementById('btn-flutuante-novidades');
+        const sino = document.getElementById('sinoIcon');
+
+        if (naoLidas > 0) {
+            badge.style.display = 'inline';
+            badge.innerText = naoLidas;
+            btn.style.display = 'flex';
+            sino.classList.add('animar-sino');
+        } else {
+            badge.style.display = 'none';
+            btn.style.display = 'none';
+            sino.classList.remove('animar-sino');
+        }
+    }
+
+    function formatarData(dataStr) {
+        const d = new Date(dataStr + 'T00:00:00');
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function abrirCartilhaPorId(id) {
+        closeAllModals();
+        cartilhaAtiva = id;
+        openCartilhas();
+    }
+
+    function abrirListaCartilhas() {
+        closeAllModals();
+        cartilhaAtiva = cartilhasData[0].id;
+        openCartilhas();
+    }
+
+    // ==============================================================
+    // ==================== FUNÇÕES DE PESQUISA =====================
+    // ==============================================================
+
+    let resultadoPesquisaAtual = null;
+    let recognitionInstance = null;
+
+    function openPesquisa() {
+        closeAllModals();
+        focusModal('pesquisaCard');
+        const hoje = new Date();
+        document.getElementById('pesquisaData').value = hoje.toISOString().split('T')[0];
+        document.getElementById('pesquisaDataTexto').value = '';
+        document.getElementById('resultadoTexto').innerHTML = 'Nenhuma pesquisa realizada.';
+        document.getElementById('resultadoDetalhe').innerText = '';
+        resultadoPesquisaAtual = null;
+    }
+
+    function fecharPesquisa() {
+        closeAllModals();
+    }
+
+    function formatarTurmaParaVoz(turma) {
+        if (!turma || turma.length !== 2) return turma;
+        return turma.split('').join(' e ');
+    }
+
+    function pesquisarData() {
+        const dataInput = document.getElementById('pesquisaData').value;
+        let textoInput = document.getElementById('pesquisaDataTexto').value.trim();
+        let dataObj = null;
+
+        if (textoInput) {
+            dataObj = parseDataTexto(textoInput);
+            if (dataObj) {
+                const ano = dataObj.getFullYear();
+                const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+                const dia = String(dataObj.getDate()).padStart(2, '0');
+                document.getElementById('pesquisaData').value = `${ano}-${mes}-${dia}`;
+            }
+        } else if (dataInput) {
+            const partes = dataInput.split('-');
+            dataObj = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+        }
+
+        const resultadoDiv = document.getElementById('resultadoTexto');
+        const detalheDiv = document.getElementById('resultadoDetalhe');
+
+        if (!dataObj || isNaN(dataObj.getTime())) {
+            resultadoDiv.innerHTML = '❌ Data inválida.';
+            detalheDiv.innerText = 'Use dd/mm/aaaa ou escreva por extenso (ex: 18 de novembro 2027).';
+            resultadoPesquisaAtual = null;
+            return;
+        }
+
+        const region = currentRegion;
+        const turma = currentTurma;
+        const trabalhando = isTrabalhando(dataObj, region, turma);
+        const ferias = isFerias(dataObj);
+
+        let status, cor, iconeHtml, detalhes;
+        const regiaoNome = region === 'BR' ? 'ECOFLAC' : 'MANUTENÇÃO';
+        detalhes = `Região: ${regiaoNome} · Turma: ${turma}`;
+
+        if (ferias) {
+            status = 'EM FÉRIAS ✈️';
+            cor = 'var(--ferias)';
+            iconeHtml = `<span class="icone-ferias">✈️</span>`;
+        } else if (trabalhando) {
+            status = 'TRABALHANDO ⚙️';
+            cor = 'var(--accent)';
+            iconeHtml = `<span class="icone-trabalho">⚙️</span>`;
+        } else {
+            status = 'DE FOLGA 🌊';
+            cor = 'var(--primary)';
+            iconeHtml = `<span class="icone-folga">🌊</span>`;
+        }
+
+        const dataStr = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        resultadoDiv.style.color = cor;
+        resultadoDiv.innerHTML = `
+            ${iconeHtml}
+            <div><strong>${dataStr}</strong></div>
+            <div style="font-size:1.1em;">${status}</div>
+        `;
+        detalheDiv.innerText = detalhes;
+
+        resultadoPesquisaAtual = {
+            data: dataObj,
+            status: status.replace(/[⚙️🌊✈️]/g, '').trim(),
+            detalhes: detalhes,
+            ferias: ferias,
+            trabalhando: trabalhando
+        };
+
+        if (getStorageValue('braun_voice_response') !== 'false') {
+            lerResultado();
+        }
+    }
+
+    function parseDataTexto(texto) {
+        const meses = {
+            'janeiro':0,'fevereiro':1,'março':2,'abril':3,'maio':4,'junho':5,
+            'julho':6,'agosto':7,'setembro':8,'outubro':9,'novembro':10,'dezembro':11,
+            'jan':0,'fev':1,'mar':2,'abr':3,'mai':4,'jun':5,
+            'jul':6,'ago':7,'set':8,'out':9,'nov':10,'dez':11
+        };
+        texto = texto.toLowerCase().trim();
+
+        let match = texto.match(/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{2,4})$/);
+        if (match) {
+            let dia = parseInt(match[1]), mes = parseInt(match[2])-1, ano = parseInt(match[3]);
+            if (ano<100) ano+=2000;
+            const d = new Date(ano, mes, dia);
+            if (!isNaN(d.getTime())) return d;
+        }
+        match = texto.match(/^(\d{1,2})\s*(?:de\s*)?([a-zç]+)\s*(?:de\s*)?(\d{2,4})$/);
+        if (match) {
+            let dia = parseInt(match[1]), mesNome = match[2], ano = parseInt(match[3]);
+            if (ano<100) ano+=2000;
+            if (meses[mesNome]!==undefined) {
+                const d = new Date(ano, meses[mesNome], dia);
+                if (!isNaN(d.getTime())) return d;
+            }
+        }
+        match = texto.match(/^([a-zç]+)\s*(?:de\s*)?(\d{2,4})$/);
+        if (match) {
+            let mesNome = match[1], ano = parseInt(match[2]);
+            if (ano<100) ano+=2000;
+            if (meses[mesNome]!==undefined) {
+                const d = new Date(ano, meses[mesNome], 1);
+                if (!isNaN(d.getTime())) return d;
+            }
+        }
+        return null;
+    }
+
+    function iniciarReconhecimentoVoz() {
+        const campoTexto = document.getElementById('pesquisaDataTexto');
+        if (!campoTexto) return;
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            campoTexto.placeholder = 'Seu navegador não suporta voz. Digite manualmente.';
+            return;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (recognitionInstance) { recognitionInstance.abort(); recognitionInstance = null; }
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onstart = () => {
+            campoTexto.placeholder = '🎤 Ouvindo...';
+            campoTexto.style.borderColor = 'var(--accent)';
+        };
+        recognition.onerror = (event) => {
+            campoTexto.placeholder = '🎤 Clique no microfone e fale a data...';
+            campoTexto.style.borderColor = '';
+            recognitionInstance = null;
+            if (event.error === 'not-allowed') {
+                alert('Permissão de microfone negada. Habilite no seu navegador para usar a voz.');
+            }
+        };
+        recognition.onresult = (event) => {
+            const resultado = event.results[0][0].transcript;
+            campoTexto.value = resultado;
+            campoTexto.placeholder = '🎤 Clique no microfone e fale a data...';
+            campoTexto.style.borderColor = '';
+            recognitionInstance = null;
+            pesquisarData();
+        };
+        recognition.onend = () => {
+            campoTexto.placeholder = '🎤 Clique no microfone e fale a data...';
+            campoTexto.style.borderColor = '';
+            recognitionInstance = null;
+        };
+        try { recognition.start(); recognitionInstance = recognition; } catch(e) { console.warn(e); }
+    }
+
+    function lerResultado() {
+        if (!resultadoPesquisaAtual) { alert('Faça uma pesquisa primeiro.'); return; }
+        const voz = new SpeechSynthesisUtterance();
+        voz.lang = 'pt-BR';
+        voz.rate = 1.1;
+        const dataStr = resultadoPesquisaAtual.data.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+        const status = resultadoPesquisaAtual.status;
+        const regiao = resultadoPesquisaAtual.detalhes || '';
+        voz.text = `Data ${dataStr}. ${status}. ${regiao}`;
+        if (window.speechSynthesis) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(voz); }
+    }
+
+    function enviarPedidoEmail() {
+        const nome = getStorageValue('braun_nome_completo') || 'Não informado';
+        const matricula = getStorageValue('braun_matricula') || 'Não informado';
+        const turma = getStorageValue('braun_turma_perfil') || 'Não informado';
+        const ano = getStorageValue('braun_ano') || 'Não informado';
+        const item = document.getElementById('pedidoItem').value || 'Não informado';
+        const tamanho = document.getElementById('pedidoTamanho').value || 'Não informado';
+        const obs = document.getElementById('pedidoObs').value || '';
+        const assunto = encodeURIComponent(`Pedido de Uniforme - ${nome}`);
+        const corpo = encodeURIComponent(`Nome: ${nome}\nMatrícula: ${matricula}\nTurma: ${turma}\nAno: ${ano}\nItem: ${item}\nTamanho: ${tamanho}\nObservações: ${obs}`);
+        window.open(`mailto:ecoflac@braun.com.br?subject=${assunto}&body=${corpo}`, '_blank');
+    }
+
+    // ==============================================================
+    // ==================== NAVEGAÇÃO DE MÊS =======================
+    // ==============================================================
+    let mesAtualVisivel = new Date().getMonth();
+    let anoAtualVisivel = parseInt(currentAno) || 2026;
+
+    function atualizarTituloMes() {
+        const dt = new Date(anoAtualVisivel, mesAtualVisivel, 1);
+        const nome = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dt);
+        const el = document.getElementById('mesNavTitle');
+        if (el) el.innerText = nome;
+    }
+
+    function mudarMes(direcao) {
+        mesAtualVisivel += direcao;
+        if (mesAtualVisivel > 11) {
+            mesAtualVisivel = 0;
+            anoAtualVisivel++;
+        } else if (mesAtualVisivel < 0) {
+            mesAtualVisivel = 11;
+            anoAtualVisivel--;
+        }
+        if (anoAtualVisivel < 2026) { anoAtualVisivel = 2026; mesAtualVisivel = 0; }
+        if (anoAtualVisivel > 2027) { anoAtualVisivel = 2027; mesAtualVisivel = 11; }
+        atualizarTituloMes();
+        scrollParaMes(mesAtualVisivel, anoAtualVisivel);
+    }
+
+    function irParaHoje() {
+        const hoje = new Date();
+        mesAtualVisivel = hoje.getMonth();
+        anoAtualVisivel = hoje.getFullYear();
+        if (anoAtualVisivel < 2026 || anoAtualVisivel > 2027) {
+            anoAtualVisivel = 2026;
+            mesAtualVisivel = 0;
+        }
+        atualizarTituloMes();
+        scrollToToday('smooth');
+    }
+
+    function scrollParaMes(mes, ano) {
+        const containers = document.querySelectorAll('.mes-container');
+        if (!containers.length) return;
+        const index = mes;
+        if (containers[index]) {
+            const header = document.querySelector('header');
+            const status = document.querySelector('.status-panel');
+            const nav = document.getElementById('mesNav');
+            const offset = (header?.offsetHeight || 0) + (status?.offsetHeight || 0) + (nav?.offsetHeight || 0) + 20;
+            const rect = containers[index].getBoundingClientRect();
+            const target = window.scrollY + rect.top - offset;
+            window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+        }
+    }
+
+    // ==============================================================
+    // ==================== EXPORTAR ICS ===========================
+    // ==============================================================
+    function exportarEscalaICS() {
+        const ano = parseInt(currentAno);
+        const turma = currentTurma;
+        const region = currentRegion;
+        const nomeTurma = getStorageValue('braun_turma_perfil') || turma;
+        
+        let ics = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Braun OnLine//Escala 2026-2027//PT',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            `X-WR-CALNAME:Escala Braun - Turma ${nomeTurma}`,
+            'X-WR-TIMEZONE:America/Sao_Paulo'
+        ];
+        
+        for (let m = 0; m < 12; m++) {
+            const diasNoMes = new Date(ano, m + 1, 0).getDate();
+            for (let d = 1; d <= diasNoMes; d++) {
+                const data = new Date(ano, m, d);
+                const trabalhando = isTrabalhando(data, region, turma);
+                const ferias = isFerias(data);
+                if (!trabalhando && !ferias) continue;
+                
+                const yyyy = data.getFullYear();
+                const mm = String(data.getMonth() + 1).padStart(2, '0');
+                const dd = String(data.getDate()).padStart(2, '0');
+                const dataStr = `${yyyy}${mm}${dd}`;
+                
+                let titulo = ferias ? '✈️ Férias' : '⚙️ Trabalho';
+                let descricao = ferias 
+                    ? 'Período de férias programado no Braun OnLine'
+                    : `Dia de trabalho - Turma ${nomeTurma} (${region === 'BR' ? 'ECOFLAC' : 'Manutenção'})`;
+                
+                ics.push('BEGIN:VEVENT');
+                ics.push(`UID:${dataStr}-braun-${turma}@braunonline`);
+                ics.push(`DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+                ics.push(`DTSTART;VALUE=DATE:${dataStr}`);
+                ics.push(`DTEND;VALUE=DATE:${dataStr}`);
+                ics.push(`SUMMARY:${titulo}`);
+                ics.push(`DESCRIPTION:${descricao}`);
+                ics.push('END:VEVENT');
+            }
+        }
+        
+        ics.push('END:VCALENDAR');
+        
+        const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Escala_Braun_Turma_${nomeTurma}_${ano}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('Arquivo .ics gerado! Abra no seu aplicativo de calendário para importar.');
+    }
+
+    // ==============================================================
+    // ==================== NOTIFICAÇÕES ===========================
+    // ==============================================================
+    async function solicitarPermissaoNotificacao() {
+        if (!('Notification' in window)) {
+            alert('Seu navegador não suporta notificações.');
+            return false;
+        }
+        if (Notification.permission === 'granted') return true;
+        if (Notification.permission !== 'denied') {
+            const permission = await Notification.requestPermission();
+            return permission === 'granted';
+        }
+        return false;
+    }
+
+    function mostrarNotificacaoLocal(titulo, corpo) {
+        if (Notification.permission === 'granted') {
+            new Notification(titulo, {
+                body: corpo,
+                icon: './maskable_icon_x192.png',
+                badge: './maskable_icon_x192.png',
+                tag: 'braun-lembrete',
+                renotify: true
+            });
+        }
+    }
+
+    function agendarLembreteTurno() {
+        const amanha = new Date();
+        amanha.setDate(amanha.getDate() + 1);
+        amanha.setHours(0, 0, 0, 0);
+        const trabalhando = isTrabalhando(amanha, currentRegion, currentTurma);
+        const ferias = isFerias(amanha);
+        if (ferias) {
+            mostrarNotificacaoLocal('✈️ Férias amanhã', 'Aproveite seu descanso! Suas férias estão programadas.');
+        } else if (trabalhando) {
+            mostrarNotificacaoLocal('⚙️ Trabalho amanhã', `Você está escalado para trabalhar amanhã (${amanha.toLocaleDateString('pt-BR')}).`);
+        } else {
+            mostrarNotificacaoLocal('🌊 Folga amanhã', 'Aproveite seu dia de folga!');
+        }
+    }
+
+    function verificarNovidadesParaNotificar() {
+        const total = novidadesData.length;
+        const lidas = novidadesLidas.length;
+        const naoLidas = total - lidas;
+        if (naoLidas > 0 && Notification.permission === 'granted') {
+            mostrarNotificacaoLocal(`🔔 ${naoLidas} novidade${naoLidas > 1 ? 's' : ''} no Braun OnLine`, 'Toque para ver as atualizações.');
+        }
+    }
+
+    async function iniciarNotificacoes() {
+        const permitido = await solicitarPermissaoNotificacao();
+        if (permitido) {
+            const ultimaVerificacao = getStorageValue('braun_ultima_notificacao');
+            const hoje = new Date().toDateString();
+            if (ultimaVerificacao !== hoje) {
+                agendarLembreteTurno();
+                verificarNovidadesParaNotificar();
+                setStorageValue('braun_ultima_notificacao', hoje);
+            }
+            alert('Lembretes ativados com sucesso! Você receberá avisos sobre seu turno.');
+        } else {
+            alert('Permissão de notificação negada. Você pode ativar nas configurações do navegador.');
+        }
+    }
+
+    // ==============================================================
+    // ==================== GAMIFICAÇÃO ============================
+    // ==============================================================
+    const conquistas = {
+        primeiro_passo: { id: 'primeiro_passo', titulo: 'Primeiro Passo', descricao: 'Marcou a primeira cartilha como lida', icone: '🏁' },
+        leitor_dedicado: { id: 'leitor_dedicado', titulo: 'Leitor Dedicado', descricao: 'Leu 5 cartilhas', icone: '📚' },
+        expert_braun: { id: 'expert_braun', titulo: 'Expert Braun', descricao: 'Completou todas as 9 cartilhas', icone: '🏆' },
+        quiz_master: { id: 'quiz_master', titulo: 'Quiz Master', descricao: 'Acertou 10 perguntas de quiz', icone: '🎯' }
+    };
+
+    function getConquistas() {
+        return JSON.parse(getStorageValue('braun_conquistas') || '[]');
+    }
+
+    function salvarConquista(id) {
+        const lista = getConquistas();
+        if (!lista.includes(id)) {
+            lista.push(id);
+            setStorageValue('braun_conquistas', JSON.stringify(lista));
+            mostrarConquistaDesbloqueada(id);
+        }
+    }
+
+    function mostrarConquistaDesbloqueada(id) {
+        const c = conquistas[id];
+        if (!c) return;
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #7030A0, #00A97A); color: white;
+            padding: 16px 24px; border-radius: 20px; font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 3000;
+            display: flex; align-items: center; gap: 12px;
+            animation: bounceIn 0.6s cubic-bezier(0.68,-0.55,0.27,1.55);
+            max-width: 90%;
+        `;
+        toast.innerHTML = `
+            <span style="font-size: 2em;">${c.icone}</span>
+            <div>
+                <div style="font-size: 0.75em; opacity: 0.85;">CONQUISTA DESBLOQUEADA</div>
+                <div style="font-size: 1.1em;">${c.titulo}</div>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.4s';
+            setTimeout(() => toast.remove(), 400);
+        }, 3500);
+    }
+
+    function openConquistas() {
+        const lista = getConquistas();
+        const container = document.getElementById('listaConquistas');
+        container.innerHTML = '';
+        Object.values(conquistas).forEach(c => {
+            const desbloqueada = lista.includes(c.id);
+            const card = document.createElement('div');
+            card.style.cssText = `
+                background: var(--bg); border-radius: 16px; padding: 16px;
+                border: 1px solid var(--border); display: flex; align-items: center; gap: 14px;
+                opacity: ${desbloqueada ? '1' : '0.45'};
+            `;
+            card.innerHTML = `
+                <div style="font-size:2.2em;">${c.icone}</div>
+                <div>
+                    <div style="font-weight:800;font-size:1.05em;">${c.titulo}</div>
+                    <div style="font-size:0.85em;opacity:0.7;">${c.descricao}</div>
+                    ${desbloqueada ? '<div style="font-size:0.75em;color:var(--primary);font-weight:700;margin-top:4px;">✓ Desbloqueada</div>' : 
+                    '<div style="font-size:0.75em;opacity:0.5;margin-top:4px;">Bloqueada</div>'}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        focusModal('conquistasCard');
+    }
+
+    // Override das funções de cartilha para incluir gamificação
+    let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0');
+
+    const originalToggleCartilhaLida = typeof toggleCartilhaLida === 'function' ? toggleCartilhaLida : null;
+
+    // ==============================================================
+    // ==================== INICIALIZAÇÃO ==========================
+    // ==============================================================
+
+    window.addEventListener('load', function() {
+        if (document.body.classList.contains('dark-mode')) {
+            document.body.classList.remove('dark-mode');
+        }
+        const darkMode = getStorageValue('braun_dark_mode') === 'true';
+        if (darkMode) document.body.classList.add('dark-mode');
+
+        const visited = getStorageValue('braun_visited');
+        if (!visited) {
+            document.getElementById('welcomeScreen').style.display = 'flex';
+        } else {
+            document.getElementById('welcomeScreen').style.display = 'none';
+        }
+
+        startClock();
+        tick();
+        gerarCalendario();
+        atualizarBadgeTurma();
+        preencherDadosModais();
+        atualizarNovidadesUI();
+        atualizarTituloMes();
+
+        document.getElementById('pesquisaDataTexto').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                pesquisarData();
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>
