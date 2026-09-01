@@ -63,13 +63,23 @@
       font-weight: 600;
     }
   </style>
+  <script>
+    //  Evita loop de recarga se ainda estiver offline
+    function tryReload() {
+      if (navigator.onLine) {
+        location.reload();
+      } else {
+        alert('Você ainda está offline. Verifique sua conexão com a internet e tente novamente.');
+      }
+    }
+  </script>
 </head>
 <body>
-  <div class="icon">ðŸ“¡</div>
-  <h1>VocÃª estÃ¡ offline</h1>
-  <p>NÃ£o foi possÃ­vel conectar Ã  internet.<br>
-  Suas escalas, anotaÃ§Ãµes e cartilhas continuam disponÃ­veis localmente quando a conexÃ£o voltar.</p>
-  <button onclick="location.reload()">Tentar novamente</button>
-  <div class="version">Braun OnLine Â· v3.8</div>
+  <div class="icon"></div>
+  <h1>Você está offline</h1>
+  <p>Não foi possível conectar à internet.<br>
+  Suas escalas, anotações e cartilhas continuam disponíveis localmente quando a conexão voltar.</p>
+  <button onclick="tryReload()">Tentar novamente</button>
+  <div class="version">Braun OnLine · v3.8</div>
 </body>
 </html>

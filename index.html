@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://www.google.com https://analytics.google.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://www.google.com https://analytics.google.com;">
 <script>
+  // ========== ANTI-FLASH DO MODO ESCURO ==========
+  (function() {
+    try {
+      if (localStorage.getItem('braun_dark_mode') === 'true') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    } catch(e) {}
+  })();
+
   // ========== SERVICE WORKER ==========
   if ('serviceWorker' in navigator) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -1781,6 +1790,14 @@
         return d >= new Date(range.inicio + 'T00:00:00').getTime() && d <= new Date(range.fim + 'T00:00:00').getTime();
     }
 
+    // ================= ESCAPE HTML (SEGURANÇA) =================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     // ================= FUNÇÃO DE RENDERIZAÇÃO DO CALENDÁRIO =================
     function gerarCalendario() {
         const box = document.getElementById('calendario-box');
@@ -1806,6 +1823,9 @@
             const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
             const container = document.createElement('div');
             container.className = 'mes-container';
+            // 🔧 dados para navegação robusta
+            container.dataset.mes = m;
+            container.dataset.ano = ano;
 
             let hF = `<div class="mes-face mes-front" onclick="this.parentElement.classList.toggle('flipped')">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;">
@@ -1854,7 +1874,11 @@
                 if (hojeStr === at.toDateString()) cls += 'hoje ';
                 if (nt) cls += 'HAS_NOTE ';
                 if (isFerias(at)) cls += 'FERIAS ';
-                if (f || nt) { hasEv = true; hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${nt}` : ''}</div>`; }
+                if (f || nt) { 
+                    hasEv = true; 
+                    // 🔧 ESCAPE HTML NA ANOTAÇÃO
+                    hB += `<div style="font-size:0.9em;margin-bottom:8px;"><b>${d}:</b> ${f || ''} ${nt ? `📝 ${escapeHtml(nt)}` : ''}</div>`; 
+                }
                 
                 hF += `<div class="${cls.trim()}" onclick="event.stopPropagation();openCard('${isoF}')">${d}</div>`;
                 colAtual++;
@@ -2403,7 +2427,6 @@
         const opcoesDiv = document.getElementById(`quiz-${cartId}-${qIndex}`);
         const feedback = document.getElementById(`feedback-${cartId}-${qIndex}`);
 
-        // Evita responder duas vezes
         if (opcoesDiv.querySelector('.desabilitada')) return;
 
         opcoesDiv.querySelectorAll('.quiz-opcao').forEach(el => el.classList.add('desabilitada'));
@@ -2832,19 +2855,17 @@
         scrollToToday('smooth');
     }
 
+    // 🔧 SCROLL POR ATRIBUTOS (mais robusto)
     function scrollParaMes(mes, ano) {
-        const containers = document.querySelectorAll('.mes-container');
-        if (!containers.length) return;
-        const index = mes;
-        if (containers[index]) {
-            const header = document.querySelector('header');
-            const status = document.querySelector('.status-panel');
-            const nav = document.getElementById('mesNav');
-            const offset = (header?.offsetHeight || 0) + (status?.offsetHeight || 0) + (nav?.offsetHeight || 0) + 20;
-            const rect = containers[index].getBoundingClientRect();
-            const target = window.scrollY + rect.top - offset;
-            window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
-        }
+        const container = document.querySelector(`.mes-container[data-mes="${mes}"][data-ano="${ano}"]`);
+        if (!container) return;
+        const header = document.querySelector('header');
+        const status = document.querySelector('.status-panel');
+        const nav = document.getElementById('mesNav');
+        const offset = (header?.offsetHeight || 0) + (status?.offsetHeight || 0) + (nav?.offsetHeight || 0) + 20;
+        const rect = container.getBoundingClientRect();
+        const target = window.scrollY + rect.top - offset;
+        window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
     }
 
     // ==============================================================
@@ -2878,6 +2899,14 @@
                 const mm = String(data.getMonth() + 1).padStart(2, '0');
                 const dd = String(data.getDate()).padStart(2, '0');
                 const dataStr = `${yyyy}${mm}${dd}`;
+
+                // 🔧 DTEND no dia seguinte (para eventos de dia inteiro)
+                const endDate = new Date(data);
+                endDate.setDate(endDate.getDate() + 1);
+                const endY = endDate.getFullYear();
+                const endM = String(endDate.getMonth() + 1).padStart(2, '0');
+                const endD = String(endDate.getDate()).padStart(2, '0');
+                const endStr = `${endY}${endM}${endD}`;
                 
                 let titulo = ferias ? '✈️ Férias' : '⚙️ Trabalho';
                 let descricao = ferias 
@@ -2888,7 +2917,7 @@
                 ics.push(`UID:${dataStr}-braun-${turma}@braunonline`);
                 ics.push(`DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
                 ics.push(`DTSTART;VALUE=DATE:${dataStr}`);
-                ics.push(`DTEND;VALUE=DATE:${dataStr}`);
+                ics.push(`DTEND;VALUE=DATE:${endStr}`);
                 ics.push(`SUMMARY:${titulo}`);
                 ics.push(`DESCRIPTION:${descricao}`);
                 ics.push('END:VEVENT');
@@ -2939,6 +2968,7 @@
     }
 
     function agendarLembreteTurno() {
+        // Notificação imediata sobre amanhã (já existente)
         const amanha = new Date();
         amanha.setDate(amanha.getDate() + 1);
         amanha.setHours(0, 0, 0, 0);
@@ -2950,6 +2980,25 @@
             mostrarNotificacaoLocal('⚙️ Trabalho amanhã', `Você está escalado para trabalhar amanhã (${amanha.toLocaleDateString('pt-BR')}).`);
         } else {
             mostrarNotificacaoLocal('🌊 Folga amanhã', 'Aproveite seu dia de folga!');
+        }
+
+        // 🔧 Agendamento para 8h da manhã do dia seguinte
+        const now = new Date();
+        const target = new Date(now);
+        target.setDate(target.getDate() + 1);
+        target.setHours(8, 0, 0, 0);
+        const diff = target.getTime() - now.getTime();
+        if (diff > 0) {
+            setTimeout(() => {
+                const hoje = new Date();
+                const trabHoje = isTrabalhando(hoje, currentRegion, currentTurma);
+                const feriasHoje = isFerias(hoje);
+                let msg = '';
+                if (feriasHoje) msg = 'Você está de férias hoje! Aproveite!';
+                else if (trabHoje) msg = 'Lembrete: você está escalado para trabalhar hoje!';
+                else msg = 'Bom dia! Hoje é seu dia de folga.';
+                mostrarNotificacaoLocal('⏰ Lembrete de Turno', msg);
+            }, diff);
         }
     }
 
@@ -3055,19 +3104,13 @@
         focusModal('conquistasCard');
     }
 
-    // Override das funções de cartilha para incluir gamificação
-    let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0');
-
-    const originalToggleCartilhaLida = typeof toggleCartilhaLida === 'function' ? toggleCartilhaLida : null;
-
     // ==============================================================
     // ==================== INICIALIZAÇÃO ==========================
     // ==============================================================
+    let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0');
 
     window.addEventListener('load', function() {
-        if (document.body.classList.contains('dark-mode')) {
-            document.body.classList.remove('dark-mode');
-        }
+        // O modo escuro já foi aplicado no <head>, não precisa remover/repor
         const darkMode = getStorageValue('braun_dark_mode') === 'true';
         if (darkMode) document.body.classList.add('dark-mode');
 

@@ -39,12 +39,14 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cacheia respostas válidas
+        // Cacheia respostas válidas (com tratamento de erro)
         if (response && response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              // 🔧 Evita que erros de quota/escrita quebrem a promessa
+              cache.put(event.request, responseToCache).catch(() => {});
+            });
         }
         return response;
       })
@@ -52,7 +54,6 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request).then((cached) => {
           if (cached) return cached;
           
-          // Se for navegação e não tiver no cache → página offline
           if (event.request.mode === 'navigate') {
             return caches.match(OFFLINE_URL);
           }
