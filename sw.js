@@ -1,9 +1,11 @@
-const CACHE_NAME = 'braun-online-v3.8-20260831';
+const CACHE_NAME = 'braun-online-v3.11-20260928';
 const OFFLINE_URL = './offline.html';
 
 const PRECACHE = [
   './',
   './index.html',
+  './app.js',
+  './boot.js',
   './offline.html',
   './manifest.json',
   './maskable_icon_x192.png',
@@ -53,11 +55,11 @@ self.addEventListener('fetch', (event) => {
       .catch(() => {
         return caches.match(event.request).then((cached) => {
           if (cached) return cached;
-          
+
           if (event.request.mode === 'navigate') {
             return caches.match(OFFLINE_URL);
           }
-          
+
           return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
         });
       })
