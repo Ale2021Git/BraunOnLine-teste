@@ -17,6 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Braun OnLine">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+<script src="boot.js"></script>
 <style>
     :root {
         --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
@@ -29,12 +30,16 @@
         --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
         --primary: #00C48D; --semana-w: #00C48D;
     }
+    html, body { background: var(--bg); }
     body {
         font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
-        margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+        margin: 0 auto; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
         -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
         touch-action: manipulation; -webkit-touch-callout: none;
+        max-width: 480px; position: relative; min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0,0,0,0.08);
     }
+    html.dark-mode body { box-shadow: 0 0 40px rgba(0,0,0,0.6); }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
             animation-duration: 0.01ms !important;
@@ -44,14 +49,32 @@
         }
     }
     .welcome-screen {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+        width: 100%; max-width: 480px; height: 100%;
         background: var(--primary); color: white; z-index: 3000;
         display: none; flex-direction: column; align-items: center; justify-content: center;
         text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
     }
-    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
-    .welcome-logo { width: 120px; margin-bottom: 25px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .btn-comecar { background: white; color: var(--primary); border: none; padding: 16px 32px; border-radius: 30px; font-weight: 800; font-size: 1em; cursor: pointer; letter-spacing: 1px; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
+    .welcome-logo { width: 120px; margin-bottom: 25px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.25)); }
+    .btn-comecar {
+        background: white; color: var(--primary); border: none;
+        padding: 20px 44px; border-radius: 40px;
+        font-weight: 900; font-size: 1.1em; cursor: pointer;
+        letter-spacing: 1.5px; box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        min-width: 260px; font-family: inherit;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-comecar:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+    .welcome-version-badge {
+        margin-top: 40px; font-size: 0.8em; font-weight: 700;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.15);
+        padding: 8px 18px; border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    }
     #install-button {
         display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
         background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
@@ -188,10 +211,6 @@
         transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
     }
     .dia:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .dia::before {
-        content: attr(data-pista); position: absolute; top: 2px; left: 4px;
-        font-size: 0.6em; font-weight: 900; opacity: 0.75;
-    }
     .AMARELO { background: var(--amarelo) !important; color: #1a1a1a !important; }
     .VERDE { background: var(--verde) !important; color: #fff !important; }
     .AZUL { background: var(--azul-mnt) !important; color: #fff !important; }
@@ -199,12 +218,22 @@
     .ROXO { background: var(--roxo-1x1) !important; color: #fff !important; }
     .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
     .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
-    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; height: 75px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+    .tab-bar {
+        position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+        background: var(--primary); display: flex; height: 75px; z-index: 1000;
+        padding-bottom: env(safe-area-inset-bottom);
+        max-width: 480px; width: 100%;
+    }
     .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.68em; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0 2px; }
     .tab.active { color: #FFFFFF; }
     .tab .material-symbols-outlined { font-size: 26px; }
     #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
-    .bottom-modal { position: fixed; bottom: -110%; left: 0; right: 0; background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px; z-index: 2000; transition: 0.5s; max-height: 85vh; overflow-y: auto; }
+    .bottom-modal {
+        position: fixed; bottom: -110%; left: 50%; transform: translateX(-50%);
+        background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
+        z-index: 2000; transition: bottom 0.5s; max-height: 85vh; overflow-y: auto;
+        max-width: 480px; width: 100%; box-sizing: border-box;
+    }
     .bottom-modal.show { bottom: 0; }
     select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
     .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
@@ -269,8 +298,19 @@
     #btn-flutuante-novidades .animar-sino { display: inline-block; animation: shake-bell 1.2s ease-in-out infinite; transform-origin: top center; }
     .hamburger-btn { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 8px; border-radius: 8px; }
     .hamburger-btn span { display: block; width: 22px; height: 2.5px; background: white; border-radius: 3px; transition: transform 0.3s, opacity 0.3s; }
-    #hamburgerDrawer { position: fixed; top: 0; left: -100%; width: 82%; max-width: 320px; height: 100%; background: var(--card); z-index: 3600; transition: left 0.38s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; box-shadow: 6px 0 30px rgba(0,0,0,0.18); }
-    #hamburgerDrawer.open { left: 0; }
+    #hamburgerDrawer {
+        position: fixed; top: 0; left: 0;
+        width: 82%; max-width: 320px; height: 100%;
+        background: var(--card); z-index: 3600;
+        transform: translateX(-100%);
+        transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+        display: flex; flex-direction: column;
+        box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+    }
+    #hamburgerDrawer.open { transform: translateX(0); }
+    @media (min-width: 481px) {
+        #hamburgerDrawer { left: calc(50% - 240px); }
+    }
     #drawerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px); }
     #drawerOverlay.show { display: block; }
     .drawer-brand { background: var(--primary); padding: 50px 20px 20px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; }
@@ -365,17 +405,18 @@
     @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
     .hoje { box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important; }
     #update-banner {
-        display: none; position: fixed; top: 0; left: 0; right: 0;
+        display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+        max-width: 480px; width: 100%;
         background: linear-gradient(90deg, #7030A0, #00A97A); color: white;
         padding: 12px 16px; z-index: 5000; align-items: center; gap: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.25); font-weight: 700; font-size: 0.9em;
-        animation: slideDown 0.4s ease;
+        animation: slideDown 0.4s ease; box-sizing: border-box;
     }
     #update-banner.show { display: flex; }
     #update-banner .material-symbols-outlined { font-size: 22px; }
     #update-banner button { background: white; color: var(--primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85em; cursor: pointer; margin-left: auto; }
     #update-banner .close-update { background: none; color: white; padding: 4px; margin-left: 4px; border-radius: 50%; }
-    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+    @keyframes slideDown { from { transform: translateX(-50%) translateY(-100%); } to { transform: translateX(-50%) translateY(0); } }
     #toast-container {
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
         z-index: 5500; display: flex; flex-direction: column; gap: 10px;
@@ -409,6 +450,67 @@
     .btn-modal-salvar { background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;cursor:pointer; }
     .btn-config { background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer; }
     .btn-config:first-of-type { margin-top:15px; }
+
+    /* ===== MEUS PEDIDOS ===== */
+    .pedido-info {
+        background: var(--bg); border-radius: 18px; padding: 14px 15px;
+        margin-bottom: 15px; border: 1px solid var(--border);
+        font-size: 0.88em; line-height: 1.7;
+    }
+    .pedido-info strong { color: var(--primary); }
+    .pedido-instrucao {
+        font-size: 0.82em; opacity: 0.75; margin: 0 0 15px 0;
+        line-height: 1.4;
+    }
+    .pedido-secao {
+        background: var(--primary); color: white;
+        padding: 6px 14px; border-radius: 10px;
+        font-size: 0.72em; font-weight: 900; letter-spacing: 1px;
+        display: inline-block; margin: 18px 0 10px 0;
+    }
+    .pedido-item-row {
+        display: grid;
+        grid-template-columns: 1fr 58px 66px;
+        gap: 8px; align-items: center;
+        margin-bottom: 8px;
+    }
+    .pedido-item-nome {
+        font-weight: 700; font-size: 0.88em;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pedido-item-row input {
+        padding: 10px 6px; border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--bg); color: var(--text);
+        font-family: inherit; font-weight: 700; font-size: 0.85em;
+        text-align: center; outline: none;
+        width: 100%; box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .pedido-item-row input:focus { border-color: var(--primary); }
+    .pedido-item-row input::placeholder { opacity: 0.5; font-weight: 600; }
+    .pedido-item-row input.pedido-nome-livre {
+        text-align: left; padding: 10px 12px;
+    }
+    .pedido-item-row input[type="number"]::-webkit-outer-spin-button,
+    .pedido-item-row input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+    .pedido-item-row input[type="number"] {
+        -moz-appearance: textfield; appearance: textfield;
+    }
+    .pedido-botoes { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-pedido-limpar {
+        background: var(--bg); color: var(--text);
+        border: 1.5px solid var(--border);
+        padding: 15px 20px; border-radius: 18px;
+        font-weight: 800; font-size: 0.9em;
+        cursor: pointer; flex-shrink: 0;
+    }
+
+    @media (max-width: 480px) {
+        body { box-shadow: none; }
+    }
 </style>
 </head>
 <body>
@@ -427,11 +529,12 @@
 <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <div id="welcomeScreen" class="welcome-screen">
-    <img src="maskable_icon_x512.png" class="welcome-logo" alt="Logo Braun OnLine">
+    <img src="icon-512.png" class="welcome-logo" alt="Logo Braun OnLine">
     <h1>Braun OnLine</h1>
     <p>Sua escala na palma da mão.</p>
     <button class="btn-comecar" data-action="go-greeting">ENTRAR NO APP</button>
-    <div style="position:absolute;bottom:40px;font-size:0.75em;opacity:0.7;font-weight:600;letter-spacing:1px;">VERSÃO 3.11 / 2026 / 2027</div>
+    <div class="welcome-version-badge">Versão 3.11</div>
+    <div style="position:absolute;bottom:40px;font-size:0.75em;opacity:0.7;font-weight:600;letter-spacing:1px;">VERSÃO 2026 / 2027</div>
 </div>
 
 <button id="install-button" data-action="install-pwa">
@@ -440,8 +543,8 @@
 
 <header>
     <div class="brand-container">
-        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Logo">
-            <title>B|BRAUN Logo Oficial</title>
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Sharing Expertise">
+            <title>B|BRAUN - Sharing Expertise</title>
             <g fill="#FFFFFF">
                 <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
                 <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
@@ -450,6 +553,24 @@
                 <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
                 <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
                 <rect x="26.5" width="0.8" height="26.2"/>
+            </g>
+            <g fill="#FFFFFF">
+                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
+                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
+                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
             </g>
         </svg>
         <span class="turma-badge" id="turmaBadge" role="button" tabindex="0">
@@ -471,6 +592,7 @@
         <div class="status-panel" aria-live="polite">
             <div id="big-clock" class="clock">00:00:00</div>
             <div id="status-msg" class="status-msg">---</div>
+            <div id="dias-ferias" style="display:none;margin-top:8px;font-size:0.82em;font-weight:800;color:var(--ferias);padding:6px 14px;background:rgba(112,48,160,0.1);border-radius:12px;align-items:center;justify-content:center;gap:4px;"></div>
         </div>
         <div class="mes-nav sem-banner" id="mesNav">
             <button class="mes-nav-btn" data-action="mes-anterior" aria-label="Mês anterior">
@@ -543,13 +665,13 @@
         </button>
         <button class="drawer-item" data-action="open-pedidos">
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128230;</div>
-            <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e requisitos</div></div>
+            <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e EPIs</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Aprendizado</div>
         <button class="drawer-item highlight" data-action="open-cartilhas">
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128216;</div>
-            <div><div class="drawer-item-label">Cartilhas</div><div class="drawer-item-sub">Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div></div>
+            <div><div class="drawer-item-label">Cartilhas</div><div class="drawer-item-sub">Como usar · Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Conquistas</div>
@@ -610,7 +732,7 @@
     <div class="cartilha-progresso">
         <span style="font-weight:600; font-size:0.85em;">Progresso</span>
         <div class="cartilha-progresso-bar"><div class="cartilha-progresso-bar-fill" id="progressoFill" style="width:0%;"></div></div>
-        <span class="cartilha-progresso-text" id="progressoTexto">0/9</span>
+        <span class="cartilha-progresso-text" id="progressoTexto">0/10</span>
     </div>
     <div class="cartilha-tabs" id="cartilhaTabs"></div>
     <div id="cartilhaPanels"></div>
@@ -639,28 +761,45 @@
         <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
         <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
     </div>
-    <div class="config-item">
-        <span class="config-label">Feedback háptico<br><small style="font-weight:400;opacity:0.7;">Vibração leve em ações.</small></span>
-        <label class="switch"><input type="checkbox" id="hapticToggle" aria-label="Feedback háptico" checked><span class="slider" aria-hidden="true"></span></label>
-    </div>
     <button data-action="open-ferias" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS</button>
     <button data-action="open-stats" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA</button>
     <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
     <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
     <button data-action="import-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span> IMPORTAR BACKUP (JSON)</button>
     <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
-    <button data-action="iniciar-notif" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">notifications</span> ATIVAR LEMBRETES DE TURNO</button>
     <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">FECHAR</button>
 </div>
 
 <div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Programar Férias</h2>
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏖️ Programar Férias</h2>
     <div style="display:flex;flex-direction:column;gap:15px;">
-        <div><label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label><input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;"></div>
-        <div><label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label><input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;"></div>
+        <div>
+            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
+            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
+            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
         <button data-action="save-ferias" class="btn-modal-salvar">SALVAR PERÍODO</button>
         <button data-action="confirm-clear-ferias" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;cursor:pointer;">LIMPAR FÉRIAS</button>
     </div>
+
+    <div style="margin-top:25px;padding-top:20px;border-top:2px solid var(--border);">
+        <div style="font-weight:900;color:var(--primary);font-size:1.05em;margin-bottom:6px;">💡 Qual a melhor data?</div>
+        <p style="font-size:0.82em;opacity:0.75;margin:0 0 14px 0;line-height:1.5;">
+            Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.
+        </p>
+        <div style="margin-bottom:10px;">
+            <select id="feriasMes" style="width:100%;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;font-size:0.95em;"></select>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:stretch;">
+            <input type="number" id="feriasDuracao" min="5" max="60" value="30" style="flex:1;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;text-align:center;font-size:1em;">
+            <button data-action="sugerir-ferias" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;font-size:0.9em;">Sugerir</button>
+        </div>
+        <div id="sugestoesFerias"></div>
+    </div>
+
     <button data-action="close-modals" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">VOLTAR</button>
 </div>
 
@@ -758,38 +897,132 @@
     <button data-action="save-perfil-fechar" class="btn-modal-salvar">SALVAR E FECHAR</button>
 </div>
 
-<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">&#127942; Colaborador do Mês</h2>
+<<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
+
     <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-        <div style="display:flex;flex-direction:column;gap:8px;">
-            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="votacaoNome" style="font-weight:800;">---</span></div>
-            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="votacaoMatricula" style="font-weight:800;">---</span></div>
-            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="votacaoAno" style="font-weight:800;">---</span></div>
+        <div style="font-size:0.7em;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Seus dados (votante)</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.9em;">
+            <div><span style="opacity:0.6;">Turma:</span> <strong id="votacaoTurma">---</strong></div>
+            <div><span style="opacity:0.6;">Matrícula:</span> <strong id="votacaoMatricula">---</strong></div>
         </div>
     </div>
-    <p style="font-size:0.9em;opacity:0.7;margin-bottom:15px;">Seus dados já estão pré-preenchidos. Clique abaixo para votar.</p>
-    <button data-action="votar" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);cursor:pointer;">
-        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span> VOTAR AGORA
-    </button>
+
+    <div id="votoFormBloco">
+        <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+       <label for="votoNome" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:8px;">EM QUEM VOCÊ VOTA</label>
+            <input type="text" id="votoNome" placeholder="Digite o nome do colega" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--card);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+
+        <div style="background:rgba(112,48,160,0.08);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:15px;">
+            <div style="font-size:0.75em;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔒 Privacidade</div>
+            <div style="font-size:0.82em;line-height:1.5;opacity:0.85;">
+                Seu voto fica registrado com a sua <strong>matrícula</strong> apenas para <strong>evitar votos duplicados</strong>. Só o RH tem acesso aos votos individuais — nenhum colega vê em quem você votou.
+            </div>
+        </div>
+
+        <button data-action="votar" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);cursor:pointer;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span> VOTAR AGORA
+        </button>
+    </div>
+
+    <div id="votoAgradecimento" style="display:none;text-align:center;padding:24px 10px;">
+        <div style="font-size:3.5em;margin-bottom:12px;">🎉</div>
+        <div style="font-weight:900;color:var(--primary);font-size:1.3em;margin-bottom:8px;">Obrigado pelo seu voto!</div>
+        <div style="font-size:0.9em;opacity:0.75;line-height:1.5;margin-bottom:20px;">
+            O formulário foi aberto em outra aba.<br>
+            <strong>Não esqueça de enviar sua resposta lá para confirmar o voto.</strong>
+        </div>
+        <button data-action="votar-novamente" style="background:var(--bg);color:var(--text);border:2px solid var(--border);padding:14px 20px;border-radius:18px;font-weight:800;font-size:0.9em;cursor:pointer;">
+            Voltar
+        </button>
+    </div>
+
     <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
 </div>
 
 <div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">&#128230; Meus Pedidos</h2>
-    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-        <div style="display:flex;flex-direction:column;gap:5px;">
-            <div><span style="font-weight:600;opacity:0.6;">Nome:</span> <span id="pedidoNome" style="font-weight:800;">---</span></div>
-            <div><span style="font-weight:600;opacity:0.6;">Matrícula:</span> <span id="pedidoMatricula" style="font-weight:800;">---</span></div>
-            <div><span style="font-weight:600;opacity:0.6;">Turma:</span> <span id="pedidoTurma" style="font-weight:800;">---</span></div>
-            <div><span style="font-weight:600;opacity:0.6;">Ano:</span> <span id="pedidoAno" style="font-weight:800;">---</span></div>
-        </div>
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:15px;">&#128230; Meus Pedidos</h2>
+
+    <div class="pedido-info">
+        <div><strong>Nome:</strong> <span id="pedidoNome">---</span></div>
+        <div><strong>Matrícula:</strong> <span id="pedidoMatricula">---</span></div>
+        <div><strong>Turma:</strong> <span id="pedidoTurma">---</span> &middot; <strong>Ano:</strong> <span id="pedidoAno">---</span></div>
     </div>
-    <div style="margin-bottom:15px;"><label for="pedidoItem" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Item desejado</label><input type="text" id="pedidoItem" placeholder="Ex: Uniforme completo, Camisa, Calça..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;"></div>
-    <div style="margin-bottom:15px;"><label for="pedidoTamanho" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Tamanho</label><input type="text" id="pedidoTamanho" placeholder="Ex: M, G, GG..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;"></div>
-    <div style="margin-bottom:15px;"><label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Observações</label><textarea id="pedidoObs" placeholder="Digite qualquer observação..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea></div>
-    <button data-action="enviar-pedido" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);cursor:pointer;">
-        <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span> ENVIAR POR E-MAIL
-    </button>
+
+    <p class="pedido-instrucao">Preencha a <strong>quantidade</strong> e o <strong>tamanho</strong> dos itens que precisa. Só os itens com quantidade serão enviados.</p>
+
+    <div class="pedido-secao">&#128085; UNIFORMES</div>
+
+    <div class="pedido-item-row" data-item="Camisa" data-secao="uniformes">
+        <span class="pedido-item-nome">Camisa</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Camisa">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Camisa">
+    </div>
+    <div class="pedido-item-row" data-item="Calça" data-secao="uniformes">
+        <span class="pedido-item-nome">Calça</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça">
+    </div>
+    <div class="pedido-item-row" data-item="Jaleco" data-secao="uniformes">
+        <span class="pedido-item-nome">Jaleco</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Jaleco">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Jaleco">
+    </div>
+    <div class="pedido-item-row" data-item="Boné / Touca" data-secao="uniformes">
+        <span class="pedido-item-nome">Boné / Touca</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Boné ou Touca">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Boné ou Touca">
+    </div>
+    <div class="pedido-item-row" data-item="Meias" data-secao="uniformes">
+        <span class="pedido-item-nome">Meias</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Meias">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Meias">
+    </div>
+
+    <div class="pedido-secao">&#129509; EQUIPAMENTOS DE PROTEÇÃO</div>
+
+    <div class="pedido-item-row" data-item="Botina" data-secao="epis">
+        <span class="pedido-item-nome">Botina</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Botina">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Botina">
+    </div>
+    <div class="pedido-item-row" data-item="Luva" data-secao="epis">
+        <span class="pedido-item-nome">Luva</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Luva">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Luva">
+    </div>
+    <div class="pedido-item-row" data-item="Óculos de Proteção" data-secao="epis">
+        <span class="pedido-item-nome">Óculos Proteção</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Óculos de Proteção">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Óculos de Proteção">
+    </div>
+    <div class="pedido-item-row" data-item="Protetor Auricular" data-secao="epis">
+        <span class="pedido-item-nome">Protetor Auricular</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Protetor Auricular">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Protetor Auricular">
+    </div>
+
+    <div class="pedido-secao">&#128230; OUTRO ITEM</div>
+
+    <div class="pedido-item-row pedido-item-livre" data-secao="outros">
+        <input type="text" maxlength="40" placeholder="Nome do item" class="pedido-nome-livre" aria-label="Nome do outro item">
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade do outro item">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho do outro item">
+    </div>
+
+    <div style="margin-top:20px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">OBSERVAÇÕES</label>
+        <textarea id="pedidoObs" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <div class="pedido-botoes">
+        <button data-action="limpar-pedido" class="btn-pedido-limpar" aria-label="Limpar todos os campos">Limpar</button>
+        <button data-action="enviar-pedido" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;flex:1;font-size:1.05em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);cursor:pointer;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span> ENVIAR POR E-MAIL
+        </button>
+    </div>
+
     <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
 </div>
 

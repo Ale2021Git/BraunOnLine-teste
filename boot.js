@@ -1,6 +1,9 @@
 /* Braun OnLine — boot.js
  * Executa ANTES do body renderizar (bloqueia). Aplica dark mode,
  * checa versão e registra o Service Worker. Nenhuma dependência.
+ *
+ * ÚNICO lugar para subir a versão: APP_VERSION.
+ * O sw.js deriva o nome do cache dessa versão (via ?v=).
  */
 (function () {
   'use strict';
@@ -13,7 +16,7 @@
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.09.27';
+  var APP_VERSION = '2026.10.03a';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;
@@ -21,7 +24,10 @@
 
   if (storedVersion !== APP_VERSION) {
     try { localStorage.setItem('braun_app_version', APP_VERSION); } catch (e) {}
-    try { localStorage.setItem('braun_update_pending', 'true'); } catch (e) {}
+    // Só sinaliza atualização se já havia uma versão anterior (não na 1ª instalação)
+    if (storedVersion !== null) {
+      try { localStorage.setItem('braun_update_pending', 'true'); } catch (e) {}
+    }
   }
 
   // 3) Service Worker (skip no iOS)
@@ -30,7 +36,7 @@
     if (!isIOS) {
       window.addEventListener('load', function () {
         navigator.serviceWorker
-          .register('./sw.js?v=' + APP_VERSION)
+          .register('./sw.js?v=' + encodeURIComponent(APP_VERSION))
           .then(function (reg) { console.log('PWA ready!', reg.scope); })
           .catch(function (err) { console.error('SW error:', err); });
       });

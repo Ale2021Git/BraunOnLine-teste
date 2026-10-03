@@ -19,8 +19,8 @@
       text-align: center;
       padding: 30px;
     }
-    .icon { 
-      font-size: 90px; 
+    .icon {
+      font-size: 90px;
       margin-bottom: 24px;
       animation: pulse 2s infinite ease-in-out;
     }
@@ -28,16 +28,19 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.08); opacity: 0.85; }
     }
-    h1 { 
-      font-size: 1.9rem; 
+    @media (prefers-reduced-motion: reduce) {
+      .icon { animation: none; }
+    }
+    h1 {
+      font-size: 1.9rem;
       margin-bottom: 14px;
       font-weight: 800;
     }
-    p { 
-      opacity: 0.92; 
-      max-width: 340px; 
-      line-height: 1.6; 
-      margin-bottom: 36px;
+    p {
+      opacity: 0.92;
+      max-width: 340px;
+      line-height: 1.6;
+      margin-bottom: 28px;
       font-size: 1.05rem;
     }
     button {
@@ -48,38 +51,43 @@
       border-radius: 30px;
       font-weight: 800;
       font-size: 1.05rem;
+      font-family: inherit;
       cursor: pointer;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       transition: transform 0.2s;
     }
-    button:active {
-      transform: scale(0.96);
-    }
-    .version {
-      position: absolute;
-      bottom: 30px;
-      font-size: 0.8rem;
-      opacity: 0.7;
-      font-weight: 600;
+    button:active { transform: scale(0.96); }
+    #status {
+      min-height: 1.4em;
+      margin-top: 18px;
+      font-size: 0.95rem;
+      opacity: 0.95;
     }
   </style>
-  <script>
-    //  Evita loop de recarga se ainda estiver offline
-    function tryReload() {
-      if (navigator.onLine) {
-        location.reload();
-      } else {
-        alert('Você ainda está offline. Verifique sua conexão com a internet e tente novamente.');
-      }
-    }
-  </script>
 </head>
 <body>
-  <div class="icon"></div>
-  <h1>Você está offline</h1>
-  <p>Não foi possível conectar à internet.<br>
-  Suas escalas, anotações e cartilhas continuam disponíveis localmente quando a conexão voltar.</p>
-  <button onclick="tryReload()">Tentar novamente</button>
-  <div class="version">Braun OnLine · v3.8</div>
+  <div class="icon" aria-hidden="true">ðŸ“¡</div>
+  <h1>VocÃª estÃ¡ offline</h1>
+  <p>NÃ£o foi possÃ­vel conectar Ã  internet.<br>
+  Abra o app uma vez com conexÃ£o para que ele passe a funcionar sem internet.</p>
+  <button type="button" id="btn-retry">Tentar novamente</button>
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      var status = document.getElementById('status');
+
+      function tryReload() {
+        if (navigator.onLine) {
+          location.reload();
+        } else {
+          status.textContent = 'Ainda sem conexÃ£o. Verifique a internet e tente novamente.';
+        }
+      }
+
+      document.getElementById('btn-retry').addEventListener('click', tryReload);
+      window.addEventListener('online', function () { location.reload(); });
+    })();
+  </script>
 </body>
 </html>
