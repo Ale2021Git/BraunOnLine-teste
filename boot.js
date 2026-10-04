@@ -16,7 +16,7 @@
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.10.03a';
+  var APP_VERSION = '2026.10.04a';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;
@@ -30,7 +30,16 @@
     }
   }
 
-  // 3) Service Worker (skip no iOS)
+  // 3) Modo diagnóstico: abra o app com ?debug=1 para ver erros na tela
+  try {
+    if (/[?&]debug=1(&|$)/.test(location.search)) {
+      var dbg = document.createElement('script');
+      dbg.src = './debug.js';
+      document.head.appendChild(dbg);
+    }
+  } catch (e) {}
+
+  // 4) Service Worker (skip no iOS)
   if ('serviceWorker' in navigator) {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (!isIOS) {
