@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<meta name="theme-color" content="#4A148C">
+<meta name="theme-color" content="#00A97A">
 <title>Braun OnLine 2026/2027</title>
 <meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC, MANUTENÇÃO e 1x1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,13 +33,13 @@
     html, body { background: var(--bg); }
     body {
         font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
-        margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+        margin: 0 auto; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
         -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
         touch-action: manipulation; -webkit-touch-callout: none;
-        width: 100%; min-height: 100vh;
-        box-shadow: none;
+        max-width: 480px; position: relative; min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0,0,0,0.08);
     }
-    html.dark-mode body { box-shadow: none; }
+    html.dark-mode body { box-shadow: 0 0 40px rgba(0,0,0,0.6); }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
             animation-duration: 0.01ms !important;
@@ -48,26 +48,33 @@
             scroll-behavior: auto !important;
         }
     }
-    
-    /* ===== SPLASH SCREEN PERSONALIZADA ===== */
     .welcome-screen {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: #4A148C;
-        background-image:
-            radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08) 0%, transparent 35%),
-            radial-gradient(circle at 85% 75%, rgba(255,255,255,0.08) 0%, transparent 35%),
-            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        color: white; z-index: 3000;
+        position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+        width: 100%; max-width: 480px; height: 100%;
+        background: var(--primary); color: white; z-index: 3000;
         display: none; flex-direction: column; align-items: center; justify-content: center;
         text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
-        cursor: pointer;
     }
-    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
-    .welcome-logo { width: 55%; max-width: 260px; height: auto; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4)); }
-    .welcome-text { margin-bottom: 60px; text-align: center; }
-    .welcome-text h1 { font-size: 2.2em; font-weight: 800; margin: 0; color: white; letter-spacing: 0.5px; }
-    .welcome-text p { font-size: 1em; font-weight: 600; margin: 8px 0 0 0; color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
-
+    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
+    .welcome-logo { width: 120px; margin-bottom: 25px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.25)); }
+    .btn-comecar {
+        background: white; color: var(--primary); border: none;
+        padding: 20px 44px; border-radius: 40px;
+        font-weight: 900; font-size: 1.1em; cursor: pointer;
+        letter-spacing: 1.5px; box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        min-width: 260px; font-family: inherit;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-comecar:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+    .welcome-version-badge {
+        margin-top: 40px; font-size: 0.8em; font-weight: 700;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.15);
+        padding: 8px 18px; border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    }
     #install-button {
         display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
         background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
@@ -103,11 +110,12 @@
         background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
         justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
     }
-    .brand-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .brand-logo-svg { height: 35px; width: auto; }
+    .brand-container { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; min-width: 0; flex: 1 1 auto; }
+    header > div:last-child { flex-shrink: 0; }
+    .brand-logo-svg { height: clamp(28px, 9vw, 35px); width: auto; flex-shrink: 0; }
     .turma-badge {
         background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
-        border-radius: 30px; padding: 4px 14px; font-weight: 800; font-size: 0.85rem;
+        border-radius: 30px; padding: 4px clamp(8px, 2.6vw, 14px); font-weight: 800; font-size: clamp(0.72rem, 3.4vw, 0.85rem);
         color: white; cursor: pointer; display: inline-flex; align-items: center;
         gap: 6px; transition: background 0.2s; user-select: none; white-space: nowrap;
     }
@@ -211,26 +219,23 @@
     .ROXO { background: var(--roxo-1x1) !important; color: #fff !important; }
     .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
     .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
-    
     .tab-bar {
-        position: fixed; bottom: 0; left: 0; right: 0;
+        position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
         background: var(--primary); display: flex; height: 75px; z-index: 1000;
         padding-bottom: env(safe-area-inset-bottom);
-        width: 100%;
+        max-width: 480px; width: 100%;
     }
     .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.68em; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0 2px; }
     .tab.active { color: #FFFFFF; }
     .tab .material-symbols-outlined { font-size: 26px; }
     #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
-    
     .bottom-modal {
-        position: fixed; bottom: -110%; left: 0; right: 0;
+        position: fixed; bottom: -110%; left: 50%; transform: translateX(-50%);
         background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
         z-index: 2000; transition: bottom 0.5s; max-height: 85vh; overflow-y: auto;
-        width: 100%; box-sizing: border-box;
+        max-width: 480px; width: 100%; box-sizing: border-box;
     }
     .bottom-modal.show { bottom: 0; }
-    
     select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
     .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
     .config-label { font-weight: 600; font-size: 0.95em; }
@@ -304,6 +309,9 @@
         box-shadow: 6px 0 30px rgba(0,0,0,0.18);
     }
     #hamburgerDrawer.open { transform: translateX(0); }
+    @media (min-width: 481px) {
+        #hamburgerDrawer { left: calc(50% - 240px); }
+    }
     #drawerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px); }
     #drawerOverlay.show { display: block; }
     .drawer-brand { background: var(--primary); padding: 50px 20px 20px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; }
@@ -397,9 +405,9 @@
     .turma-badge::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent); transform: rotate(45deg); animation: shine 4s infinite; }
     @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
     .hoje { box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important; }
-    
     #update-banner {
-        display: none; position: fixed; top: 0; left: 0; right: 0;
+        display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+        max-width: 480px; width: 100%;
         background: linear-gradient(90deg, #7030A0, #00A97A); color: white;
         padding: 12px 16px; z-index: 5000; align-items: center; gap: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.25); font-weight: 700; font-size: 0.9em;
@@ -409,8 +417,7 @@
     #update-banner .material-symbols-outlined { font-size: 22px; }
     #update-banner button { background: white; color: var(--primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85em; cursor: pointer; margin-left: auto; }
     #update-banner .close-update { background: none; color: white; padding: 4px; margin-left: 4px; border-radius: 50%; }
-    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-    
+    @keyframes slideDown { from { transform: translateX(-50%) translateY(-100%); } to { transform: translateX(-50%) translateY(0); } }
     #toast-container {
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
         z-index: 5500; display: flex; flex-direction: column; gap: 10px;
@@ -505,9 +512,91 @@
     @media (max-width: 480px) {
         body { box-shadow: none; }
     }
+
+    /* ===== SPLASH ===== */
+    #splash {
+        --sp-bg: #7030A0;
+        position: fixed; inset: 0; z-index: 9999; background: var(--sp-bg); color: #fff; overflow: hidden;
+        transition: opacity .45s ease, visibility .45s;
+    }
+    #splash.is-out { opacity: 0; visibility: hidden; }
+    #splash .sp-vig {
+        position: absolute; inset: 0;
+        background: radial-gradient(120% 90% at 50% 45%, rgba(112,48,160,0) 35%, rgba(62,20,104,.6) 100%);
+        animation: sp-fade .9s ease .1s backwards;
+    }
+    #splash .sp-deco { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .sp-deco .ln {
+        fill: none; stroke: rgba(255,255,255,.2); stroke-width: 1.2; stroke-linecap: round;
+        stroke-dasharray: 1; stroke-dashoffset: 0;
+        animation: sp-draw .9s ease calc(.3s + var(--i) * .08s) backwards;
+    }
+    .sp-deco .nd {
+        fill: rgba(255,255,255,.09); stroke: rgba(255,255,255,.2); stroke-width: 1.2;
+        transform-box: fill-box; transform-origin: center;
+        animation: sp-node .6s cubic-bezier(.3,1.4,.5,1) calc(.45s + var(--i) * .08s) backwards;
+    }
+    .sp-deco .mol { animation: sp-float var(--fd) ease-in-out var(--fl) infinite alternate; }
+    .sp-deco .bars { fill: rgba(255,255,255,.14); animation: sp-fade .8s ease .5s backwards; }
+    .sp-deco .col { animation: sp-eq var(--d) steps(var(--n)) var(--dl) infinite alternate; }
+    #splash .sp-hero {
+        position: absolute; top: 46%; left: 50%; width: min(64vw, 250px); aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        animation: sp-pop .9s cubic-bezier(.2,.9,.25,1.05) backwards;
+    }
+    #splash .sp-glow {
+        position: absolute; inset: -45%; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(64,199,161,.42), rgba(64,199,161,0));
+        animation: sp-fade 1s ease .5s backwards, sp-breathe 3.4s ease-in-out 1.5s infinite alternate;
+    }
+    #splash .sp-icon {
+        position: relative; display: block; width: 100%; height: 100%; object-fit: contain;
+        filter: drop-shadow(0 18px 26px rgba(0,0,0,.38));
+        animation: sp-idle 4.5s ease-in-out 1.2s infinite alternate;
+    }
+    #splash .sp-foot {
+        position: absolute; left: 0; right: 0; padding: 0 24px; text-align: center;
+        bottom: max(4.5%, calc(env(safe-area-inset-bottom) + 24px));
+    }
+    #splash .sp-name {
+        font-size: clamp(30px, 11.5vw, 46px); font-weight: 400; letter-spacing: -.3px; line-height: 1.1;
+        animation: sp-name .8s cubic-bezier(.2,.8,.2,1) backwards;
+    }
+    #splash .sp-tag {
+        margin-top: 8px; font-size: clamp(11px, 3.8vw, 15px); font-weight: 400; opacity: .85;
+        animation: sp-rise .7s ease 1s backwards;
+    }
+    @keyframes sp-fade { from { opacity: 0; } }
+    @keyframes sp-draw { from { stroke-dashoffset: 1; } }
+    @keyframes sp-node { from { transform: scale(0); opacity: 0; } }
+    @keyframes sp-float { to { transform: translate(4px, -6px); } }
+    @keyframes sp-eq { from { clip-path: inset(55% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+    @keyframes sp-pop {
+        0% { transform: translate(-50%, calc(-50% + 4vh)) scale(.4); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes sp-breathe { from { opacity: 1; transform: scale(1); } to { opacity: .55; transform: scale(1.08); } }
+    @keyframes sp-idle { to { transform: translateY(-6px); } }
+    @keyframes sp-name { from { transform: translateY(14px) scale(.5); } }
+    @keyframes sp-rise { from { opacity: 0; transform: translateY(10px); } }
+    @media (prefers-reduced-motion: reduce) {
+        #splash { transition: none; }
+        #splash *, #splash *::before, #splash *::after { animation: none !important; }
+    }
 </style>
 </head>
 <body>
+
+<div id="splash" role="status" aria-label="Carregando Braun OnLine">
+    <div class="sp-vig"></div>
+    <svg class="sp-deco" viewBox="0 0 360 740" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="mol m1" style="--fd:8s;--fl:0s"><line class="ln" pathLength="1" style="--i:0" x1="87" y1="161" x2="109" y2="130"/><line class="ln" pathLength="1" style="--i:1" x1="87" y1="161" x2="48" y2="143"/><line class="ln" pathLength="1" style="--i:2" x1="87" y1="161" x2="121" y2="183"/><line class="ln" pathLength="1" style="--i:3" x1="121" y1="183" x2="150" y2="166"/><line class="ln" pathLength="1" style="--i:4" x1="87" y1="161" x2="68" y2="201"/><line class="ln" pathLength="1" style="--i:5" x1="68" y1="201" x2="11" y2="198"/><line class="ln" pathLength="1" style="--i:6" x1="68" y1="203" x2="11" y2="200.5"/><line class="ln" pathLength="1" style="--i:7" x1="68" y1="201" x2="41" y2="246"/><line class="ln" pathLength="1" style="--i:8" x1="41" y1="246" x2="33" y2="257"/><circle class="nd" style="--i:0" cx="87" cy="161" r="15"/><circle class="nd" style="--i:1" cx="109" cy="130" r="8"/><circle class="nd" style="--i:2" cx="48" cy="143" r="8"/><circle class="nd" style="--i:3" cx="121" cy="183" r="8"/><circle class="nd" style="--i:4" cx="150" cy="166" r="7"/><circle class="nd" style="--i:5" cx="68" cy="201" r="8"/><circle class="nd" style="--i:6" cx="11" cy="198" r="8"/><circle class="nd" style="--i:7" cx="33" cy="257" r="8"/></g><g class="mol m2" style="--fd:9s;--fl:-2s"><line class="ln" pathLength="1" style="--i:0" x1="335" y1="290" x2="296" y2="293"/><line class="ln" pathLength="1" style="--i:1" x1="335" y1="468" x2="305" y2="455"/><circle class="nd" style="--i:0" cx="335" cy="290" r="11"/><circle class="nd" style="--i:1" cx="335" cy="468" r="11"/></g><g class="mol m3" style="--fd:10s;--fl:-4s"><line class="ln" pathLength="1" style="--i:0" x1="12" y1="493" x2="57" y2="520"/><line class="ln" pathLength="1" style="--i:1" x1="57" y1="520" x2="112" y2="507"/><line class="ln" pathLength="1" style="--i:2" x1="112" y1="507" x2="147" y2="537"/><line class="ln" pathLength="1" style="--i:3" x1="57" y1="520" x2="68" y2="567"/><circle class="nd" style="--i:0" cx="12" cy="493" r="13"/><circle class="nd" style="--i:1" cx="57" cy="520" r="15"/><circle class="nd" style="--i:2" cx="112" cy="507" r="15"/><circle class="nd" style="--i:3" cx="147" cy="537" r="8"/><circle class="nd" style="--i:4" cx="68" cy="567" r="13"/></g><g class="bars"><g class="col" style="--n:3;--d:2.1s;--dl:-0.00s"><rect x="218" y="227" width="16" height="6" rx="1"/><rect x="218" y="219" width="16" height="6" rx="1"/><rect x="218" y="211" width="16" height="6" rx="1"/></g><g class="col" style="--n:10;--d:1.7s;--dl:-0.37s"><rect x="237" y="227" width="16" height="6" rx="1"/><rect x="237" y="219" width="16" height="6" rx="1"/><rect x="237" y="211" width="16" height="6" rx="1"/><rect x="237" y="203" width="16" height="6" rx="1"/><rect x="237" y="195" width="16" height="6" rx="1"/><rect x="237" y="187" width="16" height="6" rx="1"/><rect x="237" y="179" width="16" height="6" rx="1"/><rect x="237" y="171" width="16" height="6" rx="1"/><rect x="237" y="163" width="16" height="6" rx="1"/><rect x="237" y="155" width="16" height="6" rx="1"/></g><g class="col" style="--n:7;--d:2.6s;--dl:-0.74s"><rect x="256" y="227" width="16" height="6" rx="1"/><rect x="256" y="219" width="16" height="6" rx="1"/><rect x="256" y="211" width="16" height="6" rx="1"/><rect x="256" y="203" width="16" height="6" rx="1"/><rect x="256" y="195" width="16" height="6" rx="1"/><rect x="256" y="187" width="16" height="6" rx="1"/><rect x="256" y="179" width="16" height="6" rx="1"/></g><g class="col" style="--n:9;--d:1.9s;--dl:-1.11s"><rect x="275" y="227" width="16" height="6" rx="1"/><rect x="275" y="219" width="16" height="6" rx="1"/><rect x="275" y="211" width="16" height="6" rx="1"/><rect x="275" y="203" width="16" height="6" rx="1"/><rect x="275" y="195" width="16" height="6" rx="1"/><rect x="275" y="187" width="16" height="6" rx="1"/><rect x="275" y="179" width="16" height="6" rx="1"/><rect x="275" y="171" width="16" height="6" rx="1"/><rect x="275" y="163" width="16" height="6" rx="1"/></g><g class="col" style="--n:6;--d:2.3s;--dl:-1.48s"><rect x="294" y="227" width="16" height="6" rx="1"/><rect x="294" y="219" width="16" height="6" rx="1"/><rect x="294" y="211" width="16" height="6" rx="1"/><rect x="294" y="203" width="16" height="6" rx="1"/><rect x="294" y="195" width="16" height="6" rx="1"/><rect x="294" y="187" width="16" height="6" rx="1"/></g><g class="col" style="--n:8;--d:1.6s;--dl:-1.85s"><rect x="313" y="227" width="16" height="6" rx="1"/><rect x="313" y="219" width="16" height="6" rx="1"/><rect x="313" y="211" width="16" height="6" rx="1"/><rect x="313" y="203" width="16" height="6" rx="1"/><rect x="313" y="195" width="16" height="6" rx="1"/><rect x="313" y="187" width="16" height="6" rx="1"/><rect x="313" y="179" width="16" height="6" rx="1"/><rect x="313" y="171" width="16" height="6" rx="1"/></g></g><g class="bars"><g class="col" style="--n:8;--d:2.4s;--dl:-0.00s"><rect x="12" y="456" width="19" height="6" rx="1"/><rect x="12" y="448" width="19" height="6" rx="1"/><rect x="12" y="440" width="19" height="6" rx="1"/><rect x="12" y="432" width="19" height="6" rx="1"/><rect x="12" y="424" width="19" height="6" rx="1"/><rect x="12" y="416" width="19" height="6" rx="1"/><rect x="12" y="408" width="19" height="6" rx="1"/><rect x="12" y="400" width="19" height="6" rx="1"/></g><g class="col" style="--n:9;--d:1.8s;--dl:-0.37s"><rect x="34" y="456" width="19" height="6" rx="1"/><rect x="34" y="448" width="19" height="6" rx="1"/><rect x="34" y="440" width="19" height="6" rx="1"/><rect x="34" y="432" width="19" height="6" rx="1"/><rect x="34" y="424" width="19" height="6" rx="1"/><rect x="34" y="416" width="19" height="6" rx="1"/><rect x="34" y="408" width="19" height="6" rx="1"/><rect x="34" y="400" width="19" height="6" rx="1"/><rect x="34" y="392" width="19" height="6" rx="1"/></g></g><g class="bars"><g class="col" style="--n:6;--d:2.2s;--dl:-0.00s"><rect x="210.0" y="581" width="15.5" height="6" rx="1"/><rect x="210.0" y="573" width="15.5" height="6" rx="1"/><rect x="210.0" y="565" width="15.5" height="6" rx="1"/><rect x="210.0" y="557" width="15.5" height="6" rx="1"/><rect x="210.0" y="549" width="15.5" height="6" rx="1"/><rect x="210.0" y="541" width="15.5" height="6" rx="1"/></g><g class="col" style="--n:5;--d:1.5s;--dl:-0.37s"><rect x="228.5" y="581" width="15.5" height="6" rx="1"/><rect x="228.5" y="573" width="15.5" height="6" rx="1"/><rect x="228.5" y="565" width="15.5" height="6" rx="1"/><rect x="228.5" y="557" width="15.5" height="6" rx="1"/><rect x="228.5" y="549" width="15.5" height="6" rx="1"/></g><g class="col" style="--n:8;--d:2.7s;--dl:-0.74s"><rect x="247.0" y="581" width="15.5" height="6" rx="1"/><rect x="247.0" y="573" width="15.5" height="6" rx="1"/><rect x="247.0" y="565" width="15.5" height="6" rx="1"/><rect x="247.0" y="557" width="15.5" height="6" rx="1"/><rect x="247.0" y="549" width="15.5" height="6" rx="1"/><rect x="247.0" y="541" width="15.5" height="6" rx="1"/><rect x="247.0" y="533" width="15.5" height="6" rx="1"/><rect x="247.0" y="525" width="15.5" height="6" rx="1"/></g><g class="col" style="--n:7;--d:1.8s;--dl:-1.11s"><rect x="265.5" y="581" width="15.5" height="6" rx="1"/><rect x="265.5" y="573" width="15.5" height="6" rx="1"/><rect x="265.5" y="565" width="15.5" height="6" rx="1"/><rect x="265.5" y="557" width="15.5" height="6" rx="1"/><rect x="265.5" y="549" width="15.5" height="6" rx="1"/><rect x="265.5" y="541" width="15.5" height="6" rx="1"/><rect x="265.5" y="533" width="15.5" height="6" rx="1"/></g><g class="col" style="--n:4;--d:2.4s;--dl:-1.48s"><rect x="284.0" y="581" width="15.5" height="6" rx="1"/><rect x="284.0" y="573" width="15.5" height="6" rx="1"/><rect x="284.0" y="565" width="15.5" height="6" rx="1"/><rect x="284.0" y="557" width="15.5" height="6" rx="1"/></g><g class="col" style="--n:7;--d:1.6s;--dl:-1.85s"><rect x="302.5" y="581" width="15.5" height="6" rx="1"/><rect x="302.5" y="573" width="15.5" height="6" rx="1"/><rect x="302.5" y="565" width="15.5" height="6" rx="1"/><rect x="302.5" y="557" width="15.5" height="6" rx="1"/><rect x="302.5" y="549" width="15.5" height="6" rx="1"/><rect x="302.5" y="541" width="15.5" height="6" rx="1"/><rect x="302.5" y="533" width="15.5" height="6" rx="1"/></g><g class="col" style="--n:5;--d:2.0s;--dl:-0.22s"><rect x="321.0" y="581" width="15.5" height="6" rx="1"/><rect x="321.0" y="573" width="15.5" height="6" rx="1"/><rect x="321.0" y="565" width="15.5" height="6" rx="1"/><rect x="321.0" y="557" width="15.5" height="6" rx="1"/><rect x="321.0" y="549" width="15.5" height="6" rx="1"/></g></g></svg>
+    <div class="sp-hero"><div class="sp-glow"></div><img class="sp-icon" src="icon-512.png" alt=""></div>
+    <div class="sp-foot">
+        <div class="sp-name">Braun OnLine</div>
+        <div class="sp-tag">Empowering Global Health Workforce</div>
+    </div>
+</div>
+<script src="splash.js"></script>
 
 <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
@@ -522,14 +611,13 @@
 
 <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-<div id="welcomeScreen" class="welcome-screen" data-action="go-greeting">
-    <div style="flex: 1;"></div>
+<div id="welcomeScreen" class="welcome-screen">
     <img src="icon-512.png" class="welcome-logo" alt="Logo Braun OnLine">
-    <div style="flex: 1;"></div>
-    <div class="welcome-text">
-        <h1>Braun OnLine</h1>
-        <p>Empowering Global Health Workforce</p>
-    </div>
+    <h1>Braun OnLine</h1>
+    <p>Sua escala na palma da mão.</p>
+    <button class="btn-comecar" data-action="go-greeting">ENTRAR NO APP</button>
+    <div class="welcome-version-badge">Versão 3.11</div>
+    <div style="position:absolute;bottom:40px;font-size:0.75em;opacity:0.7;font-weight:600;letter-spacing:1px;">VERSÃO 2026 / 2027</div>
 </div>
 
 <button id="install-button" data-action="install-pwa">

@@ -36,25 +36,6 @@ function getStorageValue(key) {
     try { return sessionStorage.getItem(key); } catch (f) { return null; }
   }
 }
-function getJSON(key, fallback) {
-  try {
-    const raw = getStorageValue(key);
-    if (raw === null || raw === undefined || raw === '') return fallback;
-    const v = JSON.parse(raw);
-    if (Array.isArray(fallback)) return Array.isArray(v) ? v : fallback;
-    return (v !== null && typeof v === 'object' && !Array.isArray(v)) ? v : fallback;
-  } catch (e) { return fallback; }
-}
-window.__braunErrors = window.__braunErrors || [];
-function registrarErro(onde, err) {
-  try {
-    window.__braunErrors.push(onde + ': ' + (err && err.message ? err.message : String(err)));
-    console.error('[Braun] ' + onde, err);
-  } catch (e) {}
-}
-function safeRun(nome, fn) {
-  try { fn(); } catch (err) { registrarErro(nome, err); }
-}
 function setStorageValue(key, value) {
   try { localStorage.setItem(key, value); } catch (e) {
     try { sessionStorage.setItem(key, value); } catch (f) {}
@@ -459,7 +440,7 @@ function atualizarBannerAvisos() {
   }
 
   // Notas futuras
-  const logs = getJSON('logs_v26', {});
+  const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
   Object.keys(logs)
     .filter(function (iso) {
       const d = new Date(iso + 'T00:00:00');
@@ -509,7 +490,7 @@ function gerarCalendario() {
     if (mg !== calendarioGeracao) return;
     if (cm >= total) { setTimeout(function () { if (mg !== calendarioGeracao) return; scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 100); return; }
     const m = cm, t = currentTurma, fer = getFeriados(ano), lang = translations[currentRegion];
-    const logs = getJSON('logs_v26', {});
+    const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
     const hojeStr = new Date().toDateString();
     const dtM = new Date(ano, m, 1);
     const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);
@@ -603,7 +584,7 @@ function bindCalendarioDelegation() {
    ============================================================ */
 function openCard(iso) {
   dataAtiva = iso;
-  const logs = getJSON('logs_v26', {});
+  const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
   const d = iso.split('-');
   document.getElementById('card-data').innerText = d[2] + '/' + d[1] + '/' + d[0];
   document.getElementById('noteInput').value = logs[iso] || '';
@@ -631,7 +612,7 @@ function copyLote() {
 }
 function saveNota() {
   const log = document.getElementById('noteInput').value;
-  const logs = getJSON('logs_v26', {});
+  const logs = JSON.parse(getStorageValue('logs_v26') || '{}');
   if (log.trim() === '') delete logs[dataAtiva]; else logs[dataAtiva] = log.trim();
   setStorageValue('logs_v26', JSON.stringify(logs));
   closeAllModals(); gerarCalendario(); atualizarBannerAvisos();
@@ -672,10 +653,8 @@ function openColaboradorDoMes() {
 }
 function openMeusPedidos() { closeHamburger(); preencherDadosModais(); limparPedido(); focusModal('meusPedidosCard'); }
 function openConfig() {
-  const tgMin = document.getElementById('minimalGreetingToggle');
-  const tgVoz = document.getElementById('voiceResponseToggle');
-  if (tgMin) tgMin.checked = getStorageValue('braun_minimal_greeting') === 'true';
-  if (tgVoz) tgVoz.checked = getStorageValue('braun_voice_response') !== 'false';
+  document.getElementById('minimalGreetingToggle').checked = getStorageValue('braun_minimal_greeting') === 'true';
+  document.getElementById('voiceResponseToggle').checked = getStorageValue('braun_voice_response') !== 'false';
   focusModal('configCard');
 }
 function openFerias() {
@@ -1111,7 +1090,7 @@ const cartilhasData = [
 ];
 
 let cartilhaAtiva = 'comousar';
-let cartilhasLidas = getJSON('braun_cartilhas_lidas', []);
+let cartilhasLidas = JSON.parse(getStorageValue('braun_cartilhas_lidas') || '[]');
 
 function openCartilhas() { closeHamburger(); renderCartilhas(); focusModal('cartilhasCard'); }
 function renderCartilhas() {
@@ -1170,7 +1149,7 @@ function atualizarProgresso() {
   document.getElementById('progressoFill').style.width = p + '%';
   document.getElementById('progressoTexto').innerText = l + '/' + t;
 }
-let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0', 10) || 0;
+let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0');
 function responderQuiz(cid, qi, oi) {
   const c = cartilhasData.find(function (x) { return x.id === cid; }); if (!c) return;
   const q = c.quiz[qi];
@@ -1202,7 +1181,7 @@ const novidadesData = [
   { id:'nov5', titulo:'🧯 Nova Cartilha: Prevenção de Incêndios', descricao:'Aprenda sobre classes de incêndio e método PASS.', data:'2026-07-05', cartilhaId:'incendio' },
   { id:'nov1', titulo:'📘 Nova Cartilha: Compliance', descricao:'Ética, Código de Conduta, LGPD e Canal de Denúncia.', data:'2026-07-04', cartilhaId:'compliance' }
 ];
-let novidadesLidas = getJSON('braun_novidades_lidas', []);
+let novidadesLidas = JSON.parse(getStorageValue('braun_novidades_lidas') || '[]');
 
 function openNovidades() { closeAllModals(); renderNovidades(); focusModal('novidadesCard'); }
 function renderNovidades() {
@@ -1340,7 +1319,7 @@ const conquistas = {
   expert_braun: { id:'expert_braun', titulo:'Expert Braun', descricao:'Completou todas as 10 cartilhas', icone:'&#127942;' },
   quiz_master: { id:'quiz_master', titulo:'Quiz Master', descricao:'Acertou 10 perguntas de quiz', icone:'&#127919;' }
 };
-function getConquistas() { return getJSON('braun_conquistas', []); }
+function getConquistas() { return JSON.parse(getStorageValue('braun_conquistas') || '[]'); }
 function salvarConquista(id) {
   const l = getConquistas();
   if (l.indexOf(id) === -1) { l.push(id); setStorageValue('braun_conquistas', JSON.stringify(l)); mostrarConquistaDesbloqueada(id); }
@@ -1419,11 +1398,7 @@ function bindAll() {
     if (!el) return;
     const a = el.getAttribute('data-action');
     const f = ACTION_MAP[a];
-    if (typeof f !== 'function') return;
-    try { f(); } catch (err) {
-      registrarErro('ação ' + a, err);
-      toast('Não foi possível concluir essa ação. Tente novamente.', 'erro', 4000);
-    }
+    if (typeof f === 'function') f();
   });
   document.querySelectorAll('.tab[data-region]').forEach(function (t) { t.addEventListener('click', function () { setRegion(t.dataset.region); }); });
   const tb = document.getElementById('turmaBadge');
@@ -1474,14 +1449,14 @@ window.addEventListener('load', function () {
   const v = getStorageValue('braun_visited');
   const w = document.getElementById('welcomeScreen');
   w.style.display = v ? 'none' : 'flex';
-  safeRun('bindAll', bindAll);
-  safeRun('startClock', startClock);
-  safeRun('tick', tick);
-  safeRun('atualizarLegenda1x1', atualizarLegenda1x1);
-  safeRun('gerarCalendario', gerarCalendario);
-  safeRun('atualizarBadgeTurma', atualizarBadgeTurma);
-  safeRun('preencherDadosModais', preencherDadosModais);
-  safeRun('atualizarNovidadesUI', atualizarNovidadesUI);
-  safeRun('atualizarTituloMes', atualizarTituloMes);
-  safeRun('atualizarBannerAvisos', atualizarBannerAvisos);
+  bindAll();
+  startClock();
+  tick();
+  atualizarLegenda1x1();
+  gerarCalendario();
+  atualizarBadgeTurma();
+  preencherDadosModais();
+  atualizarNovidadesUI();
+  atualizarTituloMes();
+  atualizarBannerAvisos();
 });
