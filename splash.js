@@ -1,5 +1,12 @@
 (function () {
   'use strict';
+  // Fontes do Google sem bloquear a 1ª pintura (a CSP não permite onload inline):
+  // carregam como "print" e viram "all" quando terminam de baixar.
+  Array.prototype.forEach.call(document.querySelectorAll('link[data-async-css]'), function (l) {
+    if (l.sheet) { l.media = 'all'; return; }
+    l.addEventListener('load', function () { l.media = 'all'; });
+  });
+
   var el = document.getElementById('splash');
   if (!el) return;
 
