@@ -1,5 +1,5 @@
 /* Braun OnLine — app.js
- * Versão 3.11 · 2026/2027
+ * Versão 3.12 · 2026/2027
  */
 'use strict';
 
@@ -392,15 +392,6 @@ function aplicarAtualizacao() {
 }
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'SW_UPDATED') mostrarBannerAtualizacao(); });
-  // PWA instalado volta do segundo plano sem navegar: força a checagem de nova versão (no máx. 1x a cada 10 min)
-  let ultimaChecagemSW = 0;
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState !== 'visible') return;
-    const agora = Date.now();
-    if (agora - ultimaChecagemSW < 600000) return;
-    ultimaChecagemSW = agora;
-    navigator.serviceWorker.getRegistration().then(function (reg) { if (reg) reg.update().catch(function () {}); });
-  });
 }
 if (getStorageValue('braun_update_pending') === 'true') {
   window.addEventListener('load', function () {
@@ -439,7 +430,7 @@ function setRegion(r) {
 }
 
 /* ============================================================
-   13) BANNER DE AVISOS (com countdown de férias)
+   13) BANNER DE AVISOS
    ============================================================ */
 function atualizarBannerAvisos() {
   const banner = document.getElementById('banner-avisos');
@@ -451,7 +442,6 @@ function atualizarBannerAvisos() {
   hoje.setHours(0, 0, 0, 0);
   const items = [];
 
-  // Countdown de férias (em destaque, primeiro item)
   const range = getFeriasRange();
   if (range.inicio && range.fim) {
     const inicio = new Date(range.inicio + 'T00:00:00');
@@ -467,7 +457,6 @@ function atualizarBannerAvisos() {
     }
   }
 
-  // Notas futuras
   const logs = getJSON('logs_v26', {});
   Object.keys(logs)
     .filter(function (iso) {
@@ -967,7 +956,13 @@ function renderSugestoesFerias(sug, duracao) {
 /* ============================================================
    18) DARK MODE + NAV
    ============================================================ */
-function toggleDarkMode() { document.documentElement.classList.toggle('dark-mode'); setStorageValue('braun_dark_mode', document.documentElement.classList.contains('dark-mode')); }
+function sincronizarCorBarraStatus() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) return;
+  const cor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+  if (cor) meta.setAttribute('content', cor);
+}
+function toggleDarkMode() { document.documentElement.classList.toggle('dark-mode'); setStorageValue('braun_dark_mode', document.documentElement.classList.contains('dark-mode')); sincronizarCorBarraStatus(); }
 function toggleMinimalGreeting() { setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked ? 'true' : 'false'); tick(); }
 function toggleVoiceResponse() { setStorageValue('braun_voice_response', document.getElementById('voiceResponseToggle').checked ? 'true' : 'false'); }
 function atualizarTituloMes() {
@@ -1028,11 +1023,6 @@ function scrollToToday() {
     setTimeout(function () { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 200);
   } else { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }
   atualizarTituloMes();
-}
-function goToGreeting() {
-  const w = document.getElementById('welcomeScreen');
-  w.classList.add('hide');
-  setTimeout(function () { w.style.display = 'none'; setStorageValue('braun_visited', 'true'); scrollToToday(); }, 500);
 }
 
 /* ============================================================
@@ -1378,15 +1368,89 @@ function openConquistas() {
 }
 
 /* ============================================================
+   23.5) CAMPANHA DO MÊS
+   ============================================================ */
+const campanhasData = {
+  1:  { nome:'Janeiro Branco',           cor:'#BDBDBD', corTexto:'#333333', emoji:'🤍', abrev:'JAN', descricao:'Janeiro é o mês de conscientização sobre a <b>saúde mental</b>. Cuide da sua mente, procure ajuda quando precisar. Você não está sozinho(a). 💙' },
+  2:  { nome:'Fevereiro Roxo e Laranja', cor:'#BA68C8', corTexto:'#FFFFFF', emoji:'💜', abrev:'FEV', descricao:'Fevereiro Roxo: conscientização sobre <b>Lúpus, Fibromialgia e Alzheimer</b>.<br>Fevereiro Laranja: conscientização sobre a <b>Leucemia</b>. Doe medula óssea, salve vidas!' },
+  3:  { nome:'Março Lilás',              cor:'#CE93D8', corTexto:'#FFFFFF', emoji:'💜', abrev:'MAR', descricao:'Março Lilás: mês de conscientização e prevenção do <b>câncer de colo do útero</b>. Faça o exame preventivo regularmente! 💜' },
+  4:  { nome:'Abril Verde',              cor:'#81C784', corTexto:'#FFFFFF', emoji:'💚', abrev:'ABR', descricao:'Abril Verde: mês dedicado à <b>segurança e saúde no trabalho</b>. Use seus EPIs, siga os procedimentos e cuide da sua vida! 💚' },
+  5:  { nome:'Maio Amarelo',             cor:'#FFD54F', corTexto:'#1A1A1A', emoji:'💛', abrev:'MAI', descricao:'Maio Amarelo: atenção pela vida. Mês de conscientização sobre <b>segurança no trânsito</b>. No trânsito, escolha a vida! 💛' },
+  6:  { nome:'Junho Vermelho',           cor:'#EF5350', corTexto:'#FFFFFF', emoji:'❤️', abrev:'JUN', descricao:'Junho Vermelho: mês de incentivo à <b>doação de sangue</b>. Doe sangue, doe vida! Uma doação pode salvar até 4 vidas. ❤️' },
+  7:  { nome:'Julho Amarelo',            cor:'#FFD54F', corTexto:'#1A1A1A', emoji:'💛', abrev:'JUL', descricao:'Julho Amarelo: mês de conscientização sobre as <b>hepatites virais</b>. Previna-se, faça exames regularmente! 💛' },
+  8:  { nome:'Agosto Dourado',           cor:'#FFCA28', corTexto:'#1A1A1A', emoji:'💛', abrev:'AGO', descricao:'Agosto Dourado: mês de incentivo à <b>amamentação</b>. O leite materno é o melhor alimento para o bebê. 💛' },
+  9:  { nome:'Setembro Amarelo',         cor:'#FFEE58', corTexto:'#1A1A1A', emoji:'💛', abrev:'SET', descricao:'Setembro Amarelo: mês de prevenção ao <b>suicídio</b>. A vida é a melhor escolha! Se precisar conversar, ligue <b>188</b> (CVV) — gratuito, 24h. 💛' },
+  10: { nome:'Outubro Rosa',             cor:'#F48FB1', corTexto:'#FFFFFF', emoji:'🎀', laco:true, abrev:'OUT', descricao:'Outubro Rosa: mês de conscientização e prevenção do <b>câncer de mama</b>. Faça o autoexame e a mamografia regularmente. Previna-se!' },
+  11: { nome:'Novembro Azul',            cor:'#64B5F6', corTexto:'#FFFFFF', emoji:'💙', abrev:'NOV', descricao:'Novembro Azul: mês de conscientização sobre o <b>câncer de próstata</b> e a saúde do homem. Cuide-se, faça exames! 💙' },
+  12: { nome:'Dezembro Vermelho',        cor:'#EF5350', corTexto:'#FFFFFF', emoji:'❤️', abrev:'DEZ', descricao:'Dezembro Vermelho: mês de prevenção ao <b>HIV/AIDS</b> e outras ISTs. Informe-se, previna-se e faça o teste! ❤️' }
+};
+
+// Fita de conscientização (laço com as pontas cruzadas), em SVG
+const LACO_TRECHO_A = 'M30 108C44 84 62 62 66 40C70 18 56 8 50 8';
+const LACO_TRECHO_B = 'M50 8C44 8 30 18 34 40C38 62 56 84 70 108';
+function lacoSvg() {
+  return '<svg viewBox="0 0 100 120" focusable="false">' +
+    '<path class="laco-fita" d="' + LACO_TRECHO_B + '"/>' +
+    '<path class="laco-recorte" d="' + LACO_TRECHO_A + '"/>' +
+    '<path class="laco-fita" d="' + LACO_TRECHO_A + '"/>' +
+    '<path class="laco-brilho" transform="translate(-2.5 -1)" d="' + LACO_TRECHO_A + '"/>' +
+    '</svg>';
+}
+
+function campanhaDoMes(mes) {
+  return campanhasData[mes] || null;
+}
+
+function aplicarCampanhaDoMes() {
+  const mes = new Date().getMonth() + 1;
+  const c = campanhaDoMes(mes);
+  if (!c) return;
+
+  const tarja = document.getElementById('campanhaBanner');
+  const texto = document.getElementById('campanhaTexto');
+
+  if (tarja && texto) {
+    tarja.style.setProperty('--cor-campanha', c.cor);
+    texto.style.color = c.corTexto;
+    texto.innerText = c.nome;
+    tarja.classList.add('show');
+    const panel = document.querySelector('.status-panel');
+    if (panel) panel.style.borderBottom = 'none';
+  }
+}
+
+function openCampanha() {
+  const mes = new Date().getMonth() + 1;
+  const c = campanhaDoMes(mes);
+  if (!c) return;
+  const titulo = document.getElementById('campanhaTitulo');
+  const corpo  = document.getElementById('campanhaCorpo');
+  const icone  = document.getElementById('campanhaModalIcon');
+  const laco   = document.getElementById('campanhaLaco');
+  const modalHeader = document.getElementById('campanhaCard');
+
+  if (titulo) { titulo.innerText = (c.laco ? '' : c.emoji + ' ') + c.nome; titulo.style.color = c.cor; }
+  if (corpo)  { corpo.innerHTML = c.descricao; }
+  if (icone)  { icone.style.color = c.cor; icone.style.display = c.laco ? 'none' : ''; }
+  if (laco)   {
+    if (c.laco) { laco.innerHTML = lacoSvg(); laco.style.color = c.cor; laco.style.display = 'block'; }
+    else { laco.innerHTML = ''; laco.style.display = 'none'; }
+  }
+  if (modalHeader) modalHeader.style.borderTop = '4px solid ' + c.cor;
+
+  focusModal('campanhaCard');
+}
+
+/* ============================================================
    24) EVENT BINDING
    ============================================================ */
 const ACTION_MAP = {
-  'go-greeting': goToGreeting,
   'install-pwa': installPWA,
   'aplicar-atualizacao': aplicarAtualizacao,
   'dispensar-atualizacao': dispensarAtualizacao,
   'open-novidades': openNovidades,
   'open-pesquisa': openPesquisa,
+  'open-campanha': openCampanha,
   'mes-anterior': function () { mudarMes(-1); },
   'mes-proximo': function () { mudarMes(1); },
   'ir-hoje': irParaHoje,
@@ -1480,9 +1544,6 @@ function bindAll() {
 })();
 
 window.addEventListener('load', function () {
-  const v = getStorageValue('braun_visited');
-  const w = document.getElementById('welcomeScreen');
-  w.style.display = v ? 'none' : 'flex';
   safeRun('bindAll', bindAll);
   safeRun('startClock', startClock);
   safeRun('tick', tick);
@@ -1493,4 +1554,6 @@ window.addEventListener('load', function () {
   safeRun('atualizarNovidadesUI', atualizarNovidadesUI);
   safeRun('atualizarTituloMes', atualizarTituloMes);
   safeRun('atualizarBannerAvisos', atualizarBannerAvisos);
+  safeRun('aplicarCampanhaDoMes', aplicarCampanhaDoMes);
+safeRun('sincronizarCorBarraStatus', sincronizarCorBarraStatus);
 });
