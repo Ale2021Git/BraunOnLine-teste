@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<meta name="theme-color" content="#00A97A">
+<meta name="theme-color" content="#4A148C">
 <title>Braun OnLine 2026/2027</title>
 <meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC, MANUTENÇÃO e 1x1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,10 +25,12 @@
         --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
         --laranja-1x1: #FF9800; --roxo-1x1: #7B1FA2;
         --danger: #e74c3c; --success: #00A97A;
+        --bar-bg: var(--primary); --bar-border: transparent;
     }
     html.dark-mode {
         --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
         --primary: #00C48D; --semana-w: #00C48D;
+        --bar-bg: #121212; --bar-border: #333333;
     }
     html, body { background: var(--bg); }
     body {
@@ -36,7 +38,8 @@
         margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
         -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
         touch-action: manipulation; -webkit-touch-callout: none;
-        width: 100%; min-height: 100vh; box-shadow: none;
+        width: 100%; min-height: 100vh;
+        box-shadow: none;
     }
     html.dark-mode body { box-shadow: none; }
     @media (prefers-reduced-motion: reduce) {
@@ -47,6 +50,26 @@
             scroll-behavior: auto !important;
         }
     }
+    
+    /* ===== SPLASH SCREEN PERSONALIZADA ===== */
+    .welcome-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #4A148C;
+        background-image:
+            radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08) 0%, transparent 35%),
+            radial-gradient(circle at 85% 75%, rgba(255,255,255,0.08) 0%, transparent 35%),
+            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        color: white; z-index: 3000;
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
+        cursor: pointer;
+    }
+    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
+    .welcome-logo { width: 55%; max-width: 260px; height: auto; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4)); }
+    .welcome-text { margin-bottom: 60px; text-align: center; }
+    .welcome-text h1 { font-size: 2.2em; font-weight: 800; margin: 0; color: white; letter-spacing: 0.5px; }
+    .welcome-text p { font-size: 1em; font-weight: 600; margin: 8px 0 0 0; color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
+
     #install-button {
         display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
         background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
@@ -79,7 +102,7 @@
         50% { transform: translate(2px, -3px) rotate(10deg); }
     }
     header {
-        background: var(--primary); padding: 45px 18px 20px 18px; color: white; display: flex;
+        background: var(--bar-bg); border-bottom: 1px solid var(--bar-border); padding: 45px 18px 20px 18px; color: white; display: flex; transition: background 0.3s;
         justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
     }
     .brand-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -97,57 +120,9 @@
         background: var(--card); border-radius: 25px 25px 0 0; padding: 15px 10px;
         border: 1px solid var(--border); border-bottom: none; text-align: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
-        position: relative; overflow: hidden;
     }
     .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
     .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
-
-    /* ===== TARJA DIAGONAL DA CAMPANHA ===== */
-    .campanha-tarja {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 110px;
-        height: 110px;
-        overflow: hidden;
-        pointer-events: none;
-        display: none;
-        z-index: 20;
-    }
-    .campanha-tarja.show { display: block; }
-    .campanha-tarja span {
-        position: absolute;
-        display: block;
-        width: 160px;
-        padding: 5px 0;
-        top: 24px;
-        right: -42px;
-        background: var(--cor-campanha, #F48FB1);
-        color: #FFFFFF;
-        font-size: 0.6em;
-        font-weight: 900;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        text-align: center;
-        transform: rotate(45deg);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        pointer-events: auto;
-        cursor: pointer;
-        border-top: 1px solid rgba(255,255,255,0.5);
-        border-bottom: 1px solid rgba(255,255,255,0.5);
-        -webkit-user-select: none;
-        user-select: none;
-    }
-    .campanha-tarja:active span { filter: brightness(0.9); }
-
-    /* ===== LAÇO DA CAMPANHA (fita de conscientização) ===== */
-    .laco-svg { display: block; line-height: 0; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.18)); }
-    .laco-svg svg { width: 100%; height: 100%; overflow: visible; }
-    .laco-svg .laco-fita { fill: none; stroke: currentColor; stroke-width: 15; stroke-linecap: round; stroke-linejoin: round; }
-    .laco-svg .laco-recorte { fill: none; stroke: var(--card); stroke-width: 23; stroke-linecap: butt; stroke-linejoin: round; }
-    .laco-svg .laco-brilho { fill: none; stroke: #fff; stroke-opacity: 0.4; stroke-width: 3.5; stroke-linecap: round; }
-
     .mes-nav {
         display: flex; align-items: center; justify-content: space-between;
         background: var(--card); padding: 10px 14px; border: 1px solid var(--border);
@@ -238,17 +213,18 @@
     .ROXO { background: var(--roxo-1x1) !important; color: #fff !important; }
     .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
     .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
-
+    
     .tab-bar {
         position: fixed; bottom: 0; left: 0; right: 0;
-        background: var(--primary); display: flex; height: 75px; z-index: 1000;
-        padding-bottom: env(safe-area-inset-bottom); width: 100%;
+        background: var(--bar-bg); border-top: 1px solid var(--bar-border); display: flex; height: 75px; z-index: 1000; transition: background 0.3s;
+        padding-bottom: env(safe-area-inset-bottom);
+        width: 100%;
     }
     .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.68em; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0 2px; }
     .tab.active { color: #FFFFFF; }
     .tab .material-symbols-outlined { font-size: 26px; }
     #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
-
+    
     .bottom-modal {
         position: fixed; bottom: -110%; left: 0; right: 0;
         background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
@@ -256,7 +232,7 @@
         width: 100%; box-sizing: border-box;
     }
     .bottom-modal.show { bottom: 0; }
-
+    
     select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
     .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
     .config-label { font-weight: 600; font-size: 0.95em; }
@@ -423,7 +399,7 @@
     .turma-badge::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent); transform: rotate(45deg); animation: shine 4s infinite; }
     @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
     .hoje { box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important; }
-
+    
     #update-banner {
         display: none; position: fixed; top: 0; left: 0; right: 0;
         background: linear-gradient(90deg, #7030A0, #00A97A); color: white;
@@ -436,7 +412,7 @@
     #update-banner button { background: white; color: var(--primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85em; cursor: pointer; margin-left: auto; }
     #update-banner .close-update { background: none; color: white; padding: 4px; margin-left: 4px; border-radius: 50%; }
     @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-
+    
     #toast-container {
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
         z-index: 5500; display: flex; flex-direction: column; gap: 10px;
@@ -471,23 +447,66 @@
     .btn-config { background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer; }
     .btn-config:first-of-type { margin-top:15px; }
 
-    .pedido-info { background: var(--bg); border-radius: 18px; padding: 14px 15px; margin-bottom: 15px; border: 1px solid var(--border); font-size: 0.88em; line-height: 1.7; }
+    /* ===== MEUS PEDIDOS ===== */
+    .pedido-info {
+        background: var(--bg); border-radius: 18px; padding: 14px 15px;
+        margin-bottom: 15px; border: 1px solid var(--border);
+        font-size: 0.88em; line-height: 1.7;
+    }
     .pedido-info strong { color: var(--primary); }
-    .pedido-instrucao { font-size: 0.82em; opacity: 0.75; margin: 0 0 15px 0; line-height: 1.4; }
-    .pedido-secao { background: var(--primary); color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.72em; font-weight: 900; letter-spacing: 1px; display: inline-block; margin: 18px 0 10px 0; }
-    .pedido-item-row { display: grid; grid-template-columns: 1fr 58px 66px; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .pedido-item-nome { font-weight: 700; font-size: 0.88em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .pedido-item-row input { padding: 10px 6px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-weight: 700; font-size: 0.85em; text-align: center; outline: none; width: 100%; box-sizing: border-box; transition: border-color 0.2s; }
+    .pedido-instrucao {
+        font-size: 0.82em; opacity: 0.75; margin: 0 0 15px 0;
+        line-height: 1.4;
+    }
+    .pedido-secao {
+        background: var(--primary); color: white;
+        padding: 6px 14px; border-radius: 10px;
+        font-size: 0.72em; font-weight: 900; letter-spacing: 1px;
+        display: inline-block; margin: 18px 0 10px 0;
+    }
+    .pedido-item-row {
+        display: grid;
+        grid-template-columns: 1fr 58px 66px;
+        gap: 8px; align-items: center;
+        margin-bottom: 8px;
+    }
+    .pedido-item-nome {
+        font-weight: 700; font-size: 0.88em;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pedido-item-row input {
+        padding: 10px 6px; border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--bg); color: var(--text);
+        font-family: inherit; font-weight: 700; font-size: 0.85em;
+        text-align: center; outline: none;
+        width: 100%; box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
     .pedido-item-row input:focus { border-color: var(--primary); }
     .pedido-item-row input::placeholder { opacity: 0.5; font-weight: 600; }
-    .pedido-item-row input.pedido-nome-livre { text-align: left; padding: 10px 12px; }
+    .pedido-item-row input.pedido-nome-livre {
+        text-align: left; padding: 10px 12px;
+    }
     .pedido-item-row input[type="number"]::-webkit-outer-spin-button,
-    .pedido-item-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .pedido-item-row input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    .pedido-item-row input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+    .pedido-item-row input[type="number"] {
+        -moz-appearance: textfield; appearance: textfield;
+    }
     .pedido-botoes { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-pedido-limpar { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); padding: 15px 20px; border-radius: 18px; font-weight: 800; font-size: 0.9em; cursor: pointer; flex-shrink: 0; }
+    .btn-pedido-limpar {
+        background: var(--bg); color: var(--text);
+        border: 1.5px solid var(--border);
+        padding: 15px 20px; border-radius: 18px;
+        font-weight: 800; font-size: 0.9em;
+        cursor: pointer; flex-shrink: 0;
+    }
 
-    @media (max-width: 480px) { body { box-shadow: none; } }
+    @media (max-width: 480px) {
+        body { box-shadow: none; }
+    }
 </style>
 </head>
 <body>
@@ -504,6 +523,16 @@
 </div>
 
 <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<div id="welcomeScreen" class="welcome-screen" data-action="go-greeting">
+    <div style="flex: 1;"></div>
+    <img src="icon-512.png" class="welcome-logo" alt="Logo Braun OnLine">
+    <div style="flex: 1;"></div>
+    <div class="welcome-text">
+        <h1>Braun OnLine</h1>
+        <p>Empowering Global Health Workforce</p>
+    </div>
+</div>
 
 <button id="install-button" data-action="install-pwa">
     <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
@@ -558,14 +587,10 @@
 
     <div class="sticky-header-block">
         <div class="status-panel" aria-live="polite">
-            <div id="campanhaBanner" class="campanha-tarja" role="button" tabindex="0" data-action="open-campanha" aria-label="Campanha do Mês">
-                <span id="campanhaTexto">Outubro Rosa</span>
-            </div>
             <div id="big-clock" class="clock">00:00:00</div>
             <div id="status-msg" class="status-msg">---</div>
             <div id="dias-ferias" style="display:none;margin-top:8px;font-size:0.82em;font-weight:800;color:var(--ferias);padding:6px 14px;background:rgba(112,48,160,0.1);border-radius:12px;align-items:center;justify-content:center;gap:4px;"></div>
         </div>
-
         <div class="mes-nav sem-banner" id="mesNav">
             <button class="mes-nav-btn" data-action="mes-anterior" aria-label="Mês anterior">
                 <span class="material-symbols-outlined">chevron_left</span>
@@ -640,6 +665,11 @@
             <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e EPIs</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
+        <button class="drawer-item" data-action="open-ferias">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127958;&#65039;</div>
+            <div><div class="drawer-item-label">Programar Férias</div><div class="drawer-item-sub">Período e sugestão de datas</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
         <div class="drawer-section-label">Aprendizado</div>
         <button class="drawer-item highlight" data-action="open-cartilhas">
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128216;</div>
@@ -655,7 +685,7 @@
         <div class="drawer-section-label">Ferramentas</div>
         <button class="drawer-item" data-action="open-config">
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#9881;&#65039;</div>
-            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Férias · Tema · Estatísticas · Backup</div></div>
+            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Estatísticas · Exportar · Backup</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item no-arrow" data-action="toggle-dark">
@@ -684,17 +714,6 @@
     Novidades
     <span class="badge" id="novidadesBadge" style="display:none;">0</span>
 </button>
-
-<!-- MODAL DA CAMPANHA DO MÊS -->
-<div id="campanhaCard" class="bottom-modal" role="dialog" aria-label="Campanha do Mês" aria-modal="true">
-    <div style="text-align:center; margin-bottom:20px;">
-        <div id="campanhaLaco" class="laco-svg" aria-hidden="true" style="display:none; width:64px; height:77px; margin:0 auto 10px;"></div>
-        <span class="material-symbols-outlined" id="campanhaModalIcon" style="font-size:50px; margin-bottom:8px;">favorite</span>
-        <h2 id="campanhaTitulo" style="font-weight:900; margin:0; font-size:1.5em;">Outubro Rosa</h2>
-    </div>
-    <div id="campanhaCorpo" style="font-size:1em; line-height:1.6; text-align:center; color:var(--text); margin-bottom:25px;"></div>
-    <button data-action="close-modals" class="btn-modal-fechar" style="background:var(--primary); color:white;">ENTENDI</button>
-</div>
 
 <div id="novidadesCard" class="bottom-modal" role="dialog" aria-label="Novidades" aria-modal="true">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -744,7 +763,6 @@
         <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
         <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
     </div>
-    <button data-action="open-ferias" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true" style="animation:plane-fly 2s infinite ease-in-out;color:#7030A0;">flight</span> PROGRAMAR FÉRIAS</button>
     <button data-action="open-stats" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA</button>
     <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
     <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>

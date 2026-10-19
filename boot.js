@@ -12,11 +12,14 @@
   try {
     if (localStorage.getItem('braun_dark_mode') === 'true') {
       document.documentElement.classList.add('dark-mode');
+      // Barra de status preta já no primeiro paint (a meta theme-color existe antes deste script)
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', '#121212');
     }
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.10.07a';
+  var APP_VERSION = '2026.10.19a';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;
