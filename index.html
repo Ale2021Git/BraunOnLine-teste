@@ -1,1063 +1,1101 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<meta name="theme-color" content="#4A148C">
-<title>Braun OnLine 2026/2027</title>
-<meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC, MANUTENÇÃO e 1x1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="maskable_icon_x192.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Braun OnLine">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
-<script src="boot.js"></script>
-<style>
-    :root {
-        --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
-        --accent: #7030A0; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
-        --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
-        --laranja-1x1: #FF9800; --roxo-1x1: #7B1FA2;
-        --danger: #e74c3c; --success: #00A97A;
-        --bar-bg: var(--primary); --bar-border: transparent;
-    }
-    html.dark-mode {
-        --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
-        --primary: #00C48D; --semana-w: #00C48D;
-        --bar-bg: #121212; --bar-border: #333333;
-    }
-    html, body { background: var(--bg); }
-    body {
-        font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
-        margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
-        -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
-        touch-action: manipulation; -webkit-touch-callout: none;
-        width: 100%; min-height: 100vh;
-        box-shadow: none;
-    }
-    html.dark-mode body { box-shadow: none; }
-    @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-            scroll-behavior: auto !important;
-        }
-    }
-    
-    /* ===== SPLASH SCREEN PERSONALIZADA ===== */
-    .welcome-screen {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: #4A148C;
-        background-image:
-            radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08) 0%, transparent 35%),
-            radial-gradient(circle at 85% 75%, rgba(255,255,255,0.08) 0%, transparent 35%),
-            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        color: white; z-index: 3000;
-        display: none; flex-direction: column; align-items: center; justify-content: center;
-        text-align: center; padding: 0 30px; box-sizing: border-box; transition: 0.5s;
-        cursor: pointer;
-    }
-    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: translateY(-20px); }
-    .welcome-logo { width: 55%; max-width: 260px; height: auto; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4)); }
-    .welcome-text { margin-bottom: 60px; text-align: center; }
-    .welcome-text h1 { font-size: 2.2em; font-weight: 800; margin: 0; color: white; letter-spacing: 0.5px; }
-    .welcome-text p { font-size: 1em; font-weight: 600; margin: 8px 0 0 0; color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
-
-    #install-button {
-        display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
-        background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
-        font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
-        animation: slideIn 0.5s ease; cursor: pointer;
-    }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-    .hoje {
-        background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
-        border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
-        animation: hoje-pulsar 1.5s infinite ease-in-out;
-    }
-    html.dark-mode .hoje { border-color: #1E1E1E !important; }
-    @keyframes hoje-pulsar {
-        0%   { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
-        50%  { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
-        100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
-    }
-    .FERIAS { position: relative; border: 2px dashed var(--ferias) !important; box-shadow: inset 0 0 10px rgba(112,48,160,0.2); }
-    .FERIAS::before {
-        content: 'flight'; font-family: 'Material Symbols Outlined';
-        position: absolute; top: -6px; right: -6px; font-size: 16px;
-        color: var(--ferias); background: var(--card); border-radius: 50%;
-        z-index: 5; animation: plane-fly 2s infinite ease-in-out;
-        font-variation-settings: 'FILL' 1;
-    }
-    @keyframes plane-fly {
-        0%, 100% { transform: translate(0, 0) rotate(-15deg); }
-        50% { transform: translate(2px, -3px) rotate(10deg); }
-    }
-    header {
-        background: var(--bar-bg); border-bottom: 1px solid var(--bar-border); padding: 45px 18px 20px 18px; color: white; display: flex; transition: background 0.3s;
-        justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
-    }
-    .brand-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .brand-logo-svg { height: 35px; width: auto; }
-    .turma-badge {
-        background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
-        border-radius: 30px; padding: 4px 14px; font-weight: 800; font-size: 0.85rem;
-        color: white; cursor: pointer; display: inline-flex; align-items: center;
-        gap: 6px; transition: background 0.2s; user-select: none; white-space: nowrap;
-    }
-    .turma-badge:active { background: rgba(255,255,255,0.35); transform: scale(0.96); }
-    .turma-badge .material-symbols-outlined { font-size: 16px; }
-    .sticky-header-block { position: sticky; top: 85px; z-index: 95; padding: 0 15px; }
-    .status-panel {
-        background: var(--card); border-radius: 25px 25px 0 0; padding: 15px 10px;
-        border: 1px solid var(--border); border-bottom: none; text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
-    }
-    .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
-    .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
-    .mes-nav {
-        display: flex; align-items: center; justify-content: space-between;
-        background: var(--card); padding: 10px 14px; border: 1px solid var(--border);
-        border-top: none; border-bottom: none; border-radius: 0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
-    }
-    .mes-nav.sem-banner { border-radius: 0 0 25px 25px; border-bottom: 1px solid var(--border); }
-    .mes-nav-btn {
-        background: var(--bg); border: none; width: 42px; height: 42px;
-        border-radius: 12px; display: flex; align-items: center; justify-content: center;
-        cursor: pointer; color: var(--primary); transition: 0.2s;
-    }
-    .mes-nav-btn:active { transform: scale(0.92); background: var(--primary); color: white; }
-    .mes-nav-title { font-weight: 800; font-size: 1.05em; color: var(--text); text-transform: capitalize; flex: 1; text-align: center; }
-    .btn-hoje {
-        background: var(--primary); color: white; border: none; padding: 8px 16px;
-        border-radius: 20px; font-weight: 800; font-size: 0.8em; display: flex;
-        align-items: center; gap: 6px; cursor: pointer; margin-left: 8px; white-space: nowrap;
-    }
-    .btn-hoje:active { transform: scale(0.95); }
-    #banner-avisos {
-        display: none; background: linear-gradient(90deg, var(--accent), #9b4dca);
-        color: white; overflow: hidden; position: relative; height: 38px;
-        align-items: center; border: 1px solid var(--border); border-top: none;
-        border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
-    }
-    #banner-avisos.show { display: flex; }
-    #banner-avisos .banner-label {
-        background: rgba(0,0,0,0.25); padding: 0 12px; height: 100%;
-        display: flex; align-items: center; font-weight: 900; font-size: 0.72em;
-        letter-spacing: 0.5px; flex-shrink: 0; z-index: 2; text-transform: uppercase;
-    }
-    #banner-avisos .banner-label .material-symbols-outlined {
-        font-size: 18px; margin-right: 4px;
-        animation: shake-bell 1.5s ease-in-out infinite; transform-origin: top center;
-    }
-    #banner-avisos .banner-track {
-        flex: 1; overflow: hidden; height: 100%; position: relative;
-        display: flex; align-items: center;
-        mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
-        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
-    }
-    #banner-avisos .banner-content {
-        display: inline-block; white-space: nowrap; padding-left: 100%;
-        font-weight: 700; font-size: 0.85em; animation: marquee-banner 30s linear infinite;
-    }
-    #banner-avisos .banner-item { margin: 0 22px; display: inline-flex; align-items: center; gap: 4px; }
-    #banner-avisos .banner-item .material-symbols-outlined { font-size: 16px; color: var(--amarelo); }
-    @keyframes marquee-banner { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-    #legenda-1x1 {
-        display: none; background: var(--card); padding: 10px 14px;
-        border: 1px solid var(--border); border-top: none;
-        border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin: 0; gap: 16px; flex-wrap: wrap; justify-content: center; align-items: center;
-    }
-    .sticky-header-block.com-legenda #legenda-1x1 { display: flex; }
-    .legenda-item { display: flex; align-items: center; gap: 6px; font-size: 0.78em; font-weight: 700; color: var(--text); white-space: nowrap; }
-    .legenda-cor { width: 16px; height: 16px; border-radius: 4px; display: inline-block; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15); }
-    .sticky-header-block.com-legenda .mes-nav,
-    .sticky-header-block.com-legenda .mes-nav.sem-banner { border-radius: 0; border-bottom: none; }
-    .sticky-header-block.com-legenda #banner-avisos { border-radius: 0; }
-    #calendario-box { margin-top: 0; padding-top: 0; }
-    .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; padding-top: 0; scroll-margin-top: 220px; }
-    #calendario-box > .mes-container:first-child { margin-top: 15px; }
-    .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
-    .mes-inner.flipped { transform: rotateY(180deg); }
-    .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-    .mes-front { background: var(--card); }
-    .mes-back { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
-    .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
-    .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
-    .dia-label-w {
-        font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 900;
-        background: linear-gradient(135deg, var(--semana-w), #007d5a); color: #FFFFFF;
-        border-radius: 8px; height: 28px; display: flex; align-items: center; justify-content: center;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
-    }
-    .dia {
-        aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
-        border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent;
-        transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
-    }
-    .dia:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .AMARELO { background: var(--amarelo) !important; color: #1a1a1a !important; }
-    .VERDE { background: var(--verde) !important; color: #fff !important; }
-    .AZUL { background: var(--azul-mnt) !important; color: #fff !important; }
-    .LARANJA { background: var(--laranja-1x1) !important; color: #fff !important; }
-    .ROXO { background: var(--roxo-1x1) !important; color: #fff !important; }
-    .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
-    .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
-    
-    .tab-bar {
-        position: fixed; bottom: 0; left: 0; right: 0;
-        background: var(--bar-bg); border-top: 1px solid var(--bar-border); display: flex; height: 75px; z-index: 1000; transition: background 0.3s;
-        padding-bottom: env(safe-area-inset-bottom);
-        width: 100%;
-    }
-    .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.68em; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0 2px; }
-    .tab.active { color: #FFFFFF; }
-    .tab .material-symbols-outlined { font-size: 26px; }
-    #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
-    
-    .bottom-modal {
-        position: fixed; bottom: -110%; left: 0; right: 0;
-        background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
-        z-index: 2000; transition: bottom 0.5s; max-height: 85vh; overflow-y: auto;
-        width: 100%; box-sizing: border-box;
-    }
-    .bottom-modal.show { bottom: 0; }
-    
-    select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
-    .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
-    .config-label { font-weight: 600; font-size: 0.95em; }
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--primary); }
-    input:checked + .slider:before { transform: translateX(24px); }
-    .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; flex-wrap: wrap; gap: 10px; }
-    .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
-    .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-    .ramal-badge { background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace; font-weight: 800; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--primary); text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
-    .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
-    .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
-    .ramal-item.emergencia-destaque {
-        background: linear-gradient(90deg, rgba(231,76,60,0.12), rgba(231,76,60,0.03));
-        border-left: 4px solid #e74c3c; border-radius: 10px; padding: 12px 12px;
-        border-bottom: none; margin: 10px 0;
-        animation: emergencia-pulse 2s infinite ease-in-out;
-    }
-    .ramal-item.emergencia-destaque .ramal-nome { color: #e74c3c; font-weight: 900; font-size: 1.05em; }
-    .ramal-item.emergencia-destaque .ramal-nome::before { content: '\1F6A8  '; }
-    .ramal-item.emergencia-destaque .ramal-badge {
-        background: #e74c3c; color: white; border-color: #e74c3c;
-        font-size: 1em; font-weight: 900; padding: 10px 18px;
-        animation: emergencia-badge-pulse 1.5s infinite ease-in-out;
-    }
-    @keyframes emergencia-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); } 50% { box-shadow: 0 0 0 8px rgba(231,76,60,0); } }
-    @keyframes emergencia-badge-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-    html.dark-mode .ramal-item.emergencia-destaque { background: linear-gradient(90deg, rgba(231,76,60,0.25), rgba(231,76,60,0.08)); }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
-    .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .stat-card-big.purple { border-color: var(--accent); }
-    .stat-card-big.teal { border-color: var(--verde); }
-    .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
-    .stat-val-big.purple { color: var(--accent); }
-    .stat-val-big.teal { color: var(--verde); }
-    .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
-    .lote-box { background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; position: relative; }
-    .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
-    .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
-    .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
-    #btn-flutuante-novidades {
-        position: fixed; bottom: 95px; right: 20px;
-        background: var(--primary); color: white; border: none; border-radius: 50px; padding: 12px 22px;
-        font-weight: 800; font-size: 0.85em; display: none; align-items: center; gap: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
-        animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
-        cursor: pointer; border: 2px solid rgba(255,255,255,0.4); transition: 0.2s;
-    }
-    #btn-flutuante-novidades .badge { background: #7030A0; color: white; border-radius: 50%; font-size: 0.7em; font-weight: 900; padding: 2px 8px; margin-left: 4px; }
-    @keyframes bounceIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    @keyframes shake-bell {
-        0%, 100% { transform: rotate(0deg); } 10% { transform: rotate(15deg); }
-        20% { transform: rotate(-15deg); } 30% { transform: rotate(10deg); }
-        40% { transform: rotate(-10deg); } 50% { transform: rotate(5deg); }
-        60% { transform: rotate(-5deg); } 70% { transform: rotate(2deg); }
-        80% { transform: rotate(-2deg); } 90% { transform: rotate(0deg); }
-    }
-    #btn-flutuante-novidades .animar-sino { display: inline-block; animation: shake-bell 1.2s ease-in-out infinite; transform-origin: top center; }
-    .hamburger-btn { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 8px; border-radius: 8px; }
-    .hamburger-btn span { display: block; width: 22px; height: 2.5px; background: white; border-radius: 3px; transition: transform 0.3s, opacity 0.3s; }
-    #hamburgerDrawer {
-        position: fixed; top: 0; left: 0;
-        width: 82%; max-width: 320px; height: 100%;
-        background: var(--card); z-index: 3600;
-        transform: translateX(-100%);
-        transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
-        display: flex; flex-direction: column;
-        box-shadow: 6px 0 30px rgba(0,0,0,0.18);
-    }
-    #hamburgerDrawer.open { transform: translateX(0); }
-    #drawerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px); }
-    #drawerOverlay.show { display: block; }
-    .drawer-brand { background: var(--primary); padding: 50px 20px 20px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; }
-    .drawer-brand-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
-    .drawer-brand-text { color: white; font-size: 1em; font-weight: 800; }
-    .drawer-brand-sub { color: rgba(255,255,255,0.7); font-size: 0.72em; font-weight: 600; margin-top: 2px; }
-    .drawer-close-btn { background: none; border: none; color: white; cursor: pointer; margin-left: auto; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
-    .drawer-close-btn:active { background: rgba(255,255,255,0.2); }
-    .drawer-close-btn span { font-size: 24px; }
-    .drawer-menu { flex: 1; overflow-y: auto; padding: 20px 0; }
-    .drawer-section-label { font-size: 0.65em; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); opacity: 0.5; padding: 15px 20px 5px 20px; }
-    .drawer-item { display: flex; align-items: center; gap: 18px; padding: 18px 20px; cursor: pointer; transition: background 0.2s; background: none; width: 100%; text-align: left; border: none; margin-bottom: 2px; }
-    .drawer-item:active { background: rgba(0,0,0,0.05); }
-    html.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
-    .drawer-item.highlight { background: rgba(0,169,122,0.08); }
-    html.dark-mode .drawer-item.highlight { background: rgba(0,169,122,0.15); }
-    .drawer-item-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; background: transparent !important; color: var(--text) !important; }
-    .drawer-item-label { flex: 1; font-weight: 700; font-size: 1.1rem; color: var(--text); }
-    .drawer-item-sub { font-size: 0.75rem; font-weight: 500; opacity: 0.5; margin-top: 2px; color: var(--text); }
-    .drawer-item-arrow { color: var(--text); opacity: 0.3; font-size: 20px; }
-    .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--border); font-size: 0.75rem; opacity: 0.6; font-weight: 600; }
-    .qr-img { width: 120px; height: 120px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    html.dark-mode .qr-img { filter: invert(1); }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-    .skip-link { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-    .skip-link:focus { top: 10px; left: 10px; width: auto; height: auto; background: #000; color: #fff; padding: 10px; z-index: 9999; border-radius: 8px; }
-    @supports (-webkit-touch-callout: none) {
-        .mes-inner { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
-        .mes-face { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
-    }
-    .cartilha-titulo { font-weight: 900; color: var(--primary); font-size: 1.5em; margin: 0 0 6px 0; }
-    .cartilha-sub { font-size: 0.9em; opacity: 0.7; margin-bottom: 18px; font-weight: 600; }
-    .cartilha-conteudo { line-height: 1.7; font-size: 0.95em; }
-    .cartilha-conteudo strong { color: var(--primary); }
-    .cartilha-destaque { background: var(--bg); border-left: 5px solid var(--primary); padding: 15px; border-radius: 10px; margin: 15px 0; }
-    .cartilha-exemplo { background: var(--bg); border-radius: 12px; padding: 15px; margin: 15px 0; border: 1px dashed var(--border); }
-    .cartilha-progresso { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-    .cartilha-progresso-bar { flex: 1; height: 8px; background: var(--border); border-radius: 10px; overflow: hidden; min-width: 80px; }
-    .cartilha-progresso-bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s; }
-    .cartilha-progresso-text { font-weight: 700; font-size: 0.9em; color: var(--primary); white-space: nowrap; }
-    .cartilha-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
-    .cartilha-tab-btn { background: var(--bg); border: 2px solid transparent; padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 0.8em; color: var(--text); opacity: 0.7; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
-    .cartilha-tab-btn.active { opacity: 1; background: var(--primary); color: white; border-color: var(--primary); }
-    .cartilha-tab-btn .material-symbols-outlined { font-size: 18px; }
-    .cartilha-tab-btn.lida { opacity: 0.5; text-decoration: line-through; }
-    .cartilha-panel { display: none; animation: fadeIn 0.3s ease; }
-    .cartilha-panel.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .cartilha-btn-marcar { background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 18px; font-weight: 800; font-size: 1em; width: 100%; cursor: pointer; margin-top: 20px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .cartilha-btn-marcar:active { transform: scale(0.97); }
-    .cartilha-btn-marcar.marcado { background: var(--border); color: var(--text); }
-    .cartilha-quiz { margin-top: 25px; border-top: 2px solid var(--border); padding-top: 20px; }
-    .cartilha-quiz h4 { color: var(--primary); margin: 0 0 15px 0; font-size: 1.1em; }
-    .quiz-pergunta { font-weight: 700; margin: 12px 0 6px 0; }
-    .quiz-opcoes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-    .quiz-opcao { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
-    .quiz-opcao:active { transform: scale(0.97); }
-    .quiz-opcao.certa { border-color: var(--primary); background: rgba(0,169,122,0.15); }
-    .quiz-opcao.errada { border-color: #e74c3c; background: rgba(231,76,60,0.15); }
-    .quiz-opcao.desabilitada { pointer-events: none; opacity: 0.6; }
-    .quiz-feedback { font-weight: 700; font-size: 0.9em; margin-top: 5px; }
-    .quiz-feedback.certo { color: var(--primary); }
-    .quiz-feedback.errado { color: #e74c3c; }
-    .novidades-timeline { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
-    .novidade-card { background: var(--bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
-    .novidade-card:active { transform: scale(0.98); }
-    .novidade-card.lida { opacity: 0.6; }
-    .novidade-card .novidade-titulo { font-weight: 800; font-size: 1em; display: flex; align-items: center; gap: 8px; }
-    .novidade-card .novidade-desc { font-size: 0.9em; opacity: 0.8; margin-top: 4px; line-height: 1.4; }
-    .novidade-card .novidade-data { font-size: 0.7em; opacity: 0.5; margin-top: 8px; display: block; }
-    .novidade-card .badge-novo { background: var(--primary); color: white; font-size: 0.6em; font-weight: 800; padding: 2px 10px; border-radius: 20px; margin-left: 8px; }
-    .novidade-card .link-cartilha { color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; cursor: pointer; }
-    #resultadoPesquisa { background: var(--bg); border-radius: 16px; padding: 15px; border: 1px solid var(--border); min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
-    #resultadoTexto { font-weight: 800; font-size: 1.2em; color: var(--text); display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .icone-folga { font-size: 3.5rem; display: inline-block; animation: onda 2.5s ease-in-out infinite; }
-    .icone-trabalho { font-size: 3.5rem; display: inline-block; animation: girar 3s linear infinite; }
-    .icone-ferias { font-size: 3.5rem; display: inline-block; animation: voar 2s ease-in-out infinite; }
-    @keyframes onda { 0% { transform: translateX(0px) rotate(0deg); } 25% { transform: translateX(8px) rotate(3deg); } 75% { transform: translateX(-8px) rotate(-3deg); } 100% { transform: translateX(0px) rotate(0deg); } }
-    @keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes voar { 0% { transform: translateX(0px) rotate(0deg); } 25% { transform: translateX(8px) rotate(-5deg); } 75% { transform: translateX(-8px) rotate(5deg); } 100% { transform: translateX(0px) rotate(0deg); } }
-    #resultadoDetalhe { font-size: 0.85em; opacity: 0.7; }
-    .btn-ouvir { background: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 1; }
-    .btn-ouvir:active { transform: scale(0.96); }
-    .btn-ouvir.parar { background: var(--danger); }
-    .btn-mic { background: var(--accent); color: white; border: none; border-radius: 50%; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
-    .btn-mic:active { transform: scale(0.92); }
-    .btn-mic .material-symbols-outlined { font-size: 28px; }
-    button, .tab, .drawer-item, .dia, .turma-badge, .ramal-badge { transition: transform 0.15s ease, opacity 0.15s ease; }
-    button:active, .tab:active, .drawer-item:active, .dia:active { transform: scale(0.96); }
-    .turma-badge { position: relative; overflow: hidden; }
-    .turma-badge::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent); transform: rotate(45deg); animation: shine 4s infinite; }
-    @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
-    .hoje { box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important; }
-    
-    #update-banner {
-        display: none; position: fixed; top: 0; left: 0; right: 0;
-        background: linear-gradient(90deg, #7030A0, #00A97A); color: white;
-        padding: 12px 16px; z-index: 5000; align-items: center; gap: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.25); font-weight: 700; font-size: 0.9em;
-        animation: slideDown 0.4s ease; box-sizing: border-box;
-    }
-    #update-banner.show { display: flex; }
-    #update-banner .material-symbols-outlined { font-size: 22px; }
-    #update-banner button { background: white; color: var(--primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85em; cursor: pointer; margin-left: auto; }
-    #update-banner .close-update { background: none; color: white; padding: 4px; margin-left: 4px; border-radius: 50%; }
-    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-    
-    #toast-container {
-        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-        z-index: 5500; display: flex; flex-direction: column; gap: 10px;
-        pointer-events: none; width: min(92%, 420px);
-    }
-    .toast {
-        background: var(--card); color: var(--text); border: 1px solid var(--border);
-        border-radius: 16px; padding: 14px 18px; font-weight: 600; font-size: 0.92em;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.25); pointer-events: auto;
-        display: flex; align-items: center; gap: 12px; line-height: 1.35;
-        animation: toastIn 0.35s cubic-bezier(0.68,-0.55,0.27,1.55);
-        border-left: 5px solid var(--primary);
-    }
-    .toast.sucesso { border-left-color: var(--success); }
-    .toast.erro { border-left-color: var(--danger); }
-    .toast.info { border-left-color: var(--accent); }
-    .toast.aviso { border-left-color: var(--amarelo); }
-    .toast .material-symbols-outlined { font-size: 22px; flex-shrink: 0; }
-    .toast.sucesso .material-symbols-outlined { color: var(--success); }
-    .toast.erro .material-symbols-outlined { color: var(--danger); }
-    .toast.info .material-symbols-outlined { color: var(--accent); }
-    .toast.aviso .material-symbols-outlined { color: var(--amarelo); }
-    .toast .toast-msg { flex: 1; }
-    .toast .toast-actions { display: flex; gap: 8px; margin-top: 8px; }
-    .toast .toast-actions button { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 0.8em; cursor: pointer; }
-    .toast .toast-actions button.secundario { background: var(--border); color: var(--text); }
-    @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .toast.saindo { animation: toastOut 0.3s ease forwards; }
-    @keyframes toastOut { to { opacity: 0; transform: translateY(10px) scale(0.97); } }
-    .btn-modal-fechar { background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer; }
-    .btn-modal-salvar { background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;cursor:pointer; }
-    .btn-config { background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer; }
-    .btn-config:first-of-type { margin-top:15px; }
-
-    /* ===== MEUS PEDIDOS ===== */
-    .pedido-info {
-        background: var(--bg); border-radius: 18px; padding: 14px 15px;
-        margin-bottom: 15px; border: 1px solid var(--border);
-        font-size: 0.88em; line-height: 1.7;
-    }
-    .pedido-info strong { color: var(--primary); }
-    .pedido-instrucao {
-        font-size: 0.82em; opacity: 0.75; margin: 0 0 15px 0;
-        line-height: 1.4;
-    }
-    .pedido-secao {
-        background: var(--primary); color: white;
-        padding: 6px 14px; border-radius: 10px;
-        font-size: 0.72em; font-weight: 900; letter-spacing: 1px;
-        display: inline-block; margin: 18px 0 10px 0;
-    }
-    .pedido-item-row {
-        display: grid;
-        grid-template-columns: 1fr 58px 66px;
-        gap: 8px; align-items: center;
-        margin-bottom: 8px;
-    }
-    .pedido-item-nome {
-        font-weight: 700; font-size: 0.88em;
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .pedido-item-row input {
-        padding: 10px 6px; border-radius: 12px;
-        border: 2px solid var(--border);
-        background: var(--bg); color: var(--text);
-        font-family: inherit; font-weight: 700; font-size: 0.85em;
-        text-align: center; outline: none;
-        width: 100%; box-sizing: border-box;
-        transition: border-color 0.2s;
-    }
-    .pedido-item-row input:focus { border-color: var(--primary); }
-    .pedido-item-row input::placeholder { opacity: 0.5; font-weight: 600; }
-    .pedido-item-row input.pedido-nome-livre {
-        text-align: left; padding: 10px 12px;
-    }
-    .pedido-item-row input[type="number"]::-webkit-outer-spin-button,
-    .pedido-item-row input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none; margin: 0;
-    }
-    .pedido-item-row input[type="number"] {
-        -moz-appearance: textfield; appearance: textfield;
-    }
-    .pedido-botoes { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-pedido-limpar {
-        background: var(--bg); color: var(--text);
-        border: 1.5px solid var(--border);
-        padding: 15px 20px; border-radius: 18px;
-        font-weight: 800; font-size: 0.9em;
-        cursor: pointer; flex-shrink: 0;
-    }
-
-    @media (max-width: 480px) {
-        body { box-shadow: none; }
-    }
-</style>
-</head>
-<body>
-
-<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
-
-<div id="update-banner" role="status" aria-live="polite">
-    <span class="material-symbols-outlined">system_update</span>
-    <span>Nova versão disponível.</span>
-    <button data-action="aplicar-atualizacao">Atualizar</button>
-    <button class="close-update" data-action="dispensar-atualizacao" aria-label="Fechar aviso">
-        <span class="material-symbols-outlined">close</span>
-    </button>
-</div>
-
-<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
-
-<div id="welcomeScreen" class="welcome-screen" data-action="go-greeting">
-    <div style="flex: 1;"></div>
-    <img src="icon-512.png" class="welcome-logo" alt="Logo Braun OnLine">
-    <div style="flex: 1;"></div>
-    <div class="welcome-text">
-        <h1>Braun OnLine</h1>
-        <p>Empowering Global Health Workforce</p>
-    </div>
-</div>
-
-<button id="install-button" data-action="install-pwa">
-    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
-</button>
-
-<header>
-    <div class="brand-container">
-        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Sharing Expertise">
-            <title>B|BRAUN - Sharing Expertise</title>
-            <g fill="#FFFFFF">
-                <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
-                <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
-                <path d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
-                <path d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
-                <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
-                <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
-                <rect x="26.5" width="0.8" height="26.2"/>
-            </g>
-            <g fill="#FFFFFF">
-                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
-                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
-                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
-                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
-                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
-                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
-                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
-                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
-                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
-                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
-                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
-                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
-                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
-                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
-                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
-                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
-            </g>
-        </svg>
-        <span class="turma-badge" id="turmaBadge" role="button" tabindex="0">
-            <span class="material-symbols-outlined">groups</span>
-            <span id="turmaBadgeText">Turma A</span>
-        </span>
-    </div>
-    <div style="display:flex; gap:10px; align-items:center;">
-        <button class="hamburger-btn" id="menuButton" aria-label="Menu principal" aria-expanded="false">
-            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
-        </button>
-    </div>
-</header>
-
-<main id="main-content">
-    <h1 class="sr-only">Escala Braun OnLine</h1>
-
-    <div class="sticky-header-block">
-        <div class="status-panel" aria-live="polite">
-            <div id="big-clock" class="clock">00:00:00</div>
-            <div id="status-msg" class="status-msg">---</div>
-            <div id="dias-ferias" style="display:none;margin-top:8px;font-size:0.82em;font-weight:800;color:var(--ferias);padding:6px 14px;background:rgba(112,48,160,0.1);border-radius:12px;align-items:center;justify-content:center;gap:4px;"></div>
-        </div>
-        <div class="mes-nav sem-banner" id="mesNav">
-            <button class="mes-nav-btn" data-action="mes-anterior" aria-label="Mês anterior">
-                <span class="material-symbols-outlined">chevron_left</span>
-            </button>
-            <div class="mes-nav-title" id="mesNavTitle">Janeiro 2026</div>
-            <button class="btn-hoje" data-action="ir-hoje">
-                <span class="material-symbols-outlined" style="font-size:18px;">today</span>
-                HOJE
-            </button>
-            <button class="mes-nav-btn" data-action="mes-proximo" aria-label="Próximo mês">
-                <span class="material-symbols-outlined">chevron_right</span>
-            </button>
-        </div>
-        <div id="banner-avisos" aria-live="polite">
-            <div class="banner-label">
-                <span class="material-symbols-outlined" aria-hidden="true">campaign</span>
-                Avisos
-            </div>
-            <div class="banner-track">
-                <div class="banner-content" id="bannerContent"></div>
-            </div>
-        </div>
-        <div id="legenda-1x1" aria-label="Legenda das cores">
-            <div class="legenda-item"><span class="legenda-cor" style="background: var(--laranja-1x1);"></span><span>Trab. Manhã</span></div>
-            <div class="legenda-item"><span class="legenda-cor" style="background: var(--roxo-1x1);"></span><span>Trab. Noite</span></div>
-            <div class="legenda-item"><span class="legenda-cor" style="background: var(--verde);"></span><span>Folga</span></div>
-        </div>
-    </div>
-
-    <div id="calendario-box"></div>
-</main>
-
-<div class="tab-bar" role="tablist" aria-label="Selecionar escala">
-    <button class="tab" data-region="BR" id="tab-BR" role="tab" aria-selected="true"><span class="material-symbols-outlined" aria-hidden="true">factory</span>ECOFLAC</button>
-    <button class="tab" data-region="MNT" id="tab-MNT" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">engineering</span>MANUT.</button>
-    <button class="tab" data-region="1x1" id="tab-1x1" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>1x1</button>
-    <button class="tab" data-action="open-pesquisa" id="tab-SEARCH" role="tab" aria-selected="false"><span class="material-symbols-outlined search-icon">search</span><span>BUSCAR</span></button>
-</div>
-
-<div id="drawerOverlay" aria-hidden="true"></div>
-
-<div id="hamburgerDrawer" role="dialog" aria-label="Menu lateral" aria-modal="true">
-    <div class="drawer-brand">
-        <div class="drawer-brand-icon"><span class="material-symbols-outlined" aria-hidden="true" style="color:white;font-size:22px;font-variation-settings:'FILL' 1">factory</span></div>
-        <div>
-            <div class="drawer-brand-text">Braun OnLine</div>
-            <div class="drawer-brand-sub">v3.11 · 2026/2027</div>
-        </div>
-        <button class="drawer-close-btn" data-action="close-drawer" aria-label="Fechar menu"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
-    </div>
-    <div class="drawer-menu">
-        <div class="drawer-section-label">Perfil</div>
-        <button class="drawer-item" data-action="open-perfil">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128100;</div>
-            <div><div class="drawer-item-label">Meu Perfil</div><div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <div class="drawer-section-label">Contatos</div>
-        <button class="drawer-item" data-action="open-ramais">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128222;</div>
-            <div><div class="drawer-item-label">Ramais Úteis</div><div class="drawer-item-sub">Contatos internos</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <div class="drawer-section-label">Colaborador</div>
-        <button class="drawer-item" data-action="open-colaborador">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127942;</div>
-            <div><div class="drawer-item-label">Colaborador do Mês</div><div class="drawer-item-sub">Votação mensal</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <button class="drawer-item" data-action="open-pedidos">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128230;</div>
-            <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e EPIs</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <button class="drawer-item" data-action="open-ferias">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127958;&#65039;</div>
-            <div><div class="drawer-item-label">Programar Férias</div><div class="drawer-item-sub">Período e sugestão de datas</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <div class="drawer-section-label">Aprendizado</div>
-        <button class="drawer-item highlight" data-action="open-cartilhas">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128216;</div>
-            <div><div class="drawer-item-label">Cartilhas</div><div class="drawer-item-sub">Como usar · Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <div class="drawer-section-label">Conquistas</div>
-        <button class="drawer-item" data-action="open-conquistas">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127885;</div>
-            <div><div class="drawer-item-label">Minhas Conquistas</div><div class="drawer-item-sub">Selos e progresso</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <div class="drawer-section-label">Ferramentas</div>
-        <button class="drawer-item" data-action="open-config">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#9881;&#65039;</div>
-            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Estatísticas · Exportar · Backup</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <button class="drawer-item no-arrow" data-action="toggle-dark">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127763;</div>
-            <div><div class="drawer-item-label">Modo Escuro</div><div class="drawer-item-sub">Alterna o tema</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <button class="drawer-item" data-action="open-privacy">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128737;&#65039;</div>
-            <div><div class="drawer-item-label">Privacidade</div><div class="drawer-item-sub">Política de dados</div></div>
-            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
-        </button>
-        <div class="drawer-section-label">Conecte-se</div>
-        <div class="drawer-item" style="cursor:default; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 15px 0;">
-            <img src="qr-code.png" alt="QR Code para acessar o Braun OnLine" class="qr-img">
-            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;">Escaneie para acessar</div>
-        </div>
-    </div>
-    <div class="drawer-footer">&copy; 2026 Braun OnLine · Todos os direitos reservados</div>
-</div>
-
-<div id="overlay" aria-hidden="true"></div>
-
-<button id="btn-flutuante-novidades" data-action="open-novidades" aria-label="Novidades">
-    <span class="material-symbols-outlined animar-sino" id="sinoIcon">notifications</span>
-    Novidades
-    <span class="badge" id="novidadesBadge" style="display:none;">0</span>
-</button>
-
-<div id="novidadesCard" class="bottom-modal" role="dialog" aria-label="Novidades" aria-modal="true">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128276; Novidades</h2>
-        <button data-action="marcar-novidades" style="background:none;border:none;color:var(--primary);font-weight:700;font-size:0.8em;cursor:pointer;">Marcar todas como lidas</button>
-    </div>
-    <div class="cartilha-sub">Fique por dentro das últimas atualizações e conteúdos.</div>
-    <div id="novidadesLista" class="novidades-timeline"></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
-</div>
-
-<div id="cartilhasCard" class="bottom-modal" role="dialog" aria-label="Cartilhas" aria-modal="true">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128216; Cartilhas</h2>
-        <span style="font-size:0.75em; opacity:0.5; font-weight:600;" id="cartilhaVersao">v1.0</span>
-    </div>
-    <div class="cartilha-sub">Aprenda sobre melhorias contínuas, qualidade, segurança, compliance, incêndio e muito mais.</div>
-    <div class="cartilha-progresso">
-        <span style="font-weight:600; font-size:0.85em;">Progresso</span>
-        <div class="cartilha-progresso-bar"><div class="cartilha-progresso-bar-fill" id="progressoFill" style="width:0%;"></div></div>
-        <span class="cartilha-progresso-text" id="progressoTexto">0/10</span>
-    </div>
-    <div class="cartilha-tabs" id="cartilhaTabs"></div>
-    <div id="cartilhaPanels"></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
-</div>
-
-<div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
-    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
-    <div class="lote-box">
-        <span class="lote-label">Lote Sugerido (YYWWD)</span>
-        <div id="lote-display" class="lote-value">------</div>
-        <button class="material-symbols-outlined lote-copy" data-action="copy-lote" aria-label="Copiar lote">content_copy</button>
-    </div>
-    <label for="noteInput" class="sr-only">Anotação</label>
-    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
-    <button data-action="save-nota" class="btn-modal-salvar">SALVAR</button>
-</div>
-
-<div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
-    <div class="config-item">
-        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
-        <label class="switch"><input type="checkbox" id="minimalGreetingToggle" aria-label="Saudação minimalista"><span class="slider" aria-hidden="true"></span></label>
-    </div>
-    <div class="config-item">
-        <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
-        <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
-    </div>
-    <button data-action="open-stats" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA</button>
-    <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
-    <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
-    <button data-action="import-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span> IMPORTAR BACKUP (JSON)</button>
-    <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
-    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">FECHAR</button>
-</div>
-
-<div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏖️ Programar Férias</h2>
-    <div style="display:flex;flex-direction:column;gap:15px;">
-        <div>
-            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
-            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
-        </div>
-        <div>
-            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
-            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
-        </div>
-        <button data-action="save-ferias" class="btn-modal-salvar">SALVAR PERÍODO</button>
-        <button data-action="confirm-clear-ferias" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;cursor:pointer;">LIMPAR FÉRIAS</button>
-    </div>
-
-    <div style="margin-top:25px;padding-top:20px;border-top:2px solid var(--border);">
-        <div style="font-weight:900;color:var(--primary);font-size:1.05em;margin-bottom:6px;">💡 Qual a melhor data?</div>
-        <p style="font-size:0.82em;opacity:0.75;margin:0 0 14px 0;line-height:1.5;">
-            Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.
-        </p>
-        <div style="margin-bottom:10px;">
-            <select id="feriasMes" style="width:100%;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;font-size:0.95em;"></select>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:stretch;">
-            <input type="number" id="feriasDuracao" min="5" max="60" value="30" style="flex:1;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;text-align:center;font-size:1em;">
-            <button data-action="sugerir-ferias" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;font-size:0.9em;">Sugerir</button>
-        </div>
-        <div id="sugestoesFerias"></div>
-    </div>
-
-    <button data-action="close-modals" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">VOLTAR</button>
-</div>
-
-<div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
-    <div id="stats-content"></div>
-    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">VOLTAR</button>
-</div>
-
-<div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
-    <div class="ramal-secao">URGÊNCIAS &amp; SERVIÇOS</div>
-    <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
-    <div class="ramal-item emergencia-destaque"><span class="ramal-nome">Emergência</span><div class="ramal-numeros-container"><a href="tel:26023222" class="ramal-badge">3222</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
-    <div class="ramal-secao">ADMINISTRAÇÃO &amp; RH</div>
-    <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
-    <div class="ramal-secao">ECOFLAC - PRODUÇÃO &amp; QUALIDADE</div>
-    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Esterilização / Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a> <a href="tel:26023408" class="ramal-badge">3408</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
-    <div class="ramal-secao">MANUTENÇÃO &amp; APOIO</div>
-    <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
-    <div class="ramal-secao">CONTATOS NOMINAIS &amp; OUTROS</div>
-    <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
-    <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
-</div>
-
-<div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;">Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.</p>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Dados armazenados no dispositivo:</b> nome, matrícula, turma, ano, setor, anotações, férias, preferências e progresso em cartilhas são salvos exclusivamente no seu navegador (localStorage). Nada disso é enviado para servidores nossos ou de terceiros.</p>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Serviços de terceiros:</b> utilizamos apenas o Google Fonts para tipografia. Nenhum dado pessoal ou de uso é enviado a terceiros.</p>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Seus direitos (LGPD):</b> você pode exportar todos os seus dados locais via "Exportar Backup (JSON)" em Configurações e apagá-los limpando os dados do navegador.</p>
-    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">ENTENDI</button>
-</div>
-
-<div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
-    <div style="display:flex;flex-direction:column;gap:15px;">
-        <div><label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label><input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
-        <div><label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label><input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
-        <div>
-            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma / Escala</label>
-            <select id="turmaPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
-                <optgroup label="ECOFLAC">
-                    <option value="A">Turma A (Manhã - ECOFLAC)</option>
-                    <option value="B">Turma B (Manhã - ECOFLAC)</option>
-                    <option value="C">Turma C (Noite - ECOFLAC)</option>
-                    <option value="D">Turma D (Noite - ECOFLAC)</option>
-                </optgroup>
-                <optgroup label="MANUTENÇÃO">
-                    <option value="E">Turma E (Manhã - Manutenção)</option>
-                    <option value="F">Turma F (Manhã - Manutenção)</option>
-                    <option value="G">Turma G (Noite - Manutenção)</option>
-                    <option value="H">Turma H (Noite - Manutenção)</option>
-                </optgroup>
-                <optgroup label="1x1">
-                    <option value="1x1A">1x1 Manhã - Equipe A</option>
-                    <option value="1x1B">1x1 Manhã - Equipe B</option>
-                    <option value="1x1C">1x1 Noite - Equipe A</option>
-                    <option value="1x1D">1x1 Noite - Equipe B</option>
-                </optgroup>
-            </select>
-        </div>
-        <div>
-            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
-            <select id="anoPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-            </select>
-        </div>
-        <div><label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label><input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
-    </div>
-    <button data-action="save-perfil-fechar" class="btn-modal-salvar">SALVAR E FECHAR</button>
-</div>
-
-<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
-
-    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-        <div style="font-size:0.7em;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Seus dados (votante)</div>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.9em;">
-            <div><span style="opacity:0.6;">Turma:</span> <strong id="votacaoTurma">---</strong></div>
-            <div><span style="opacity:0.6;">Matrícula:</span> <strong id="votacaoMatricula">---</strong></div>
-        </div>
-    </div>
-
-    <div id="votoFormBloco">
-        <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-       <label for="votoNome" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:8px;">EM QUEM VOCÊ VOTA</label>
-            <input type="text" id="votoNome" placeholder="Digite o nome do colega" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--card);color:var(--text);font-weight:800;font-size:1em;">
-        </div>
-
-        <div style="background:rgba(112,48,160,0.08);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:15px;">
-            <div style="font-size:0.75em;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔒 Privacidade</div>
-            <div style="font-size:0.82em;line-height:1.5;opacity:0.85;">
-                Seu voto fica registrado com a sua <strong>matrícula</strong> apenas para <strong>evitar votos duplicados</strong>. Só o RH tem acesso aos votos individuais — nenhum colega vê em quem você votou.
-            </div>
-        </div>
-
-        <button data-action="votar" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);cursor:pointer;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span> VOTAR AGORA
-        </button>
-    </div>
-
-    <div id="votoAgradecimento" style="display:none;text-align:center;padding:24px 10px;">
-        <div style="font-size:3.5em;margin-bottom:12px;">🎉</div>
-        <div style="font-weight:900;color:var(--primary);font-size:1.3em;margin-bottom:8px;">Obrigado pelo seu voto!</div>
-        <div style="font-size:0.9em;opacity:0.75;line-height:1.5;margin-bottom:20px;">
-            O formulário foi aberto em outra aba.<br>
-            <strong>Não esqueça de enviar sua resposta lá para confirmar o voto.</strong>
-        </div>
-        <button data-action="votar-novamente" style="background:var(--bg);color:var(--text);border:2px solid var(--border);padding:14px 20px;border-radius:18px;font-weight:800;font-size:0.9em;cursor:pointer;">
-            Voltar
-        </button>
-    </div>
-
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
-</div>
-
-<div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:15px;">&#128230; Meus Pedidos</h2>
-
-    <div class="pedido-info">
-        <div><strong>Nome:</strong> <span id="pedidoNome">---</span></div>
-        <div><strong>Matrícula:</strong> <span id="pedidoMatricula">---</span></div>
-        <div><strong>Turma:</strong> <span id="pedidoTurma">---</span> &middot; <strong>Ano:</strong> <span id="pedidoAno">---</span></div>
-    </div>
-
-    <p class="pedido-instrucao">Preencha a <strong>quantidade</strong> e o <strong>tamanho</strong> dos itens que precisa. Só os itens com quantidade serão enviados.</p>
-
-    <div class="pedido-secao">&#128085; UNIFORMES</div>
-
-    <div class="pedido-item-row" data-item="Camisa" data-secao="uniformes">
-        <span class="pedido-item-nome">Camisa</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Camisa">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Camisa">
-    </div>
-    <div class="pedido-item-row" data-item="Calça" data-secao="uniformes">
-        <span class="pedido-item-nome">Calça</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça">
-    </div>
-    <div class="pedido-item-row" data-item="Jaleco" data-secao="uniformes">
-        <span class="pedido-item-nome">Jaleco</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Jaleco">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Jaleco">
-    </div>
-    <div class="pedido-item-row" data-item="Boné / Touca" data-secao="uniformes">
-        <span class="pedido-item-nome">Boné / Touca</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Boné ou Touca">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Boné ou Touca">
-    </div>
-    <div class="pedido-item-row" data-item="Meias" data-secao="uniformes">
-        <span class="pedido-item-nome">Meias</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Meias">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Meias">
-    </div>
-
-    <div class="pedido-secao">&#129509; EQUIPAMENTOS DE PROTEÇÃO</div>
-
-    <div class="pedido-item-row" data-item="Botina" data-secao="epis">
-        <span class="pedido-item-nome">Botina</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Botina">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Botina">
-    </div>
-    <div class="pedido-item-row" data-item="Luva" data-secao="epis">
-        <span class="pedido-item-nome">Luva</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Luva">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Luva">
-    </div>
-    <div class="pedido-item-row" data-item="Óculos de Proteção" data-secao="epis">
-        <span class="pedido-item-nome">Óculos Proteção</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Óculos de Proteção">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Óculos de Proteção">
-    </div>
-    <div class="pedido-item-row" data-item="Protetor Auricular" data-secao="epis">
-        <span class="pedido-item-nome">Protetor Auricular</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Protetor Auricular">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Protetor Auricular">
-    </div>
-
-    <div class="pedido-secao">&#128230; OUTRO ITEM</div>
-
-    <div class="pedido-item-row pedido-item-livre" data-secao="outros">
-        <input type="text" maxlength="40" placeholder="Nome do item" class="pedido-nome-livre" aria-label="Nome do outro item">
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade do outro item">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho do outro item">
-    </div>
-
-    <div style="margin-top:20px;">
-        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">OBSERVAÇÕES</label>
-        <textarea id="pedidoObs" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
-    </div>
-
-    <div class="pedido-botoes">
-        <button data-action="limpar-pedido" class="btn-pedido-limpar" aria-label="Limpar todos os campos">Limpar</button>
-        <button data-action="enviar-pedido" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;flex:1;font-size:1.05em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);cursor:pointer;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span> ENVIAR POR E-MAIL
-        </button>
-    </div>
-
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
-</div>
-
-<div id="pesquisaCard" class="bottom-modal" role="dialog" aria-label="Pesquisar escala" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">&#128269; Pesquisar data</h2>
-    <div style="display:flex;flex-direction:column;gap:14px;">
-        <div style="width:100%;"><input type="date" id="pesquisaData" class="input-date" style="width:100%;box-sizing:border-box;"></div>
-        <div style="display:flex;gap:10px;align-items:center;width:100%;">
-            <input type="text" id="pesquisaDataTexto" placeholder="dd/mm/aaaa ou fale a data" style="flex:1;min-width:60px;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;font-size:0.9em;">
-            <button data-action="mic" class="btn-mic" aria-label="Pesquisar por voz"><span class="material-symbols-outlined">mic</span></button>
-            <button data-action="pesquisar" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;height:54px;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0;">
-                <span class="material-symbols-outlined" style="font-size:20px;">search</span> Buscar
-            </button>
-        </div>
-    </div>
-    <div id="resultadoPesquisa" style="background:var(--bg);border-radius:16px;padding:15px;border:1px solid var(--border);min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;margin-top:15px;">
-        <div id="resultadoTexto" style="font-weight:800;font-size:1.2em;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:8px;">Nenhuma pesquisa realizada.</div>
-        <div id="resultadoDetalhe" style="font-size:0.85em;opacity:0.7;"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:15px;">
-        <button data-action="toggle-voz" id="btnOuvirResultado" class="btn-ouvir">
-            <span class="material-symbols-outlined" id="btnOuvirIcon">volume_up</span>
-            <span id="btnOuvirTexto">Ouvir resposta</span>
-        </button>
-        <button data-action="fechar-pesquisa" style="background:var(--border);color:var(--text);border:none;padding:12px 16px;border-radius:18px;font-weight:800;cursor:pointer;flex:1;">Fechar</button>
-    </div>
-</div>
-
-<div id="conquistasCard" class="bottom-modal" role="dialog" aria-label="Conquistas" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">&#127885; Minhas Conquistas</h2>
-    <div id="listaConquistas" style="display:flex;flex-direction:column;gap:12px;margin-top:15px;"></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
-</div>
-
-<script src="app.js" defer></script>
-</body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<meta name="theme-color" content="#00A97A">
+<title>Braun OnLine 2026/2027</title>
+<meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC, MANUTENÇÃO e 1x1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="maskable_icon_x192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Braun OnLine">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+<script src="boot.js"></script>
+<style>
+    :root {
+        --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+        --accent: #7030A0; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
+        --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
+        --laranja-1x1: #FF9800; --roxo-1x1: #7B1FA2;
+        --danger: #e74c3c; --success: #00A97A;
+        --bar-bg: var(--primary); --bar-border: transparent;
+    }
+    html.dark-mode {
+        --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
+        --primary: #00C48D; --semana-w: #00C48D;
+        --bar-bg: #121212; --bar-border: #333333;
+    }
+    html, body { background: var(--bg); }
+    body {
+        font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+        margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
+        touch-action: manipulation; -webkit-touch-callout: none;
+        width: 100%; min-height: 100vh;
+        box-shadow: none;
+    }
+    html.dark-mode body { box-shadow: none; }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+    
+    /* ===== TELA DE BOAS-VINDAS (verde + branco B. Braun) ===== */
+    .welcome-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000;
+        display: none; flex-direction: column; align-items: center; justify-content: space-between;
+        text-align: center; color: #fff; cursor: pointer; overflow: hidden; box-sizing: border-box;
+        padding: calc(env(safe-area-inset-top, 0px) + 64px) 32px calc(env(safe-area-inset-bottom, 0px) + 40px);
+        background:
+            radial-gradient(120% 70% at 88% 0%, rgba(255,255,255,0.18) 0%, transparent 55%),
+            linear-gradient(170deg, #00A97A 0%, #008F68 48%, #006B4E 100%);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .welcome-screen::before, .welcome-screen::after {
+        content: ''; position: absolute; left: 50%; top: 46%; border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.13); pointer-events: none;
+        transform: translate(-50%, -50%); animation: wRing 1.6s ease-out both;
+    }
+    .welcome-screen::before { width: 120vw; height: 120vw; max-width: 780px; max-height: 780px; }
+    .welcome-screen::after { width: 78vw; height: 78vw; max-width: 500px; max-height: 500px; border-color: rgba(255,255,255,0.2); animation-delay: 0.15s; }
+    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: scale(1.03); }
+    .welcome-screen > * { position: relative; z-index: 1; }
+    .w-logo svg { display: block; width: 168px; max-width: 52vw; height: auto; margin: 0 auto; opacity: 0; animation: wFade 0.9s 0.1s ease forwards; }
+    .w-eyebrow {
+        margin: 0 0 18px; padding-left: 0.42em; font-size: 0.72rem; font-weight: 600;
+        letter-spacing: 0.42em; text-transform: uppercase; color: rgba(255,255,255,0.78);
+        opacity: 0; animation: wRise 0.8s 0.45s ease forwards;
+    }
+    .w-name {
+        margin: 0; font-size: clamp(2.6rem, 14vw, 4rem); font-weight: 300; line-height: 1.05;
+        letter-spacing: 0.01em; color: #fff; overflow-wrap: anywhere;
+        opacity: 0; animation: wRise 0.8s 0.65s ease forwards;
+    }
+    .w-rule { display: block; width: 0; height: 1px; margin: 26px auto 22px; background: rgba(255,255,255,0.75); animation: wRule 0.9s 1s ease forwards; }
+    .w-sub { margin: 0; font-size: 0.95rem; font-weight: 400; letter-spacing: 0.06em; color: rgba(255,255,255,0.88); opacity: 0; animation: wRise 0.8s 1.2s ease forwards; }
+    .w-foot { width: 100%; max-width: 240px; }
+    .w-hint {
+        margin: 0 0 16px; padding-left: 0.3em; font-size: 0.66rem; font-weight: 600;
+        letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.7);
+        opacity: 0; animation: wFade 0.8s 1.6s ease forwards, wPulse 2.6s 2.4s ease-in-out infinite;
+    }
+    .w-progress { height: 2px; border-radius: 2px; background: rgba(255,255,255,0.22); overflow: hidden; visibility: hidden; }
+    .welcome-screen.auto .w-progress { visibility: visible; }
+    .w-progress i { display: block; width: 100%; height: 100%; background: #fff; transform: scaleX(0); transform-origin: left; }
+    .welcome-screen.auto .w-progress i { animation: wProg 3.6s linear forwards; }
+    @keyframes wFade { to { opacity: 1; } }
+    @keyframes wRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes wRule { to { width: 56px; } }
+    @keyframes wPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.95; } }
+    @keyframes wProg { to { transform: scaleX(1); } }
+    @keyframes wRing { from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+        .welcome-screen *, .welcome-screen::before, .welcome-screen::after { animation-delay: 0s !important; }
+    }
+
+    #install-button {
+        display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
+        background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
+        font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
+        animation: slideIn 0.5s ease; cursor: pointer;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    .hoje {
+        background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
+        border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
+        animation: hoje-pulsar 1.5s infinite ease-in-out;
+    }
+    html.dark-mode .hoje { border-color: #1E1E1E !important; }
+    @keyframes hoje-pulsar {
+        0%   { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+        50%  { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
+        100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+    }
+    .FERIAS { position: relative; border: 2px dashed var(--ferias) !important; box-shadow: inset 0 0 10px rgba(112,48,160,0.2); }
+    .FERIAS::before {
+        content: 'flight'; font-family: 'Material Symbols Outlined';
+        position: absolute; top: -6px; right: -6px; font-size: 16px;
+        color: var(--ferias); background: var(--card); border-radius: 50%;
+        z-index: 5; animation: plane-fly 2s infinite ease-in-out;
+        font-variation-settings: 'FILL' 1;
+    }
+    @keyframes plane-fly {
+        0%, 100% { transform: translate(0, 0) rotate(-15deg); }
+        50% { transform: translate(2px, -3px) rotate(10deg); }
+    }
+    header {
+        background: var(--bar-bg); border-bottom: 1px solid var(--bar-border); padding: 45px 18px 20px 18px; color: white; display: flex; transition: background 0.3s;
+        justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+    }
+    .brand-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .brand-logo-svg { height: 35px; width: auto; }
+    .turma-badge {
+        background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
+        border-radius: 30px; padding: 4px 14px; font-weight: 800; font-size: 0.85rem;
+        color: white; cursor: pointer; display: inline-flex; align-items: center;
+        gap: 6px; transition: background 0.2s; user-select: none; white-space: nowrap;
+    }
+    .turma-badge:active { background: rgba(255,255,255,0.35); transform: scale(0.96); }
+    .turma-badge .material-symbols-outlined { font-size: 16px; }
+    .sticky-header-block { position: sticky; top: 85px; z-index: 95; padding: 0 15px; }
+    .status-panel {
+        background: var(--card); border-radius: 25px 25px 0 0; padding: 15px 10px;
+        border: 1px solid var(--border); border-bottom: none; text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
+    }
+    .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
+    .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
+    .mes-nav {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--card); padding: 10px 14px; border: 1px solid var(--border);
+        border-top: none; border-bottom: none; border-radius: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
+    }
+    .mes-nav.sem-banner { border-radius: 0 0 25px 25px; border-bottom: 1px solid var(--border); }
+    .mes-nav-btn {
+        background: var(--bg); border: none; width: 42px; height: 42px;
+        border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--primary); transition: 0.2s;
+    }
+    .mes-nav-btn:active { transform: scale(0.92); background: var(--primary); color: white; }
+    .mes-nav-title { font-weight: 800; font-size: 1.05em; color: var(--text); text-transform: capitalize; flex: 1; text-align: center; }
+    .btn-hoje {
+        background: var(--primary); color: white; border: none; padding: 8px 16px;
+        border-radius: 20px; font-weight: 800; font-size: 0.8em; display: flex;
+        align-items: center; gap: 6px; cursor: pointer; margin-left: 8px; white-space: nowrap;
+    }
+    .btn-hoje:active { transform: scale(0.95); }
+    #banner-avisos {
+        display: none; background: linear-gradient(90deg, var(--accent), #9b4dca);
+        color: white; overflow: hidden; position: relative; height: 38px;
+        align-items: center; border: 1px solid var(--border); border-top: none;
+        border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
+    }
+    #banner-avisos.show { display: flex; }
+    #banner-avisos .banner-label {
+        background: rgba(0,0,0,0.25); padding: 0 12px; height: 100%;
+        display: flex; align-items: center; font-weight: 900; font-size: 0.72em;
+        letter-spacing: 0.5px; flex-shrink: 0; z-index: 2; text-transform: uppercase;
+    }
+    #banner-avisos .banner-label .material-symbols-outlined {
+        font-size: 18px; margin-right: 4px;
+        animation: shake-bell 1.5s ease-in-out infinite; transform-origin: top center;
+    }
+    #banner-avisos .banner-track {
+        flex: 1; overflow: hidden; height: 100%; position: relative;
+        display: flex; align-items: center;
+        mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+    }
+    #banner-avisos .banner-content {
+        display: inline-block; white-space: nowrap; padding-left: 100%;
+        font-weight: 700; font-size: 0.85em; animation: marquee-banner 30s linear infinite;
+    }
+    #banner-avisos .banner-item { margin: 0 22px; display: inline-flex; align-items: center; gap: 4px; }
+    #banner-avisos .banner-item .material-symbols-outlined { font-size: 16px; color: var(--amarelo); }
+    @keyframes marquee-banner { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    #legenda-1x1 {
+        display: none; background: var(--card); padding: 10px 14px;
+        border: 1px solid var(--border); border-top: none;
+        border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin: 0; gap: 16px; flex-wrap: wrap; justify-content: center; align-items: center;
+    }
+    .sticky-header-block.com-legenda #legenda-1x1 { display: flex; }
+    .legenda-item { display: flex; align-items: center; gap: 6px; font-size: 0.78em; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .legenda-cor { width: 16px; height: 16px; border-radius: 4px; display: inline-block; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15); }
+    .sticky-header-block.com-legenda .mes-nav,
+    .sticky-header-block.com-legenda .mes-nav.sem-banner { border-radius: 0; border-bottom: none; }
+    .sticky-header-block.com-legenda #banner-avisos { border-radius: 0; }
+    #calendario-box { margin-top: 0; padding-top: 0; }
+    .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; padding-top: 0; scroll-margin-top: 220px; }
+    #calendario-box > .mes-container:first-child { margin-top: 15px; }
+    .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
+    .mes-inner.flipped { transform: rotateY(180deg); }
+    .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .mes-front { background: var(--card); }
+    .mes-back { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
+    .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
+    .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
+    .dia-label-w {
+        font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 900;
+        background: linear-gradient(135deg, var(--semana-w), #007d5a); color: #FFFFFF;
+        border-radius: 8px; height: 28px; display: flex; align-items: center; justify-content: center;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
+    }
+    .dia {
+        aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
+        border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent;
+        transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
+    }
+    .dia:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .AMARELO { background: var(--amarelo) !important; color: #1a1a1a !important; }
+    .VERDE { background: var(--verde) !important; color: #fff !important; }
+    .AZUL { background: var(--azul-mnt) !important; color: #fff !important; }
+    .LARANJA { background: var(--laranja-1x1) !important; color: #fff !important; }
+    .ROXO { background: var(--roxo-1x1) !important; color: #fff !important; }
+    .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
+    .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
+    
+    .tab-bar {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--bar-bg); border-top: 1px solid var(--bar-border); display: flex; height: 75px; z-index: 1000; transition: background 0.3s;
+        padding-bottom: env(safe-area-inset-bottom);
+        width: 100%;
+    }
+    .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.68em; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0 2px; }
+    .tab.active { color: #FFFFFF; }
+    .tab .material-symbols-outlined { font-size: 26px; }
+    #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
+    
+    .bottom-modal {
+        position: fixed; bottom: -110%; left: 0; right: 0;
+        background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
+        z-index: 2000; transition: bottom 0.5s; max-height: 85vh; overflow-y: auto;
+        width: 100%; box-sizing: border-box;
+    }
+    .bottom-modal.show { bottom: 0; }
+    
+    select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
+    .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+    .config-label { font-weight: 600; font-size: 0.95em; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(24px); }
+    .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; flex-wrap: wrap; gap: 10px; }
+    .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
+    .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .ramal-badge { background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace; font-weight: 800; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--primary); text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
+    .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
+    .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
+    .ramal-item.emergencia-destaque {
+        background: linear-gradient(90deg, rgba(231,76,60,0.12), rgba(231,76,60,0.03));
+        border-left: 4px solid #e74c3c; border-radius: 10px; padding: 12px 12px;
+        border-bottom: none; margin: 10px 0;
+        animation: emergencia-pulse 2s infinite ease-in-out;
+    }
+    .ramal-item.emergencia-destaque .ramal-nome { color: #e74c3c; font-weight: 900; font-size: 1.05em; }
+    .ramal-item.emergencia-destaque .ramal-nome::before { content: '\1F6A8  '; }
+    .ramal-item.emergencia-destaque .ramal-badge {
+        background: #e74c3c; color: white; border-color: #e74c3c;
+        font-size: 1em; font-weight: 900; padding: 10px 18px;
+        animation: emergencia-badge-pulse 1.5s infinite ease-in-out;
+    }
+    @keyframes emergencia-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); } 50% { box-shadow: 0 0 0 8px rgba(231,76,60,0); } }
+    @keyframes emergencia-badge-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    html.dark-mode .ramal-item.emergencia-destaque { background: linear-gradient(90deg, rgba(231,76,60,0.25), rgba(231,76,60,0.08)); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+    .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .stat-card-big.purple { border-color: var(--accent); }
+    .stat-card-big.teal { border-color: var(--verde); }
+    .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+    .stat-val-big.purple { color: var(--accent); }
+    .stat-val-big.teal { color: var(--verde); }
+    .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+    .lote-box { background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; position: relative; }
+    .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+    .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+    .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
+    #btn-flutuante-novidades {
+        position: fixed; bottom: 95px; right: 20px;
+        background: var(--primary); color: white; border: none; border-radius: 50px; padding: 12px 22px;
+        font-weight: 800; font-size: 0.85em; display: none; align-items: center; gap: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
+        animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
+        cursor: pointer; border: 2px solid rgba(255,255,255,0.4); transition: 0.2s;
+    }
+    #btn-flutuante-novidades .badge { background: #7030A0; color: white; border-radius: 50%; font-size: 0.7em; font-weight: 900; padding: 2px 8px; margin-left: 4px; }
+    @keyframes bounceIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes shake-bell {
+        0%, 100% { transform: rotate(0deg); } 10% { transform: rotate(15deg); }
+        20% { transform: rotate(-15deg); } 30% { transform: rotate(10deg); }
+        40% { transform: rotate(-10deg); } 50% { transform: rotate(5deg); }
+        60% { transform: rotate(-5deg); } 70% { transform: rotate(2deg); }
+        80% { transform: rotate(-2deg); } 90% { transform: rotate(0deg); }
+    }
+    #btn-flutuante-novidades .animar-sino { display: inline-block; animation: shake-bell 1.2s ease-in-out infinite; transform-origin: top center; }
+    .hamburger-btn { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 8px; border-radius: 8px; }
+    .hamburger-btn span { display: block; width: 22px; height: 2.5px; background: white; border-radius: 3px; transition: transform 0.3s, opacity 0.3s; }
+    #hamburgerDrawer {
+        position: fixed; top: 0; left: 0;
+        width: 82%; max-width: 320px; height: 100%;
+        background: var(--card); z-index: 3600;
+        transform: translateX(-100%);
+        transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+        display: flex; flex-direction: column;
+        box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+    }
+    #hamburgerDrawer.open { transform: translateX(0); }
+    #drawerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px); }
+    #drawerOverlay.show { display: block; }
+    .drawer-brand { background: var(--primary); padding: 50px 20px 20px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; }
+    .drawer-brand-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+    .drawer-brand-text { color: white; font-size: 1em; font-weight: 800; }
+    .drawer-brand-sub { color: rgba(255,255,255,0.7); font-size: 0.72em; font-weight: 600; margin-top: 2px; }
+    .drawer-close-btn { background: none; border: none; color: white; cursor: pointer; margin-left: auto; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .drawer-close-btn:active { background: rgba(255,255,255,0.2); }
+    .drawer-close-btn span { font-size: 24px; }
+    .drawer-menu { flex: 1; overflow-y: auto; padding: 20px 0; }
+    .drawer-section-label { font-size: 0.65em; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); opacity: 0.5; padding: 15px 20px 5px 20px; }
+    .drawer-item { display: flex; align-items: center; gap: 18px; padding: 18px 20px; cursor: pointer; transition: background 0.2s; background: none; width: 100%; text-align: left; border: none; margin-bottom: 2px; }
+    .drawer-item:active { background: rgba(0,0,0,0.05); }
+    html.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
+    .drawer-item.highlight { background: rgba(0,169,122,0.08); }
+    html.dark-mode .drawer-item.highlight { background: rgba(0,169,122,0.15); }
+    .drawer-item-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; background: transparent !important; color: var(--text) !important; }
+    .drawer-item-label { flex: 1; font-weight: 700; font-size: 1.1rem; color: var(--text); }
+    .drawer-item-sub { font-size: 0.75rem; font-weight: 500; opacity: 0.5; margin-top: 2px; color: var(--text); }
+    .drawer-item-arrow { color: var(--text); opacity: 0.3; font-size: 20px; }
+    .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--border); font-size: 0.75rem; opacity: 0.6; font-weight: 600; }
+    .qr-img { width: 120px; height: 120px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    html.dark-mode .qr-img { filter: invert(1); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+    .skip-link { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .skip-link:focus { top: 10px; left: 10px; width: auto; height: auto; background: #000; color: #fff; padding: 10px; z-index: 9999; border-radius: 8px; }
+    @supports (-webkit-touch-callout: none) {
+        .mes-inner { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+        .mes-face { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+    }
+    .cartilha-titulo { font-weight: 900; color: var(--primary); font-size: 1.5em; margin: 0 0 6px 0; }
+    .cartilha-sub { font-size: 0.9em; opacity: 0.7; margin-bottom: 18px; font-weight: 600; }
+    .cartilha-conteudo { line-height: 1.7; font-size: 0.95em; }
+    .cartilha-conteudo strong { color: var(--primary); }
+    .cartilha-destaque { background: var(--bg); border-left: 5px solid var(--primary); padding: 15px; border-radius: 10px; margin: 15px 0; }
+    .cartilha-exemplo { background: var(--bg); border-radius: 12px; padding: 15px; margin: 15px 0; border: 1px dashed var(--border); }
+    .cartilha-progresso { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .cartilha-progresso-bar { flex: 1; height: 8px; background: var(--border); border-radius: 10px; overflow: hidden; min-width: 80px; }
+    .cartilha-progresso-bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s; }
+    .cartilha-progresso-text { font-weight: 700; font-size: 0.9em; color: var(--primary); white-space: nowrap; }
+    .cartilha-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+    .cartilha-tab-btn { background: var(--bg); border: 2px solid transparent; padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 0.8em; color: var(--text); opacity: 0.7; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+    .cartilha-tab-btn.active { opacity: 1; background: var(--primary); color: white; border-color: var(--primary); }
+    .cartilha-tab-btn .material-symbols-outlined { font-size: 18px; }
+    .cartilha-tab-btn.lida { opacity: 0.5; text-decoration: line-through; }
+    .cartilha-panel { display: none; animation: fadeIn 0.3s ease; }
+    .cartilha-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .cartilha-btn-marcar { background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 18px; font-weight: 800; font-size: 1em; width: 100%; cursor: pointer; margin-top: 20px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .cartilha-btn-marcar:active { transform: scale(0.97); }
+    .cartilha-btn-marcar.marcado { background: var(--border); color: var(--text); }
+    .cartilha-quiz { margin-top: 25px; border-top: 2px solid var(--border); padding-top: 20px; }
+    .cartilha-quiz h4 { color: var(--primary); margin: 0 0 15px 0; font-size: 1.1em; }
+    .quiz-pergunta { font-weight: 700; margin: 12px 0 6px 0; }
+    .quiz-opcoes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .quiz-opcao { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
+    .quiz-opcao:active { transform: scale(0.97); }
+    .quiz-opcao.certa { border-color: var(--primary); background: rgba(0,169,122,0.15); }
+    .quiz-opcao.errada { border-color: #e74c3c; background: rgba(231,76,60,0.15); }
+    .quiz-opcao.desabilitada { pointer-events: none; opacity: 0.6; }
+    .quiz-feedback { font-weight: 700; font-size: 0.9em; margin-top: 5px; }
+    .quiz-feedback.certo { color: var(--primary); }
+    .quiz-feedback.errado { color: #e74c3c; }
+    .novidades-timeline { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+    .novidade-card { background: var(--bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
+    .novidade-card:active { transform: scale(0.98); }
+    .novidade-card.lida { opacity: 0.6; }
+    .novidade-card .novidade-titulo { font-weight: 800; font-size: 1em; display: flex; align-items: center; gap: 8px; }
+    .novidade-card .novidade-desc { font-size: 0.9em; opacity: 0.8; margin-top: 4px; line-height: 1.4; }
+    .novidade-card .novidade-data { font-size: 0.7em; opacity: 0.5; margin-top: 8px; display: block; }
+    .novidade-card .badge-novo { background: var(--primary); color: white; font-size: 0.6em; font-weight: 800; padding: 2px 10px; border-radius: 20px; margin-left: 8px; }
+    .novidade-card .link-cartilha { color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; cursor: pointer; }
+    #resultadoPesquisa { background: var(--bg); border-radius: 16px; padding: 15px; border: 1px solid var(--border); min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+    #resultadoTexto { font-weight: 800; font-size: 1.2em; color: var(--text); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .icone-folga { font-size: 3.5rem; display: inline-block; animation: onda 2.5s ease-in-out infinite; }
+    .icone-trabalho { font-size: 3.5rem; display: inline-block; animation: girar 3s linear infinite; }
+    .icone-ferias { font-size: 3.5rem; display: inline-block; animation: voar 2s ease-in-out infinite; }
+    @keyframes onda { 0% { transform: translateX(0px) rotate(0deg); } 25% { transform: translateX(8px) rotate(3deg); } 75% { transform: translateX(-8px) rotate(-3deg); } 100% { transform: translateX(0px) rotate(0deg); } }
+    @keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes voar { 0% { transform: translateX(0px) rotate(0deg); } 25% { transform: translateX(8px) rotate(-5deg); } 75% { transform: translateX(-8px) rotate(5deg); } 100% { transform: translateX(0px) rotate(0deg); } }
+    #resultadoDetalhe { font-size: 0.85em; opacity: 0.7; }
+    .btn-ouvir { background: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 1; }
+    .btn-ouvir:active { transform: scale(0.96); }
+    .btn-ouvir.parar { background: var(--danger); }
+    .btn-mic { background: var(--accent); color: white; border: none; border-radius: 50%; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+    .btn-mic:active { transform: scale(0.92); }
+    .btn-mic .material-symbols-outlined { font-size: 28px; }
+    button, .tab, .drawer-item, .dia, .turma-badge, .ramal-badge { transition: transform 0.15s ease, opacity 0.15s ease; }
+    button:active, .tab:active, .drawer-item:active, .dia:active { transform: scale(0.96); }
+    .turma-badge { position: relative; overflow: hidden; }
+    .turma-badge::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent); transform: rotate(45deg); animation: shine 4s infinite; }
+    @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
+    .hoje { box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important; }
+    
+    #update-banner {
+        display: none; position: fixed; top: 0; left: 0; right: 0;
+        background: linear-gradient(90deg, #7030A0, #00A97A); color: white;
+        padding: 12px 16px; z-index: 5000; align-items: center; gap: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25); font-weight: 700; font-size: 0.9em;
+        animation: slideDown 0.4s ease; box-sizing: border-box;
+    }
+    #update-banner.show { display: flex; }
+    #update-banner .material-symbols-outlined { font-size: 22px; }
+    #update-banner button { background: white; color: var(--primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85em; cursor: pointer; margin-left: auto; }
+    #update-banner .close-update { background: none; color: white; padding: 4px; margin-left: 4px; border-radius: 50%; }
+    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+    
+    #toast-container {
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+        z-index: 5500; display: flex; flex-direction: column; gap: 10px;
+        pointer-events: none; width: min(92%, 420px);
+    }
+    .toast {
+        background: var(--card); color: var(--text); border: 1px solid var(--border);
+        border-radius: 16px; padding: 14px 18px; font-weight: 600; font-size: 0.92em;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25); pointer-events: auto;
+        display: flex; align-items: center; gap: 12px; line-height: 1.35;
+        animation: toastIn 0.35s cubic-bezier(0.68,-0.55,0.27,1.55);
+        border-left: 5px solid var(--primary);
+    }
+    .toast.sucesso { border-left-color: var(--success); }
+    .toast.erro { border-left-color: var(--danger); }
+    .toast.info { border-left-color: var(--accent); }
+    .toast.aviso { border-left-color: var(--amarelo); }
+    .toast .material-symbols-outlined { font-size: 22px; flex-shrink: 0; }
+    .toast.sucesso .material-symbols-outlined { color: var(--success); }
+    .toast.erro .material-symbols-outlined { color: var(--danger); }
+    .toast.info .material-symbols-outlined { color: var(--accent); }
+    .toast.aviso .material-symbols-outlined { color: var(--amarelo); }
+    .toast .toast-msg { flex: 1; }
+    .toast .toast-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .toast .toast-actions button { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 0.8em; cursor: pointer; }
+    .toast .toast-actions button.secundario { background: var(--border); color: var(--text); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .toast.saindo { animation: toastOut 0.3s ease forwards; }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(10px) scale(0.97); } }
+    .btn-modal-fechar { background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer; }
+    .btn-modal-salvar { background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;cursor:pointer; }
+    .btn-config { background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer; }
+    .btn-config:first-of-type { margin-top:15px; }
+
+    /* ===== MEUS PEDIDOS ===== */
+    .pedido-info {
+        background: var(--bg); border-radius: 18px; padding: 14px 15px;
+        margin-bottom: 15px; border: 1px solid var(--border);
+        font-size: 0.88em; line-height: 1.7;
+    }
+    .pedido-info strong { color: var(--primary); }
+    .pedido-instrucao {
+        font-size: 0.82em; opacity: 0.75; margin: 0 0 15px 0;
+        line-height: 1.4;
+    }
+    .pedido-secao {
+        background: var(--primary); color: white;
+        padding: 6px 14px; border-radius: 10px;
+        font-size: 0.72em; font-weight: 900; letter-spacing: 1px;
+        display: inline-block; margin: 18px 0 10px 0;
+    }
+    .pedido-item-row {
+        display: grid;
+        grid-template-columns: 1fr 58px 66px;
+        gap: 8px; align-items: center;
+        margin-bottom: 8px;
+    }
+    .pedido-item-nome {
+        font-weight: 700; font-size: 0.88em;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pedido-item-row input {
+        padding: 10px 6px; border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--bg); color: var(--text);
+        font-family: inherit; font-weight: 700; font-size: 0.85em;
+        text-align: center; outline: none;
+        width: 100%; box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .pedido-item-row input:focus { border-color: var(--primary); }
+    .pedido-item-row input::placeholder { opacity: 0.5; font-weight: 600; }
+    .pedido-item-row input.pedido-nome-livre {
+        text-align: left; padding: 10px 12px;
+    }
+    .pedido-item-row input[type="number"]::-webkit-outer-spin-button,
+    .pedido-item-row input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+    .pedido-item-row input[type="number"] {
+        -moz-appearance: textfield; appearance: textfield;
+    }
+    .pedido-botoes { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-pedido-limpar {
+        background: var(--bg); color: var(--text);
+        border: 1.5px solid var(--border);
+        padding: 15px 20px; border-radius: 18px;
+        font-weight: 800; font-size: 0.9em;
+        cursor: pointer; flex-shrink: 0;
+    }
+
+    @media (max-width: 480px) {
+        body { box-shadow: none; }
+    }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<div id="update-banner" role="status" aria-live="polite">
+    <span class="material-symbols-outlined">system_update</span>
+    <span>Nova versão disponível.</span>
+    <button data-action="aplicar-atualizacao">Atualizar</button>
+    <button class="close-update" data-action="dispensar-atualizacao" aria-label="Fechar aviso">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+</div>
+
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<div id="welcomeScreen" class="welcome-screen" data-action="go-greeting" role="button" tabindex="0" aria-label="Boas-vindas. Toque para continuar">
+    <div class="w-logo" aria-hidden="true"></div>
+    <div class="w-center">
+        <p class="w-eyebrow" id="wEyebrow"></p>
+        <h1 class="w-name" id="wName">Bem-vindo</h1>
+        <span class="w-rule" aria-hidden="true"></span>
+        <p class="w-sub" id="wSub">Empowering Global Health Workforce</p>
+    </div>
+    <div class="w-foot">
+        <p class="w-hint">Toque para continuar</p>
+        <div class="w-progress" aria-hidden="true"><i></i></div>
+    </div>
+</div>
+
+<button id="install-button" data-action="install-pwa">
+    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+</button>
+
+<header>
+    <div class="brand-container">
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Sharing Expertise">
+            <title>B|BRAUN - Sharing Expertise</title>
+            <g fill="#FFFFFF">
+                <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" width="0.8" height="26.2"/>
+            </g>
+            <g fill="#FFFFFF">
+                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
+                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
+                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
+        </svg>
+        <span class="turma-badge" id="turmaBadge" role="button" tabindex="0">
+            <span class="material-symbols-outlined">groups</span>
+            <span id="turmaBadgeText">Turma A</span>
+        </span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <button class="hamburger-btn" id="menuButton" aria-label="Menu principal" aria-expanded="false">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+    </div>
+</header>
+
+<main id="main-content">
+    <h1 class="sr-only">Escala Braun OnLine</h1>
+
+    <div class="sticky-header-block">
+        <div class="status-panel" aria-live="polite">
+            <div id="big-clock" class="clock">00:00:00</div>
+            <div id="status-msg" class="status-msg">---</div>
+            <div id="dias-ferias" style="display:none;margin-top:8px;font-size:0.82em;font-weight:800;color:var(--ferias);padding:6px 14px;background:rgba(112,48,160,0.1);border-radius:12px;align-items:center;justify-content:center;gap:4px;"></div>
+        </div>
+        <div class="mes-nav sem-banner" id="mesNav">
+            <button class="mes-nav-btn" data-action="mes-anterior" aria-label="Mês anterior">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <div class="mes-nav-title" id="mesNavTitle">Janeiro 2026</div>
+            <button class="btn-hoje" data-action="ir-hoje">
+                <span class="material-symbols-outlined" style="font-size:18px;">today</span>
+                HOJE
+            </button>
+            <button class="mes-nav-btn" data-action="mes-proximo" aria-label="Próximo mês">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </div>
+        <div id="banner-avisos" aria-live="polite">
+            <div class="banner-label">
+                <span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+                Avisos
+            </div>
+            <div class="banner-track">
+                <div class="banner-content" id="bannerContent"></div>
+            </div>
+        </div>
+        <div id="legenda-1x1" aria-label="Legenda das cores">
+            <div class="legenda-item"><span class="legenda-cor" style="background: var(--laranja-1x1);"></span><span>Trab. Manhã</span></div>
+            <div class="legenda-item"><span class="legenda-cor" style="background: var(--roxo-1x1);"></span><span>Trab. Noite</span></div>
+            <div class="legenda-item"><span class="legenda-cor" style="background: var(--verde);"></span><span>Folga</span></div>
+        </div>
+    </div>
+
+    <div id="calendario-box"></div>
+</main>
+
+<div class="tab-bar" role="tablist" aria-label="Selecionar escala">
+    <button class="tab" data-region="BR" id="tab-BR" role="tab" aria-selected="true"><span class="material-symbols-outlined" aria-hidden="true">factory</span>ECOFLAC</button>
+    <button class="tab" data-region="MNT" id="tab-MNT" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">engineering</span>MANUT.</button>
+    <button class="tab" data-region="1x1" id="tab-1x1" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>1x1</button>
+    <button class="tab" data-action="open-pesquisa" id="tab-SEARCH" role="tab" aria-selected="false"><span class="material-symbols-outlined search-icon">search</span><span>BUSCAR</span></button>
+</div>
+
+<div id="drawerOverlay" aria-hidden="true"></div>
+
+<div id="hamburgerDrawer" role="dialog" aria-label="Menu lateral" aria-modal="true">
+    <div class="drawer-brand">
+        <div class="drawer-brand-icon"><span class="material-symbols-outlined" aria-hidden="true" style="color:white;font-size:22px;font-variation-settings:'FILL' 1">factory</span></div>
+        <div>
+            <div class="drawer-brand-text">Braun OnLine</div>
+            <div class="drawer-brand-sub">v3.11 · 2026/2027</div>
+        </div>
+        <button class="drawer-close-btn" data-action="close-drawer" aria-label="Fechar menu"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <div class="drawer-menu">
+        <div class="drawer-section-label">Perfil</div>
+        <button class="drawer-item" data-action="open-perfil">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128100;</div>
+            <div><div class="drawer-item-label">Meu Perfil</div><div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Contatos</div>
+        <button class="drawer-item" data-action="open-ramais">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128222;</div>
+            <div><div class="drawer-item-label">Ramais Úteis</div><div class="drawer-item-sub">Contatos internos</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Colaborador</div>
+        <button class="drawer-item" data-action="open-colaborador">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127942;</div>
+            <div><div class="drawer-item-label">Colaborador do Mês</div><div class="drawer-item-sub">Votação mensal</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-pedidos">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128230;</div>
+            <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e EPIs</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-ferias">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127958;&#65039;</div>
+            <div><div class="drawer-item-label">Programar Férias</div><div class="drawer-item-sub">Período e sugestão de datas</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Aprendizado</div>
+        <button class="drawer-item highlight" data-action="open-cartilhas">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128216;</div>
+            <div><div class="drawer-item-label">Cartilhas</div><div class="drawer-item-sub">Como usar · Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Conquistas</div>
+        <button class="drawer-item" data-action="open-conquistas">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127885;</div>
+            <div><div class="drawer-item-label">Minhas Conquistas</div><div class="drawer-item-sub">Selos e progresso</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Ferramentas</div>
+        <button class="drawer-item" data-action="open-config">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#9881;&#65039;</div>
+            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Estatísticas · Exportar · Backup</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item no-arrow" data-action="toggle-dark">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127763;</div>
+            <div><div class="drawer-item-label">Modo Escuro</div><div class="drawer-item-sub">Alterna o tema</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-privacy">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128737;&#65039;</div>
+            <div><div class="drawer-item-label">Privacidade</div><div class="drawer-item-sub">Política de dados</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Conecte-se</div>
+        <div class="drawer-item" style="cursor:default; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 15px 0;">
+            <img src="qr-code.png" alt="QR Code para acessar o Braun OnLine" class="qr-img">
+            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;">Escaneie para acessar</div>
+        </div>
+    </div>
+    <div class="drawer-footer">&copy; 2026 Braun OnLine · Todos os direitos reservados</div>
+</div>
+
+<div id="overlay" aria-hidden="true"></div>
+
+<button id="btn-flutuante-novidades" data-action="open-novidades" aria-label="Novidades">
+    <span class="material-symbols-outlined animar-sino" id="sinoIcon">notifications</span>
+    Novidades
+    <span class="badge" id="novidadesBadge" style="display:none;">0</span>
+</button>
+
+<div id="novidadesCard" class="bottom-modal" role="dialog" aria-label="Novidades" aria-modal="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128276; Novidades</h2>
+        <button data-action="marcar-novidades" style="background:none;border:none;color:var(--primary);font-weight:700;font-size:0.8em;cursor:pointer;">Marcar todas como lidas</button>
+    </div>
+    <div class="cartilha-sub">Fique por dentro das últimas atualizações e conteúdos.</div>
+    <div id="novidadesLista" class="novidades-timeline"></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="cartilhasCard" class="bottom-modal" role="dialog" aria-label="Cartilhas" aria-modal="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128216; Cartilhas</h2>
+        <span style="font-size:0.75em; opacity:0.5; font-weight:600;" id="cartilhaVersao">v1.0</span>
+    </div>
+    <div class="cartilha-sub">Aprenda sobre melhorias contínuas, qualidade, segurança, compliance, incêndio e muito mais.</div>
+    <div class="cartilha-progresso">
+        <span style="font-weight:600; font-size:0.85em;">Progresso</span>
+        <div class="cartilha-progresso-bar"><div class="cartilha-progresso-bar-fill" id="progressoFill" style="width:0%;"></div></div>
+        <span class="cartilha-progresso-text" id="progressoTexto">0/10</span>
+    </div>
+    <div class="cartilha-tabs" id="cartilhaTabs"></div>
+    <div id="cartilhaPanels"></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
+    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <button class="material-symbols-outlined lote-copy" data-action="copy-lote" aria-label="Copiar lote">content_copy</button>
+    </div>
+    <label for="noteInput" class="sr-only">Anotação</label>
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
+    <button data-action="save-nota" class="btn-modal-salvar">SALVAR</button>
+</div>
+
+<div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
+    <div class="config-item">
+        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
+        <label class="switch"><input type="checkbox" id="minimalGreetingToggle" aria-label="Saudação minimalista"><span class="slider" aria-hidden="true"></span></label>
+    </div>
+    <div class="config-item">
+        <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
+        <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
+    </div>
+    <button data-action="open-stats" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA</button>
+    <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
+    <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
+    <button data-action="import-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span> IMPORTAR BACKUP (JSON)</button>
+    <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
+    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">FECHAR</button>
+</div>
+
+<div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏖️ Programar Férias</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
+            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
+            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <button data-action="save-ferias" class="btn-modal-salvar">SALVAR PERÍODO</button>
+        <button data-action="confirm-clear-ferias" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;cursor:pointer;">LIMPAR FÉRIAS</button>
+    </div>
+
+    <div style="margin-top:25px;padding-top:20px;border-top:2px solid var(--border);">
+        <div style="font-weight:900;color:var(--primary);font-size:1.05em;margin-bottom:6px;">💡 Qual a melhor data?</div>
+        <p style="font-size:0.82em;opacity:0.75;margin:0 0 14px 0;line-height:1.5;">
+            Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.
+        </p>
+        <div style="margin-bottom:10px;">
+            <select id="feriasMes" style="width:100%;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;font-size:0.95em;"></select>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:stretch;">
+            <input type="number" id="feriasDuracao" min="5" max="60" value="30" style="flex:1;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;text-align:center;font-size:1em;">
+            <button data-action="sugerir-ferias" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;font-size:0.9em;">Sugerir</button>
+        </div>
+        <div id="sugestoesFerias"></div>
+    </div>
+
+    <button data-action="close-modals" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">VOLTAR</button>
+</div>
+
+<div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
+    <div id="stats-content"></div>
+    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">VOLTAR</button>
+</div>
+
+<div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
+    <div class="ramal-secao">URGÊNCIAS &amp; SERVIÇOS</div>
+    <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
+    <div class="ramal-item emergencia-destaque"><span class="ramal-nome">Emergência</span><div class="ramal-numeros-container"><a href="tel:26023222" class="ramal-badge">3222</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
+    <div class="ramal-secao">ADMINISTRAÇÃO &amp; RH</div>
+    <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
+    <div class="ramal-secao">ECOFLAC - PRODUÇÃO &amp; QUALIDADE</div>
+    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Esterilização / Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a> <a href="tel:26023408" class="ramal-badge">3408</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
+    <div class="ramal-secao">MANUTENÇÃO &amp; APOIO</div>
+    <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
+    <div class="ramal-secao">CONTATOS NOMINAIS &amp; OUTROS</div>
+    <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;">Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.</p>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Dados armazenados no dispositivo:</b> nome, matrícula, turma, ano, setor, anotações, férias, preferências e progresso em cartilhas são salvos exclusivamente no seu navegador (localStorage). Nada disso é enviado para servidores nossos ou de terceiros.</p>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Serviços de terceiros:</b> utilizamos apenas o Google Fonts para tipografia. Nenhum dado pessoal ou de uso é enviado a terceiros.</p>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Seus direitos (LGPD):</b> você pode exportar todos os seus dados locais via "Exportar Backup (JSON)" em Configurações e apagá-los limpando os dados do navegador.</p>
+    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">ENTENDI</button>
+</div>
+
+<div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div><label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label><input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+        <div><label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label><input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+        <div>
+            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma / Escala</label>
+            <select id="turmaPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <optgroup label="ECOFLAC">
+                    <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                    <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                    <option value="C">Turma C (Noite - ECOFLAC)</option>
+                    <option value="D">Turma D (Noite - ECOFLAC)</option>
+                </optgroup>
+                <optgroup label="MANUTENÇÃO">
+                    <option value="E">Turma E (Manhã - Manutenção)</option>
+                    <option value="F">Turma F (Manhã - Manutenção)</option>
+                    <option value="G">Turma G (Noite - Manutenção)</option>
+                    <option value="H">Turma H (Noite - Manutenção)</option>
+                </optgroup>
+                <optgroup label="1x1">
+                    <option value="1x1A">1x1 Manhã - Equipe A</option>
+                    <option value="1x1B">1x1 Manhã - Equipe B</option>
+                    <option value="1x1C">1x1 Noite - Equipe A</option>
+                    <option value="1x1D">1x1 Noite - Equipe B</option>
+                </optgroup>
+            </select>
+        </div>
+        <div>
+            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
+            <select id="anoPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
+        <div><label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label><input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+    </div>
+    <button data-action="save-perfil-fechar" class="btn-modal-salvar">SALVAR E FECHAR</button>
+</div>
+
+<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
+
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="font-size:0.7em;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Seus dados (votante)</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.9em;">
+            <div><span style="opacity:0.6;">Turma:</span> <strong id="votacaoTurma">---</strong></div>
+            <div><span style="opacity:0.6;">Matrícula:</span> <strong id="votacaoMatricula">---</strong></div>
+        </div>
+    </div>
+
+    <div id="votoFormBloco">
+        <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+       <label for="votoNome" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:8px;">EM QUEM VOCÊ VOTA</label>
+            <input type="text" id="votoNome" placeholder="Digite o nome do colega" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--card);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+
+        <div style="background:rgba(112,48,160,0.08);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:15px;">
+            <div style="font-size:0.75em;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔒 Privacidade</div>
+            <div style="font-size:0.82em;line-height:1.5;opacity:0.85;">
+                Seu voto fica registrado com a sua <strong>matrícula</strong> apenas para <strong>evitar votos duplicados</strong>. Só o RH tem acesso aos votos individuais — nenhum colega vê em quem você votou.
+            </div>
+        </div>
+
+        <button data-action="votar" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);cursor:pointer;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span> VOTAR AGORA
+        </button>
+    </div>
+
+    <div id="votoAgradecimento" style="display:none;text-align:center;padding:24px 10px;">
+        <div style="font-size:3.5em;margin-bottom:12px;">🎉</div>
+        <div style="font-weight:900;color:var(--primary);font-size:1.3em;margin-bottom:8px;">Obrigado pelo seu voto!</div>
+        <div style="font-size:0.9em;opacity:0.75;line-height:1.5;margin-bottom:20px;">
+            O formulário foi aberto em outra aba.<br>
+            <strong>Não esqueça de enviar sua resposta lá para confirmar o voto.</strong>
+        </div>
+        <button data-action="votar-novamente" style="background:var(--bg);color:var(--text);border:2px solid var(--border);padding:14px 20px;border-radius:18px;font-weight:800;font-size:0.9em;cursor:pointer;">
+            Voltar
+        </button>
+    </div>
+
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:15px;">&#128230; Meus Pedidos</h2>
+
+    <div class="pedido-info">
+        <div><strong>Nome:</strong> <span id="pedidoNome">---</span></div>
+        <div><strong>Matrícula:</strong> <span id="pedidoMatricula">---</span></div>
+        <div><strong>Turma:</strong> <span id="pedidoTurma">---</span> &middot; <strong>Ano:</strong> <span id="pedidoAno">---</span></div>
+    </div>
+
+    <p class="pedido-instrucao">Preencha a <strong>quantidade</strong> e o <strong>tamanho</strong> dos itens que precisa. Só os itens com quantidade serão enviados.</p>
+
+    <div class="pedido-secao">&#128085; UNIFORMES</div>
+
+    <div class="pedido-item-row" data-item="Camisa" data-secao="uniformes">
+        <span class="pedido-item-nome">Camisa</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Camisa">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Camisa">
+    </div>
+    <div class="pedido-item-row" data-item="Calça" data-secao="uniformes">
+        <span class="pedido-item-nome">Calça</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça">
+    </div>
+    <div class="pedido-item-row" data-item="Jaleco" data-secao="uniformes">
+        <span class="pedido-item-nome">Jaleco</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Jaleco">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Jaleco">
+    </div>
+    <div class="pedido-item-row" data-item="Boné / Touca" data-secao="uniformes">
+        <span class="pedido-item-nome">Boné / Touca</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Boné ou Touca">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Boné ou Touca">
+    </div>
+    <div class="pedido-item-row" data-item="Meias" data-secao="uniformes">
+        <span class="pedido-item-nome">Meias</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Meias">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Meias">
+    </div>
+
+    <div class="pedido-secao">&#129509; EQUIPAMENTOS DE PROTEÇÃO</div>
+
+    <div class="pedido-item-row" data-item="Botina" data-secao="epis">
+        <span class="pedido-item-nome">Botina</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Botina">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Botina">
+    </div>
+    <div class="pedido-item-row" data-item="Luva" data-secao="epis">
+        <span class="pedido-item-nome">Luva</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Luva">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Luva">
+    </div>
+    <div class="pedido-item-row" data-item="Óculos de Proteção" data-secao="epis">
+        <span class="pedido-item-nome">Óculos Proteção</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Óculos de Proteção">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Óculos de Proteção">
+    </div>
+    <div class="pedido-item-row" data-item="Protetor Auricular" data-secao="epis">
+        <span class="pedido-item-nome">Protetor Auricular</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Protetor Auricular">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Protetor Auricular">
+    </div>
+
+    <div class="pedido-secao">&#128230; OUTRO ITEM</div>
+
+    <div class="pedido-item-row pedido-item-livre" data-secao="outros">
+        <input type="text" maxlength="40" placeholder="Nome do item" class="pedido-nome-livre" aria-label="Nome do outro item">
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade do outro item">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho do outro item">
+    </div>
+
+    <div style="margin-top:20px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">OBSERVAÇÕES</label>
+        <textarea id="pedidoObs" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <div class="pedido-botoes">
+        <button data-action="limpar-pedido" class="btn-pedido-limpar" aria-label="Limpar todos os campos">Limpar</button>
+        <button data-action="enviar-pedido" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;flex:1;font-size:1.05em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);cursor:pointer;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span> ENVIAR POR E-MAIL
+        </button>
+    </div>
+
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="pesquisaCard" class="bottom-modal" role="dialog" aria-label="Pesquisar escala" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">&#128269; Pesquisar data</h2>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="width:100%;"><input type="date" id="pesquisaData" class="input-date" style="width:100%;box-sizing:border-box;"></div>
+        <div style="display:flex;gap:10px;align-items:center;width:100%;">
+            <input type="text" id="pesquisaDataTexto" placeholder="dd/mm/aaaa ou fale a data" style="flex:1;min-width:60px;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;font-size:0.9em;">
+            <button data-action="mic" class="btn-mic" aria-label="Pesquisar por voz"><span class="material-symbols-outlined">mic</span></button>
+            <button data-action="pesquisar" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;height:54px;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:20px;">search</span> Buscar
+            </button>
+        </div>
+    </div>
+    <div id="resultadoPesquisa" style="background:var(--bg);border-radius:16px;padding:15px;border:1px solid var(--border);min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;margin-top:15px;">
+        <div id="resultadoTexto" style="font-weight:800;font-size:1.2em;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:8px;">Nenhuma pesquisa realizada.</div>
+        <div id="resultadoDetalhe" style="font-size:0.85em;opacity:0.7;"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:15px;">
+        <button data-action="toggle-voz" id="btnOuvirResultado" class="btn-ouvir">
+            <span class="material-symbols-outlined" id="btnOuvirIcon">volume_up</span>
+            <span id="btnOuvirTexto">Ouvir resposta</span>
+        </button>
+        <button data-action="fechar-pesquisa" style="background:var(--border);color:var(--text);border:none;padding:12px 16px;border-radius:18px;font-weight:800;cursor:pointer;flex:1;">Fechar</button>
+    </div>
+</div>
+
+<div id="conquistasCard" class="bottom-modal" role="dialog" aria-label="Conquistas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">&#127885; Minhas Conquistas</h2>
+    <div id="listaConquistas" style="display:flex;flex-direction:column;gap:12px;margin-top:15px;"></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<script src="app.js" defer></script>
+</body>
 </html>
