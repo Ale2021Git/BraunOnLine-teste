@@ -20,7 +20,7 @@ const PRECACHE_CORE = [
 
 // Opcionais: se algum não existir, a instalação continua
 const PRECACHE_OPTIONAL = [
-  './splash.js',
+  './splash-screen.webp',
   './offline.html',
   './icon-192.png',
   './qr-code.png'

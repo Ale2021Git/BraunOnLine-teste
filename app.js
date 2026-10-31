@@ -1,1 +1,1118 @@
-/* Braun OnLine — app.js * Versão 3.11 · 2026/2027 */'use strict';/* ============================================================   0) CONFIGURAÇÕES EDITÁVEIS   ============================================================ */const EMAIL_PEDIDOS = 'braun.online.app@gmail.com';/* ============================================================   1) CONSTANTES DE CONFIGURAÇÃO   ============================================================ */const ESCALA_CONFIG = Object.freeze({  BR:    { baseDate: new Date(2026, 0, 18), cicloDias: 4, metadeCiclo: 2 },  MNT:   { baseDate: new Date(2026, 2, 6),  cicloDias: 4, metadeCiclo: 2 },  '1x1': { baseDate: new Date(2026, 0, 1) }});const SCHEMA_VERSION = 1;const BACKUP_KEYS = [  'braun_nome_completo','braun_matricula','braun_turma_perfil','braun_ano','braun_setor',  'braun_last_region','braun_turma_BR','braun_turma_MNT','braun_turma_1x1',  'braun_ferias_inicio','braun_ferias_fim','braun_dark_mode',  'braun_minimal_greeting','braun_voice_response','braun_haptic',  'braun_cartilhas_lidas','braun_conquistas','braun_quizzes_acertados',  'braun_novidades_lidas','logs_v26'];/* ============================================================   2) STORAGE HELPERS   ============================================================ */function getStorageValue(key) {  try { return localStorage.getItem(key); } catch (e) {    try { return sessionStorage.getItem(key); } catch (f) { return null; }  }}function getJSON(key, fallback) {  try {    const raw = getStorageValue(key);    if (raw === null || raw === undefined || raw === '') return fallback;    const v = JSON.parse(raw);    if (Array.isArray(fallback)) return Array.isArray(v) ? v : fallback;    return (v !== null && typeof v === 'object' && !Array.isArray(v)) ? v : fallback;  } catch (e) { return fallback; }}window.__braunErrors = window.__braunErrors || [];function registrarErro(onde, err) {  try {    window.__braunErrors.push(onde + ': ' + (err && err.message ? err.message : String(err)));    console.error('[Braun] ' + onde, err);  } catch (e) {}}function safeRun(nome, fn) {  try { fn(); } catch (err) { registrarErro(nome, err); }}function setStorageValue(key, value) {  try { localStorage.setItem(key, value); } catch (e) {    try { sessionStorage.setItem(key, value); } catch (f) {}  }}function removeStorageValue(key) {  try { localStorage.removeItem(key); } catch (e) {    try { sessionStorage.removeItem(key); } catch (f) {}  }}/* ============================================================   3) UTILITÁRIOS   ============================================================ */function dec(str) {  if (!str) return '';  var txt = document.createElement('textarea');  txt.innerHTML = str;  return txt.value;}function escapeHtml(text) {  if (!text) return '';  const div = document.createElement('div');  div.textContent = text;  return div.innerHTML;}function haptic(ms) { /* no-op — API desativada */ }/* ============================================================   4) TOAST SYSTEM   ============================================================ */function toast(mensagem, tipo, duracaoMs) {  tipo = tipo || 'info';  duracaoMs = duracaoMs || 3200;  const container = document.getElementById('toast-container');  if (!container) return;  const el = document.createElement('div');  el.className = 'toast ' + tipo;  const icones = { sucesso: 'check_circle', erro: 'error', info: 'info', aviso: 'warning' };  el.innerHTML = '<span class="material-symbols-outlined">' + (icones[tipo] || 'info') + '</span><div class="toast-msg">' + escapeHtml(mensagem) + '</div>';  container.appendChild(el);  setTimeout(function () {    el.classList.add('saindo');    setTimeout(function () { el.remove(); }, 320);  }, duracaoMs);}function toastConfirm(mensagem, onConfirm) {  const container = document.getElementById('toast-container');  if (!container) return;  const el = document.createElement('div');  el.className = 'toast aviso';  el.innerHTML = '<span class="material-symbols-outlined">help</span><div style="flex:1;"><div class="toast-msg">' + escapeHtml(mensagem) + '</div><div class="toast-actions"><button data-action="ok">Confirmar</button><button data-action="cancel" class="secundario">Cancelar</button></div></div>';  el.querySelector('[data-action="ok"]').addEventListener('click', function () { el.remove(); onConfirm(true); });  el.querySelector('[data-action="cancel"]').addEventListener('click', function () { el.remove(); onConfirm(false); });  container.appendChild(el);  setTimeout(function () { if (el.parentNode) el.remove(); }, 8000);}/* ============================================================   5) LRU CACHE   ============================================================ */function LRUCache(max) { this.max = max || 800; this.map = new Map(); }LRUCache.prototype.get = function (k) { if (!this.map.has(k)) return undefined; var v = this.map.get(k); this.map.delete(k); this.map.set(k, v); return v; };LRUCache.prototype.set = function (k, v) { if (this.map.has(k)) this.map.delete(k); this.map.set(k, v); if (this.map.size > this.max) { var f = this.map.keys().next().value; this.map.delete(f); } };LRUCache.prototype.clear = function () { this.map.clear(); };/* ============================================================   6) MODAL FOCUS TRAP   ============================================================ */let activeModalElement = null;let lastFocusedElement = null;const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';function trapFocus(e) {  if (!activeModalElement) return;  const focusable = activeModalElement.querySelectorAll(FOCUSABLE);  if (!focusable.length) return;  const first = focusable[0], last = focusable[focusable.length - 1];  const isTab = e.key === 'Tab' || e.keyCode === 9;  if (!isTab) return;  if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }  else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }}function focusModal(modalId) {  const overlay = document.getElementById('overlay');  const modal = document.getElementById(modalId);  if (!modal) return;  // Garante que o menu lateral (z-index 3600) nunca fique por cima de um modal (z-index 2000)  const drawer = document.getElementById('hamburgerDrawer');  if (drawer && drawer.classList.contains('open')) closeHamburger();  lastFocusedElement = document.activeElement;  overlay.style.display = 'block';  modal.classList.add('show');  const main = document.getElementById('main-content');  const header = document.querySelector('header');  if (main) main.setAttribute('aria-hidden', 'true');  if (header) header.setAttribute('aria-hidden', 'true');  if (activeModalElement) document.removeEventListener('keydown', trapFocus);  activeModalElement = modal;  document.addEventListener('keydown', trapFocus);  const first = modal.querySelector(FOCUSABLE);  if (first) setTimeout(function () { first.focus(); }, 50);}function closeAllModals() {  document.getElementById('overlay').style.display = 'none';  document.querySelectorAll('.bottom-modal').forEach(function (el) { el.classList.remove('show'); });  document.removeEventListener('keydown', trapFocus);  activeModalElement = null;  const main = document.getElementById('main-content');  const header = document.querySelector('header');  if (main) main.removeAttribute('aria-hidden');  if (header) header.removeAttribute('aria-hidden');  if (lastFocusedElement && lastFocusedElement.focus) { lastFocusedElement.focus(); lastFocusedElement = null; }}/* ============================================================   7) CACHES E FERIADOS   ============================================================ */let cachedFerias = null;function getFeriasRange() {  if (cachedFerias) return cachedFerias;  cachedFerias = { inicio: getStorageValue('braun_ferias_inicio'), fim: getStorageValue('braun_ferias_fim') };  return cachedFerias;}function clearFeriasCache() { cachedFerias = null; }const _escalaCache = new LRUCache(800);const weekNumberCache = new LRUCache(900);let cachedStats = {};let feriadosCache = {};function calculaPascoa(ano) {  const a = ano % 19, b = Math.floor(ano / 100), c = ano % 100;  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;  const m = Math.floor((a + 11 * h + 22 * l) / 451);  const mes = Math.floor((h + l - 7 * m + 114) / 31);  const dia = ((h + l - 7 * m + 114) % 31) + 1;  return new Date(ano, mes - 1, dia);}function getFeriados(ano) {  if (feriadosCache[ano]) return feriadosCache[ano];  const f = {    '01-01':'Ano Novo','04-21':'Tiradentes','04-23':'São Jorge','05-01':'Dia do Trabalho',    '09-07':'Independência','09-22':'Aniv. São Gonçalo','10-12':'N. S. Aparecida',    '11-02':'Finados','11-15':'Proclamação da República','12-25':'Natal'  };  const p = calculaPascoa(ano);  const car = new Date(p.getTime() - 47 * 86400000);  const ss = new Date(p.getTime() - 2 * 86400000);  const ck = String(car.getMonth() + 1).padStart(2, '0') + '-' + String(car.getDate()).padStart(2, '0');  const sk = String(ss.getMonth() + 1).padStart(2, '0') + '-' + String(ss.getDate()).padStart(2, '0');  if (!f[ck]) f[ck] = 'Carnaval';  if (!f[sk]) f[sk] = 'Sexta-Feira Santa';  feriadosCache[ano] = f;  return f;}function getWeekNumberCached(d) {  const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();  let v = weekNumberCache.get(key);  if (v !== undefined) return v;  v = getWeekNumber(d);  weekNumberCache.set(key, v);  return v;}function getWeekNumber(d) {  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));  const ys = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));  return Math.ceil((((d - ys) / 86400000) + 1) / 7);}/* ============================================================   8) ESTADO GLOBAL   ============================================================ */let currentRegion = getStorageValue('braun_last_region') || 'BR';let dataAtiva = '';const translations = {  BR:    { statusTrab: 'TRABALHANDO', statusFolga: 'DE FOLGA',  days: ['S','T','Q','Q','S','S','D'] },  MNT:   { statusTrab: 'TRABALHANDO', statusFolga: 'FOLGA MNT', days: ['S','T','Q','Q','S','S','D'] },  '1x1': { statusTrab: 'TRABALHANDO', statusFolga: 'FOLGA 1x1', days: ['S','T','Q','Q','S','S','D'] }};let currentAno = parseInt(getStorageValue('braun_ano')) || 2026;let currentTurma = getStorageValue('braun_turma_' + currentRegion) || 'AC';let mesAtualVisivel = new Date().getMonth();let anoAtualVisivel = currentAno;/* ============================================================   9) LÓGICA DE ESCALA   ============================================================ */function checkBR(dt, t) {  const k = 'BR_' + dt.getFullYear() + '_' + dt.getMonth() + '_' + dt.getDate() + '_' + t;  let v = _escalaCache.get(k); if (v !== undefined) return v;  const c = ESCALA_CONFIG.BR;  const diff = Math.floor((dt.getTime() - c.baseDate.getTime()) / 86400000);  const isA = (((diff % c.cicloDias) + c.cicloDias) % c.cicloDias) < c.metadeCiclo;  v = { isA: isA, trab: (t === 'AC' && isA) || (t === 'BD' && !isA) };  _escalaCache.set(k, v); return v;}function checkMnt(dt, t) {  const k = 'MNT_' + dt.getFullYear() + '_' + dt.getMonth() + '_' + dt.getDate() + '_' + t;  let v = _escalaCache.get(k); if (v !== undefined) return v;  const c = ESCALA_CONFIG.MNT;  const diff = Math.floor((dt.getTime() - c.baseDate.getTime()) / 86400000);  const ciclo = ((diff % c.cicloDias) + c.cicloDias) % c.cicloDias;  const isEG = ciclo < c.metadeCiclo;  v = { isEG: isEG, trab: (t === 'EG' ? isEG : !isEG) };  _escalaCache.set(k, v); return v;}function check1x1(dt, turma) {  const k = '1x1_' + dt.getFullYear() + '_' + dt.getMonth() + '_' + dt.getDate() + '_' + turma;  let v = _escalaCache.get(k); if (v !== undefined) return v;  const c = ESCALA_CONFIG['1x1'];  const diff = Math.floor((dt.getTime() - c.baseDate.getTime()) / 86400000);  const isEquipeA = (turma === '1x1A' || turma === '1x1C');  const par = (((diff % 2) + 2) % 2) === 0;  const trab = isEquipeA ? par : !par;  v = { trab: trab, isEquipeA: isEquipeA };  _escalaCache.set(k, v); return v;}function isTurnoNoite1x1(t) { return t === '1x1C' || t === '1x1D'; }function isTrabalhando(dt, r, t) {  if (r === 'BR') return checkBR(dt, t).trab;  if (r === '1x1') return check1x1(dt, t).trab;  return checkMnt(dt, t).trab;}function isFerias(dt) {  const r = getFeriasRange();  if (!r.inicio || !r.fim) return false;  const d = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();  return d >= new Date(r.inicio + 'T00:00:00').getTime() && d <= new Date(r.fim + 'T00:00:00').getTime();}function getDataRetorno() {  const range = getFeriasRange();  if (!range.fim) return null;  const fim = new Date(range.fim + 'T00:00:00');  const d = new Date(fim.getTime());  for (let i = 0; i < 30; i++) {    d.setDate(d.getDate() + 1);    if (isTrabalhando(d, currentRegion, currentTurma)) return new Date(d.getTime());  }  return null;}function diaDaSemanaPorExtenso(d) {  return ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'][d.getDay()];}function formatarTurmaParaVoz(t) {  if (!t) return '';  if (t === '1x1A') return '1x1 manhã equipe A';  if (t === '1x1B') return '1x1 manhã equipe B';  if (t === '1x1C') return '1x1 noite equipe A';  if (t === '1x1D') return '1x1 noite equipe B';  if (t.length !== 2) return t;  return t.split('').join(' e ');}function nomeRegiao(r) {  if (r === 'BR') return 'ECOFLAC';  if (r === '1x1') return '1x1';  return 'MANUTENÇÃO';}/* ============================================================   10) RELÓGIO + CONTADOR DE FÉRIAS   ============================================================ */let clockInterval = null;function startClock() {  if (clockInterval) clearInterval(clockInterval);  clockInterval = setInterval(function () { if (document.visibilityState === 'visible') tick(); }, 1000);}document.addEventListener('visibilitychange', function () {  if (document.visibilityState === 'hidden') { if (clockInterval) clearInterval(clockInterval); }  else { startClock(); tick(); }});function tick() {  const now = new Date();  const bc = document.getElementById('big-clock');  if (bc) bc.innerText = now.toLocaleTimeString('pt-BR');  const msg = document.getElementById('status-msg');  if (msg) {    if (getStorageValue('braun_minimal_greeting') === 'true') {      const h = now.getHours();      let s;      if (h >= 5 && h < 12) s = 'BOM DIA';      else if (h >= 12 && h < 18) s = 'BOA TARDE';      else s = 'BOA NOITE';      msg.innerText = s; msg.style.color = 'var(--primary)';    } else if (isFerias(now)) {      msg.innerText = 'EM FÉRIAS \u2708\uFE0F'; msg.style.color = '#7030A0';    } else {      const trab = isTrabalhando(now, currentRegion, currentTurma);      if (currentRegion === '1x1' && trab) {        msg.innerText = isTurnoNoite1x1(currentTurma) ? 'TRABALHANDO (NOITE)' : 'TRABALHANDO (MANHÃ)';      } else {        msg.innerText = trab ? translations[currentRegion].statusTrab : translations[currentRegion].statusFolga;      }      msg.style.color = trab ? 'var(--accent)' : 'var(--primary)';    }  }  atualizarContadorFerias();}function atualizarContadorFerias() {  const el = document.getElementById('dias-ferias');  if (!el) return;  const range = getFeriasRange();  if (!range.inicio || !range.fim) { el.style.display = 'none'; return; }  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);  const inicio = new Date(range.inicio + 'T00:00:00');  const fim = new Date(range.fim + 'T00:00:00');  if (hoje < inicio) {    const dias = Math.round((inicio - hoje) / 86400000);    el.innerText = dias === 1 ? '🏖️ Suas férias começam amanhã!' : '🏖️ Faltam ' + dias + ' dias para suas férias';    el.style.display = 'inline-flex';  } else if (hoje >= inicio && hoje <= fim) {    const rest = Math.round((fim - hoje) / 86400000);    el.innerText = rest === 0 ? '🏖️ Último dia de férias' : '🏖️ Férias em andamento · ' + rest + ' dia' + (rest > 1 ? 's' : '') + ' restante' + (rest > 1 ? 's' : '');    el.style.display = 'inline-flex';  } else { el.style.display = 'none'; }}/* ============================================================   11) PWA   ============================================================ */let deferredPrompt = null;window.addEventListener('beforeinstallprompt', function (e) {  e.preventDefault(); deferredPrompt = e;  const btn = document.getElementById('install-button');  if (btn) btn.style.display = 'flex';});function installPWA() {  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; const b = document.getElementById('install-button'); if (b) b.style.display = 'none'; }}function mostrarBannerAtualizacao() { const b = document.getElementById('update-banner'); if (b) b.classList.add('show'); }function dispensarAtualizacao() { const b = document.getElementById('update-banner'); if (b) b.classList.remove('show'); }function aplicarAtualizacao() {  if (navigator.serviceWorker) { navigator.serviceWorker.getRegistration().then(function (reg) { if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }); }  setTimeout(function () { window.location.reload(); }, 400);}if ('serviceWorker' in navigator) {  navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'SW_UPDATED') mostrarBannerAtualizacao(); });}if (getStorageValue('braun_update_pending') === 'true') {  window.addEventListener('load', function () {    setTimeout(function () { mostrarBannerAtualizacao(); removeStorageValue('braun_update_pending'); }, 1500);  });}/* ============================================================   12) REGIÃO / BADGE / LEGENDA   ============================================================ */function atualizarBadgeTurma() {  const tl = getStorageValue('braun_turma_perfil') || 'A';  const bt = document.getElementById('turmaBadgeText'); if (!bt) return;  if (tl.indexOf('1x1') === 0) {    const turno = (tl === '1x1A' || tl === '1x1B') ? 'M' : 'N';    const eq = (tl === '1x1A' || tl === '1x1C') ? 'A' : 'B';    bt.innerText = '1x1 ' + turno + ' ' + eq;  } else { bt.innerText = 'Turma ' + tl; }}function atualizarLegenda1x1() {  const b = document.querySelector('.sticky-header-block'); if (!b) return;  if (currentRegion === '1x1') b.classList.add('com-legenda'); else b.classList.remove('com-legenda');}function setRegion(r) {  currentRegion = r; setStorageValue('braun_last_region', r);  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });  const at = document.getElementById('tab-' + r);  if (at) { at.classList.add('active'); at.setAttribute('aria-selected', 'true'); }  if (r === '1x1') { currentTurma = getStorageValue('braun_turma_1x1') || '1x1A'; setStorageValue('braun_turma_1x1', currentTurma); }  else { currentTurma = getStorageValue('braun_turma_' + r) || (r === 'BR' ? 'AC' : 'EG'); }  _escalaCache.clear();  atualizarLegenda1x1();  gerarCalendario();  tick();  scrollParaMes(mesAtualVisivel, anoAtualVisivel);}/* ============================================================   13) BANNER DE AVISOS (com countdown de férias)   ============================================================ */function atualizarBannerAvisos() {  const banner = document.getElementById('banner-avisos');  const content = document.getElementById('bannerContent');  const mesNav = document.getElementById('mesNav');  if (!banner || !content || !mesNav) return;  const hoje = new Date();  hoje.setHours(0, 0, 0, 0);  const items = [];  // Countdown de férias (em destaque, primeiro item)  const range = getFeriasRange();  if (range.inicio && range.fim) {    const inicio = new Date(range.inicio + 'T00:00:00');    const fim = new Date(range.fim + 'T00:00:00');    if (hoje < inicio) {      const dias = Math.round((inicio - hoje) / 86400000);      if (dias === 1) items.push({ icon: 'beach_access', texto: 'Suas férias começam AMANHÃ!', destaque: true });      else items.push({ icon: 'beach_access', texto: 'Faltam ' + dias + ' dias para suas férias', destaque: true });    } else if (hoje >= inicio && hoje <= fim) {      const rest = Math.round((fim - hoje) / 86400000);      if (rest === 0) items.push({ icon: 'beach_access', texto: 'Último dia de férias', destaque: true });      else items.push({ icon: 'beach_access', texto: 'Férias em andamento · ' + rest + ' dia' + (rest > 1 ? 's' : '') + ' restante' + (rest > 1 ? 's' : ''), destaque: true });    }  }  // Notas futuras  const logs = getJSON('logs_v26', {});  Object.keys(logs)    .filter(function (iso) {      const d = new Date(iso + 'T00:00:00');      return d >= hoje && logs[iso] && logs[iso].trim() !== '';    })    .sort()    .forEach(function (iso) {      const p = iso.split('-');      items.push({ icon: 'event', texto: p[2] + '/' + p[1] + ' — ' + logs[iso], destaque: false });    });  if (items.length === 0) {    banner.classList.remove('show');    mesNav.classList.add('sem-banner');    return;  }  let html = '';  items.forEach(function (item) {    const styleInner = item.destaque      ? 'background:rgba(255,255,255,0.22);padding:4px 14px;border-radius:20px;font-weight:900;letter-spacing:0.3px;'      : '';    html += '<span class="banner-item">' +            '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">' + item.icon + '</span>' +            '<span style="' + styleInner + '">' + escapeHtml(item.texto) + '</span>' +            '</span>';  });  content.innerHTML = html;  banner.classList.add('show');  mesNav.classList.remove('sem-banner');  content.style.animation = 'none';  void content.offsetWidth;  content.style.animation = '';}/* ============================================================   14) CALENDÁRIO   ============================================================ */let calendarioGeracao = 0;function gerarCalendario() {  const box = document.getElementById('calendario-box');  box.innerHTML = '';  const mg = ++calendarioGeracao;  let cm = 0; const total = 12; const ano = anoAtualVisivel;  function next() {    if (mg !== calendarioGeracao) return;    if (cm >= total) { setTimeout(function () { if (mg !== calendarioGeracao) return; scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 100); return; }    const m = cm, t = currentTurma, fer = getFeriados(ano), lang = translations[currentRegion];    const logs = getJSON('logs_v26', {});    const hojeStr = new Date().toDateString();    const dtM = new Date(ano, m, 1);    const nomeM = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(dtM);    const container = document.createElement('div');    container.className = 'mes-container';    container.dataset.mes = m; container.dataset.ano = ano;    let hF = '<div class="mes-face mes-front"><div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;"><span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">' + nomeM + '</span><span style="color:var(--primary);font-weight:800;font-size:1.1em;">' + ano + '</span></div><div class="grid"><div class="dia-label">W</div>' + lang.days.map(function (s) { return '<div class="dia-label">' + s + '</div>'; }).join('');    let hB = '<div class="mes-face mes-back"><div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;"><span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">' + nomeM + '</span><span style="font-weight:800;font-size:1.1em;">' + ano + '</span></div><div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>';    let hasEv = false;    const dataRetorno = getDataRetorno();    const retornoStr = dataRetorno ? dataRetorno.toDateString() : '';    const dnm = new Date(ano, m + 1, 0).getDate();    const dsi = dtM.getDay();    const esp = dsi === 0 ? 6 : dsi - 1;    hF += '<div class="dia-label-w">' + getWeekNumberCached(dtM) + '</div>';    for (let i = 0; i < esp; i++) hF += '<div></div>';    let col = esp;    for (let d = 1; d <= dnm; d++) {      const at = new Date(ano, m, d);      const isoS = String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');      const isoF = ano + '-' + isoS;      const f = fer[isoS], nt = logs[isoF];      if (col === 7) { col = 0; hF += '<div class="dia-label-w">' + getWeekNumberCached(at) + '</div>'; }      let cls = 'dia '; let sh = '';      if (currentRegion === 'BR') {        const r = checkBR(at, t);        cls += (r.isA ? 'AMARELO ' : 'VERDE ') + (r.trab ? 'TRABALHO ' : 'FOLGA ');        sh = r.trab ? 'trabalhando' : 'de folga';      } else if (currentRegion === '1x1') {        const r = check1x1(at, t); const n = isTurnoNoite1x1(t);        if (r.trab) { cls += (n ? 'ROXO ' : 'LARANJA ') + 'TRABALHO '; sh = n ? 'trabalhando no turno da noite' : 'trabalhando no turno da manhã'; }        else { cls += 'VERDE FOLGA '; sh = 'de folga'; }      } else {        const mnt = checkMnt(at, t);        cls += (mnt.isEG ? 'AZUL ' : 'VERDE ') + (mnt.trab ? 'TRABALHO ' : 'FOLGA ');        sh = mnt.trab ? 'trabalhando' : 'de folga';      }      if (hojeStr === at.toDateString()) cls += 'hoje ';      if (nt) cls += 'HAS_NOTE ';      if (isFerias(at)) { cls += 'FERIAS '; sh = 'em férias'; }      const isRetorno = (retornoStr && at.toDateString() === retornoStr);      if (isRetorno) { cls += 'RETORNO '; sh = 'primeiro dia de retorno ao trabalho'; }      if (f || nt || isRetorno) {        hasEv = true;        let evLine = '<div style="font-size:0.9em;margin-bottom:8px;"><b>' + d + ':</b> ';        const partes = [];        if (f) partes.push(f);        if (nt) partes.push('&#128221; ' + escapeHtml(nt));        if (isRetorno) partes.push('&#128295; Retorno ao trabalho');        evLine += partes.join(' · ');        evLine += '</div>';        hB += evLine;      }      const al = d + ' de ' + nomeM + ' de ' + ano + ', ' + sh + (f ? ', feriado: ' + f : '') + (nt ? ', com anotação' : '') + '. Toque para ver detalhes.';      hF += '<div class="' + cls.trim() + '" data-iso="' + isoF + '" role="button" tabindex="0" aria-label="' + escapeHtml(al) + '">' + d + '</div>';      col++;    }    hF += '</div></div>';    hB += (hasEv ? '' : '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>') + '</div>';    if (mg !== calendarioGeracao) return;    container.innerHTML = '<div class="mes-inner">' + hF + hB + '</div>';    box.appendChild(container);    cm++;    requestAnimationFrame(function () { if (mg !== calendarioGeracao) return; setTimeout(next, 0); });  }  next();  atualizarTituloMes();}function bindCalendarioDelegation() {  const box = document.getElementById('calendario-box');  if (!box || box.dataset.bound === '1') return;  box.dataset.bound = '1';  function handleDia(el) { if (el.dataset.iso) openCard(el.dataset.iso); }  box.addEventListener('click', function (e) {    const dia = e.target.closest('.dia');    if (dia) { e.stopPropagation(); handleDia(dia); return; }    const face = e.target.closest('.mes-face');    if (face && face.parentElement) face.parentElement.classList.toggle('flipped');  });  box.addEventListener('keydown', function (e) {    if (e.key !== 'Enter' && e.key !== ' ') return;    const dia = e.target.closest('.dia');    if (dia) { e.preventDefault(); handleDia(dia); return; }    const face = e.target.closest('.mes-face');    if (face && face.parentElement) { e.preventDefault(); face.parentElement.classList.toggle('flipped'); }  });}/* ============================================================   15) MODAIS   ============================================================ */function openCard(iso) {  dataAtiva = iso;  const logs = getJSON('logs_v26', {});  const d = iso.split('-');  document.getElementById('card-data').innerText = d[2] + '/' + d[1] + '/' + d[0];  document.getElementById('noteInput').value = logs[iso] || '';  const dtSel = new Date(d[0], d[1] - 1, d[2]);  const yy = dtSel.getFullYear().toString().slice(-2);  const ww = String(getWeekNumberCached(dtSel)).padStart(2, '0');  let ds = dtSel.getDay(); ds = ds === 0 ? 7 : ds;  document.getElementById('lote-display').innerText = yy + ww + ds;  focusModal('infoCard');}function copyLote() {  const disp = document.getElementById('lote-display');  const lote = disp.innerText, orig = lote;  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(lote).catch(function () {});  else {    const ta = document.createElement('textarea');    ta.value = lote; ta.style.position = 'fixed'; ta.style.opacity = '0';    document.body.appendChild(ta); ta.select();    try { document.execCommand('copy'); } catch (e) {}    document.body.removeChild(ta);  }  disp.innerText = 'COPIADO!';  toast('Lote copiado.', 'sucesso', 2000);  setTimeout(function () { disp.innerText = orig; }, 1000);}function saveNota() {  const log = document.getElementById('noteInput').value;  const logs = getJSON('logs_v26', {});  if (log.trim() === '') delete logs[dataAtiva]; else logs[dataAtiva] = log.trim();  setStorageValue('logs_v26', JSON.stringify(logs));  closeAllModals(); gerarCalendario(); atualizarBannerAvisos();  toast('Anotação salva.', 'sucesso');}function openHamburger() {  document.getElementById('hamburgerDrawer').classList.add('open');  document.getElementById('drawerOverlay').classList.add('show');  const mb = document.getElementById('menuButton'); if (mb) mb.setAttribute('aria-expanded', 'true');  setTimeout(function () { const c = document.querySelector('#hamburgerDrawer .drawer-close-btn'); if (c) c.focus(); }, 100);}function closeHamburger() {  document.getElementById('hamburgerDrawer').classList.remove('open');  document.getElementById('drawerOverlay').classList.remove('show');  const mb = document.getElementById('menuButton'); if (mb) mb.setAttribute('aria-expanded', 'false'); if (mb) mb.focus();}function openRamais() { focusModal('ramaisCard'); }function openPrivacy() { focusModal('privacyCard'); }function openMeuPerfil() {  closeHamburger();  document.getElementById('nomePerfil').value = getStorageValue('braun_nome_completo') || '';  document.getElementById('matriculaPerfil').value = getStorageValue('braun_matricula') || '';  document.getElementById('turmaPerfil').value = getStorageValue('braun_turma_perfil') || 'A';  document.getElementById('anoPerfil').value = getStorageValue('braun_ano') || '2026';  document.getElementById('setorPerfil').value = getStorageValue('braun_setor') || '';  focusModal('meuPerfilCard');}function openColaboradorDoMes() {  closeHamburger();  preencherDadosModais();  const vn = document.getElementById('votoNome');  if (vn) vn.value = '';  const bloco = document.getElementById('votoFormBloco');  const agrad = document.getElementById('votoAgradecimento');  if (bloco) bloco.style.display = 'block';  if (agrad) agrad.style.display = 'none';  focusModal('colaboradorDoMesCard');}function openMeusPedidos() { closeHamburger(); preencherDadosModais(); limparPedido(); focusModal('meusPedidosCard'); }function openConfig() {  const tgMin = document.getElementById('minimalGreetingToggle');  const tgVoz = document.getElementById('voiceResponseToggle');  if (tgMin) tgMin.checked = getStorageValue('braun_minimal_greeting') === 'true';  if (tgVoz) tgVoz.checked = getStorageValue('braun_voice_response') !== 'false';  focusModal('configCard');}function openFerias() {  document.getElementById('feriasInicio').value = getStorageValue('braun_ferias_inicio') || '';  document.getElementById('feriasFim').value = getStorageValue('braun_ferias_fim') || '';  document.getElementById('feriasDuracao').value = '30';  document.getElementById('sugestoesFerias').innerHTML = '';  popularMesesFerias();  document.getElementById('configCard').classList.remove('show');  focusModal('feriasCard');}function openStats() {  const ano = parseInt(currentAno), turma = currentTurma;  const ck = ano + '_' + turma + '_' + currentRegion;  if (cachedStats[ck]) { document.getElementById('stats-content').innerHTML = cachedStats[ck]; document.getElementById('configCard').classList.remove('show'); focusModal('statsCard'); return; }  const feriados = getFeriados(ano);  let dt = 0, df = 0, ft = 0, ff = 0, lfh = '';  for (let m = 0; m < 12; m++) {    for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {      const dTeste = new Date(ano, m, d);      const isoS = String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');      const res = isTrabalhando(dTeste, currentRegion, turma);      if (res) dt++; else df++;      if (feriados[isoS]) {        if (res) ft++; else ff++;        lfh += '<div>' + feriados[isoS] + ' (' + (res ? 'TRABALHA' : 'FOLGA') + ')</div>';      }    }  }  const html = '<div class="stat-grid"><div class="stat-card-big purple"><div class="stat-val-big purple">' + dt + '</div><div class="stat-lab-big">Dias Trabalhados</div></div><div class="stat-card-big teal"><div class="stat-val-big teal">' + df + '</div><div class="stat-lab-big">Dias de Folga</div></div></div><div style="background:var(--bg);border-radius:15px;padding:15px;border:1px solid var(--border);margin-top:10px;"><div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;"><span>Feriados trabalhados</span><span style="color:var(--accent);">' + ft + '</span></div><div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;"><span>Feriados de folga</span><span style="color:var(--verde);">' + ff + '</span></div>' + (lfh ? '<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:0.85em;">' + lfh + '</div>' : '') + '</div>';  cachedStats[ck] = html;  document.getElementById('stats-content').innerHTML = html;  document.getElementById('configCard').classList.remove('show');  focusModal('statsCard');}/* ============================================================   16) PERFIL / PEDIDOS / VOTAÇÃO   ============================================================ */function salvarDadosPerfil() {  const nome = document.getElementById('nomePerfil').value;  const matr = document.getElementById('matriculaPerfil').value;  const turma = document.getElementById('turmaPerfil').value;  const ano = document.getElementById('anoPerfil').value;  const setor = document.getElementById('setorPerfil').value;  setStorageValue('braun_nome_completo', nome);  setStorageValue('braun_matricula', matr);  setStorageValue('braun_turma_perfil', turma);  setStorageValue('braun_ano', ano);  setStorageValue('braun_setor', setor);  let region, grupo;  if (['A','B','C','D'].indexOf(turma) > -1) { region = 'BR'; grupo = (turma === 'A' || turma === 'C') ? 'AC' : 'BD'; }  else if (turma.indexOf('1x1') === 0) { region = '1x1'; grupo = turma; }  else { region = 'MNT'; grupo = (turma === 'E' || turma === 'G') ? 'EG' : 'FH'; }  currentRegion = region; currentTurma = grupo;  setStorageValue('braun_last_region', region);  setStorageValue('braun_turma_' + region, grupo);  currentAno = parseInt(ano) || 2026;  anoAtualVisivel = currentAno;  mesAtualVisivel = new Date().getMonth();  _escalaCache.clear();  atualizarLegenda1x1();  gerarCalendario();  tick();  atualizarBannerAvisos();  atualizarBadgeTurma();  preencherDadosModais();}function preencherDadosModais() {  const nome = getStorageValue('braun_nome_completo') || '---';  const matr = getStorageValue('braun_matricula') || '---';  const turma = getStorageValue('braun_turma_perfil') || '---';  const ano = getStorageValue('braun_ano') || '---';  const vt = document.getElementById('votacaoTurma');  const vm = document.getElementById('votacaoMatricula');  const pn = document.getElementById('pedidoNome');  const pm = document.getElementById('pedidoMatricula');  const pt = document.getElementById('pedidoTurma');  const pa = document.getElementById('pedidoAno');  if (vt) vt.innerText = turma;  if (vm) vm.innerText = matr;  if (pn) pn.innerText = nome;  if (pm) pm.innerText = matr;  if (pt) pt.innerText = turma;  if (pa) pa.innerText = ano;}function abrirFormularioVotacao() {  const turma = getStorageValue('braun_turma_perfil') || '';  const matricula = getStorageValue('braun_matricula') || '';  const votoInput = document.getElementById('votoNome');  const voto = votoInput ? votoInput.value.trim() : '';  if (!turma) { toast('Preencha sua turma no Perfil primeiro.', 'aviso'); return; }  if (!matricula) { toast('Preencha sua matrícula no Perfil primeiro.', 'aviso'); return; }  if (!voto) { toast('Digite o nome do colaborador que você quer votar.', 'aviso'); return; }  const url = 'https://docs.google.com/forms/d/e/1FAIpQLSdoP_K57HRUXTrnMX23k2cB2h0m8UBwxiGihBoORWCrdE_x3Q/viewform?usp=pp_url' +    '&entry.1097002360=' + encodeURIComponent(turma) +    '&entry.2099346238=' + encodeURIComponent(matricula) +    '&entry.1005686647=' + encodeURIComponent(voto);  window.open(url, '_blank');  const bloco = document.getElementById('votoFormBloco');  const agrad = document.getElementById('votoAgradecimento');  if (bloco) bloco.style.display = 'none';  if (agrad) agrad.style.display = 'block';  toast('Formulário aberto em outra aba!', 'sucesso', 4000);}function voltarAoVoto() {  const bloco = document.getElementById('votoFormBloco');  const agrad = document.getElementById('votoAgradecimento');  const vn = document.getElementById('votoNome');  if (bloco) bloco.style.display = 'block';  if (agrad) agrad.style.display = 'none';  if (vn) vn.value = '';  setTimeout(function () { if (vn) vn.focus(); }, 100);}function limparPedido() {  const card = document.getElementById('meusPedidosCard'); if (!card) return;  card.querySelectorAll('.pedido-qtd, .pedido-tam, .pedido-nome-livre').forEach(function (i) { i.value = ''; });  const obs = document.getElementById('pedidoObs'); if (obs) obs.value = '';}function enviarPedidoEmail() {  const nome = getStorageValue('braun_nome_completo') || '';  const matr = getStorageValue('braun_matricula') || '';  const turma = getStorageValue('braun_turma_perfil') || '';  const ano = getStorageValue('braun_ano') || '';  const setor = getStorageValue('braun_setor') || '';  const obs = document.getElementById('pedidoObs').value.trim();  const L1 = [], L2 = [], L3 = [];  document.querySelectorAll('#meusPedidosCard .pedido-item-row').forEach(function (row) {    const li = row.querySelector('.pedido-nome-livre');    const ni = li ? li.value.trim() : (row.dataset.item || '');    if (!ni) return;    const qi = row.querySelector('.pedido-qtd'), ti = row.querySelector('.pedido-tam');    const q = qi ? qi.value.trim() : '', t = ti ? ti.value.trim() : '';    if (!q || q === '0') return;    let l = '• ' + ni + ': ' + q + ' un.';    if (t) l += ' — Tamanho: ' + t;    if (row.dataset.secao === 'uniformes') L1.push(l);    else if (row.dataset.secao === 'epis') L2.push(l);    else L3.push(l);  });  if (!L1.length && !L2.length && !L3.length) { toast('Preencha a quantidade de pelo menos um item.', 'aviso'); return; }  let c = 'Nome: ' + nome + '\nMatrícula: ' + matr + '\nTurma: ' + turma + '\n';  if (setor) c += 'Setor: ' + setor + '\n';  c += 'Ano: ' + ano + '\n\nITENS SOLICITADOS\n=================\n\n';  if (L1.length) c += 'UNIFORMES:\n' + L1.join('\n') + '\n\n';  if (L2.length) c += 'EQUIPAMENTOS DE PROTEÇÃO (EPIs):\n' + L2.join('\n') + '\n\n';  if (L3.length) c += 'OUTROS ITENS:\n' + L3.join('\n') + '\n\n';  if (obs) c += 'OBSERVAÇÕES:\n' + obs + '\n';  const a = 'Pedido de Materiais - ' + (nome || 'Colaborador') + (matr ? ' (' + matr + ')' : '');  window.location.href = 'mailto:' + EMAIL_PEDIDOS + '?subject=' + encodeURIComponent(a) + '&body=' + encodeURIComponent(c);  toast('Abrindo seu e-mail...', 'info');}/* ============================================================   17) FÉRIAS   ============================================================ */function saveFerias() {  const ini = document.getElementById('feriasInicio').value;  const fim = document.getElementById('feriasFim').value;  if (!ini || !fim) { toast('Preencha as duas datas.', 'aviso'); return; }  if (ini > fim) { toast('A data de início não pode ser após o término.', 'erro'); return; }  setStorageValue('braun_ferias_inicio', ini);  setStorageValue('braun_ferias_fim', fim);  clearFeriasCache();  closeAllModals(); gerarCalendario(); tick(); atualizarBannerAvisos();  toast('Férias programadas.', 'sucesso');}function confirmarClearFerias() {  toastConfirm('Deseja limpar o período de férias?', function (ok) {    if (!ok) return;    removeStorageValue('braun_ferias_inicio'); removeStorageValue('braun_ferias_fim');    clearFeriasCache();    closeAllModals(); gerarCalendario(); tick(); atualizarBannerAvisos();    toast('Férias removidas.', 'info');  });}/* ---------- SUGESTÃO INTELIGENTE DE FÉRIAS ---------- */function popularMesesFerias() {  const sel = document.getElementById('feriasMes'); if (!sel) return;  sel.innerHTML = '';  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];  const hoje = new Date();  for (let i = 0; i < 12; i++) {    const d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);    const opt = document.createElement('option');    opt.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');    opt.innerText = nomes[d.getMonth()] + ' ' + d.getFullYear();    sel.appendChild(opt);  }}function calcularDiasEmCasaFerias(S, E) {  let X = new Date(S.getTime());  for (let i = 0; i < 10; i++) {    const prev = new Date(X.getTime()); prev.setDate(prev.getDate() - 1);    if (!isTrabalhando(prev, currentRegion, currentTurma)) X = prev; else break;  }  let Y = new Date(E.getTime());  for (let i = 0; i < 10; i++) {    const nx = new Date(Y.getTime()); nx.setDate(nx.getDate() + 1);    if (!isTrabalhando(nx, currentRegion, currentTurma)) Y = nx; else break;  }  return Math.round((Y.getTime() - X.getTime()) / 86400000) + 1;}function sugerirFerias() {  const mesStr = document.getElementById('feriasMes').value;  const duracao = parseInt(document.getElementById('feriasDuracao').value) || 30;  if (duracao < 5 || duracao > 60) { toast('Escolha entre 5 e 60 dias.', 'aviso'); return; }  if (!mesStr) { toast('Escolha um mês.', 'aviso'); return; }  const partes = mesStr.split('-');  const ano = parseInt(partes[0]), mes = parseInt(partes[1]) - 1;  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);  const dnm = new Date(ano, mes + 1, 0).getDate();  const cands = [];  for (let d = 1; d <= dnm; d++) {    const S = new Date(ano, mes, d);    if (S <= hoje) continue;    const E = new Date(S.getTime()); E.setDate(E.getDate() + duracao - 1);    const hd = calcularDiasEmCasaFerias(S, E);    cands.push({ S: S, E: E, homeDays: hd, ganho: hd - duracao });  }  if (!cands.length) { toast('Nenhuma data disponível nesse mês.', 'aviso'); return; }  cands.sort(function (a, b) { if (b.homeDays !== a.homeDays) return b.homeDays - a.homeDays; return a.S.getTime() - b.S.getTime(); });  const top = [];  for (let i = 0; i < cands.length && top.length < 5; i++) {    const c = cands[i];    if (!top.some(function (t) { return Math.abs(t.S.getTime() - c.S.getTime()) < 3 * 86400000; })) top.push(c);  }  renderSugestoesFerias(top, duracao);}function renderSugestoesFerias(sug, duracao) {  const container = document.getElementById('sugestoesFerias');  if (!sug.length) {    container.innerHTML = '<p style="font-size:0.85em;opacity:0.6;text-align:center;">Sem sugestões para esse mês.</p>';    return;  }  const nomeDia = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];  let html = '<div style="font-size:0.82em;opacity:0.7;margin-bottom:10px;">Toque numa opção para preencher as datas:</div>';  sug.forEach(function (s, i) {    const iniF = s.S.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });    const fimF = s.E.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });    let retorno = new Date(s.E.getTime());    for (let j = 0; j < 15; j++) {      retorno.setDate(retorno.getDate() + 1);      if (isTrabalhando(retorno, currentRegion, currentTurma)) break;    }    const retornoF = retorno.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });    const retornoDia = nomeDia[retorno.getDay()];    const b = s.ganho > 0      ? '<span style="background:var(--verde);color:white;padding:3px 10px;border-radius:20px;font-size:0.75em;font-weight:800;">+' + s.ganho + ' dia' + (s.ganho > 1 ? 's' : '') + '</span>'      : '<span style="background:var(--border);color:var(--text);padding:3px 10px;border-radius:20px;font-size:0.75em;font-weight:800;opacity:0.6;">sem ganho</span>';    const est = i === 0 ? ' ⭐' : '';    html += '<div data-sugestao-ini="' + s.S.toISOString().split('T')[0] + '" data-sugestao-fim="' + s.E.toISOString().split('T')[0] + '" class="sugestao-ferias-item" style="background:var(--bg);border:1.5px solid ' + (i === 0 ? 'var(--primary)' : 'var(--border)') + ';border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:0.2s;">' +      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +      '<div style="font-weight:800;font-size:0.95em;">' + iniF + ' → ' + fimF + est + '</div>' +      b +      '</div>' +      '<div style="font-size:0.8em;opacity:0.75;margin-top:6px;">Você ficará <strong>' + s.homeDays + ' dias em casa</strong> consecutivos.</div>' +      '<div style="font-size:0.82em;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;color:var(--accent);font-weight:700;">' +      '<span class="material-symbols-outlined" style="font-size:16px;">work</span>' +      'Retorno: <strong>' + retornoF + '</strong> (' + retornoDia + ')</div>' +      '</div>';  });  container.innerHTML = html;  container.querySelectorAll('.sugestao-ferias-item').forEach(function (el) {    el.addEventListener('click', function () {      document.getElementById('feriasInicio').value = el.dataset.sugestaoIni;      document.getElementById('feriasFim').value = el.dataset.sugestaoFim;      toast('Datas preenchidas! Toque em SALVAR PERÍODO.', 'sucesso', 2500);      el.scrollIntoView({ behavior: 'smooth', block: 'center' });    });  });}/* ============================================================   18) DARK MODE + NAV   ============================================================ */function atualizarThemeColor() {  const meta = document.querySelector('meta[name="theme-color"]');  if (!meta) return;  meta.setAttribute('content', document.documentElement.classList.contains('dark-mode') ? '#121212' : '#00A97A');}function toggleDarkMode() { document.documentElement.classList.toggle('dark-mode'); setStorageValue('braun_dark_mode', document.documentElement.classList.contains('dark-mode')); atualizarThemeColor(); }function toggleMinimalGreeting() { setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked ? 'true' : 'false'); tick(); }function toggleVoiceResponse() { setStorageValue('braun_voice_response', document.getElementById('voiceResponseToggle').checked ? 'true' : 'false'); }function atualizarTituloMes() {  const dt = new Date(anoAtualVisivel, mesAtualVisivel, 1);  const nome = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(dt);  const el = document.getElementById('mesNavTitle');  if (el) el.innerText = nome.charAt(0).toUpperCase() + nome.slice(1);}function mudarMes(d) {  mesAtualVisivel += d;  if (mesAtualVisivel > 11) { mesAtualVisivel = 0; anoAtualVisivel++; }  else if (mesAtualVisivel < 0) { mesAtualVisivel = 11; anoAtualVisivel--; }  if (anoAtualVisivel < 2026) { anoAtualVisivel = 2026; mesAtualVisivel = 0; }  if (anoAtualVisivel > 2027) { anoAtualVisivel = 2027; mesAtualVisivel = 11; }  if (anoAtualVisivel !== parseInt(currentAno)) {    currentAno = anoAtualVisivel; setStorageValue('braun_ano', String(currentAno));    _escalaCache.clear(); gerarCalendario();    setTimeout(function () { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 150);  } else { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }  atualizarTituloMes();}function irParaHoje() {  const h = new Date(); mesAtualVisivel = h.getMonth(); anoAtualVisivel = h.getFullYear();  if (anoAtualVisivel < 2026 || anoAtualVisivel > 2027) { anoAtualVisivel = 2026; mesAtualVisivel = 0; }  if (anoAtualVisivel !== parseInt(currentAno)) {    currentAno = anoAtualVisivel; setStorageValue('braun_ano', String(currentAno));    _escalaCache.clear(); gerarCalendario();    setTimeout(function () { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 150);  } else { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }  atualizarTituloMes();}function scrollParaMes(mes, ano) {  let c = document.querySelector('.mes-container[data-mes="' + mes + '"][data-ano="' + ano + '"]');  if (!c) {    currentAno = ano; setStorageValue('braun_ano', String(currentAno));    _escalaCache.clear(); gerarCalendario();    setTimeout(function () {      c = document.querySelector('.mes-container[data-mes="' + mes + '"][data-ano="' + ano + '"]');      if (c) {        const h = document.querySelector('header'), sb = document.querySelector('.sticky-header-block');        const tO = (h ? h.offsetHeight : 0) + (sb ? sb.offsetHeight : 0) + 20;        const r = c.getBoundingClientRect();        window.scrollTo({ top: Math.max(0, window.scrollY + r.top - tO), behavior: 'smooth' });      }    }, 200); return;  }  const h = document.querySelector('header'), sb = document.querySelector('.sticky-header-block');  const tO = (h ? h.offsetHeight : 0) + (sb ? sb.offsetHeight : 0) + 20;  const r = c.getBoundingClientRect();  window.scrollTo({ top: Math.max(0, window.scrollY + r.top - tO), behavior: 'smooth' });}function scrollToToday() {  const h = new Date(); mesAtualVisivel = h.getMonth(); anoAtualVisivel = h.getFullYear();  if (anoAtualVisivel < 2026 || anoAtualVisivel > 2027) { anoAtualVisivel = 2026; mesAtualVisivel = 0; }  if (anoAtualVisivel !== parseInt(currentAno)) {    currentAno = anoAtualVisivel; setStorageValue('braun_ano', String(currentAno));    _escalaCache.clear(); gerarCalendario();    setTimeout(function () { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 200);  } else { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }  atualizarTituloMes();}var welcomeTimer = null;function goToGreeting() {  const w = document.getElementById('welcomeScreen');  if (!w || w.classList.contains('hide')) return;  if (welcomeTimer) { clearTimeout(welcomeTimer); welcomeTimer = null; }  w.classList.add('hide');  setTimeout(function () { w.style.display = 'none'; setStorageValue('braun_visited', 'true'); atualizarThemeColor(); scrollToToday(); }, 600);}function boasVindas() {  const w = document.getElementById('welcomeScreen');  if (!w) return;  const nomeCompleto = (getStorageValue('braun_nome_completo') || '').trim();  const temNome = nomeCompleto.length > 0;  const visitado = getStorageValue('braun_visited');  let jaMostrou = false;  try { jaMostrou = sessionStorage.getItem('braun_welcome_session') === '1'; } catch (e) {}  if (!temNome && visitado) return;  if (temNome && jaMostrou) { setStorageValue('braun_visited', 'true'); return; }  const h = new Date().getHours();  const saud = (h >= 5 && h < 12) ? 'Bom dia' : (h >= 12 && h < 18) ? 'Boa tarde' : 'Boa noite';  const ey = document.getElementById('wEyebrow'), nm = document.getElementById('wName'), sb = document.getElementById('wSub');  if (ey) ey.textContent = saud;  if (temNome) {    const p = nomeCompleto.split(/\s+/)[0];    const nome = p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();    if (nm) nm.textContent = nome;    if (sb) sb.textContent = 'Bem-vindo ao Braun OnLine';    w.setAttribute('aria-label', saud + ', ' + nome + '. Bem-vindo ao Braun OnLine. Toque para continuar');  } else {    if (nm) nm.textContent = 'Bem-vindo';    if (sb) sb.textContent = 'Empowering Global Health Workforce';  }  const slot = w.querySelector('.w-logo');  const src = document.querySelector('header .brand-logo-svg');  if (slot && src && !slot.firstChild) {    const c = src.cloneNode(true);    ['class', 'role', 'aria-label'].forEach(function (a) { c.removeAttribute(a); });    const t = c.querySelector('title'); if (t) t.remove();    c.setAttribute('aria-hidden', 'true');    slot.appendChild(c);  }  // Barra de status acompanha o verde da tela de boas-vindas  const meta = document.querySelector('meta[name="theme-color"]');  if (meta) meta.setAttribute('content', '#00A97A');  w.style.display = 'flex';  if (temNome) {    try { sessionStorage.setItem('braun_welcome_session', '1'); } catch (e) {}    w.classList.add('auto');    welcomeTimer = setTimeout(goToGreeting, 3600);  }}/* ============================================================   19) BACKUP / ICS   ============================================================ */function exportarBackup() {  try {    const data = { schema: SCHEMA_VERSION, app: 'BraunOnLine', versao: window.APP_VERSION, exportado_em: new Date().toISOString(), dados: {} };    BACKUP_KEYS.forEach(function (k) { const v = getStorageValue(k); if (v !== null) data.dados[k] = v; });    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });    const url = URL.createObjectURL(blob);    const a = document.createElement('a');    a.href = url;    a.download = 'braun-backup-' + new Date().toISOString().split('T')[0] + '.json';    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);    toast('Backup exportado com sucesso.', 'sucesso');  } catch (e) { console.error(e); toast('Falha ao exportar backup.', 'erro'); }}function importarBackup() { document.getElementById('backupFileInput').click(); }function handleBackupFile(ev) {  const file = ev.target.files && ev.target.files[0]; if (!file) return;  const r = new FileReader();  r.onload = function (e) {    try {      const j = JSON.parse(e.target.result);      if (!j || typeof j !== 'object' || !j.dados) throw new Error('Formato inválido.');      if ((j.schema || 0) > SCHEMA_VERSION) { toast('Backup de versão mais nova.', 'erro', 5000); return; }      toastConfirm('Isso substituirá seus dados atuais. Continuar?', function (ok) {        if (!ok) return;        Object.keys(j.dados).forEach(function (k) { setStorageValue(k, j.dados[k]); });        toast('Backup restaurado. Recarregando...', 'sucesso');        setTimeout(function () { window.location.reload(); }, 900);      });    } catch (err) { console.error(err); toast('Arquivo de backup inválido.', 'erro'); }  };  r.readAsText(file); ev.target.value = '';}function exportarEscalaICS() {  const ano = parseInt(currentAno), turma = currentTurma, region = currentRegion;  const nomeTurma = getStorageValue('braun_turma_perfil') || turma;  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Braun OnLine//Escala//PT','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Escala Braun - ' + nomeTurma,'X-WR-TIMEZONE:America/Sao_Paulo'];  for (let m = 0; m < 12; m++) {    for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {      const data = new Date(ano, m, d);      const trab = isTrabalhando(data, region, turma);      const fer = isFerias(data);      if (!trab && !fer) continue;      const yyyy = data.getFullYear(), mm = String(data.getMonth() + 1).padStart(2, '0'), dd = String(data.getDate()).padStart(2, '0');      const dStr = '' + yyyy + mm + dd;      const ed = new Date(data); ed.setDate(ed.getDate() + 1);      const eStr = '' + ed.getFullYear() + String(ed.getMonth() + 1).padStart(2, '0') + String(ed.getDate()).padStart(2, '0');      ics.push('BEGIN:VEVENT');      ics.push('UID:' + dStr + '-braun-' + turma + '@braunonline');      ics.push('DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z');      ics.push('DTSTART;VALUE=DATE:' + dStr);      ics.push('DTEND;VALUE=DATE:' + eStr);      ics.push('SUMMARY:' + (fer ? 'FERIAS' : 'TRABALHO'));      ics.push('DESCRIPTION:' + (fer ? 'Periodo de ferias' : 'Dia de trabalho - ' + nomeTurma));      ics.push('END:VEVENT');    }  }  ics.push('END:VCALENDAR');  const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8' });  const url = URL.createObjectURL(blob);  const a = document.createElement('a');  a.href = url; a.download = 'Escala_Braun_' + nomeTurma + '_' + ano + '.ics';  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);  toast('Arquivo .ics gerado!', 'sucesso', 4500);}/* ============================================================   20) CARTILHAS   ============================================================ */const cartilhasData = [  { id:'comousar', icone:'help', titulo:'Como usar o Braun OnLine', conteudo:'<p>Bem-vindo ao <strong>Braun OnLine</strong>! Este guia rápido mostra tudo.</p><div class="cartilha-destaque"><strong>📅 Ver sua escala</strong><br>Dias coloridos mostram sua escala. Use as abas no rodapé para alternar entre <b>ECOFLAC</b>, <b>MANUT.</b> e <b>1x1</b>.</div><div class="cartilha-destaque"><strong>✏️ Anotações</strong><br>Toque em qualquer dia para escrever um lembrete.</div><div class="cartilha-destaque"><strong>🏖️ Programar férias</strong><br>Use a ferramenta de <b>Sugestão</b> para descobrir as datas que rendem mais dias em casa!</div><div class="cartilha-destaque"><strong>📦 Meus Pedidos</strong><br>Menu ☰ → Meus Pedidos. Preencha quantidade e tamanho, envie por e-mail.</div><div class="cartilha-destaque"><strong>💾 Backup</strong><br>Menu ☰ → Configurações → Exportar Backup (JSON).</div><p><strong>Dica:</strong> Sempre que aparecer um banner roxo, toque em <b>Atualizar</b>.</p>', quiz:[{pergunta:'Como você faz backup?',opcoes:['Tocando no calendário','Menu ☰ → Configurações → Exportar Backup','Reiniciando','Falando com supervisor'],certa:1},{pergunta:'Onde programa férias?',opcoes:['Nas Cartilhas','No Meu Perfil','No menu ☰ → Programar Férias','Não dá'],certa:2},{pergunta:'O que fazer quando aparecer banner roxo?',opcoes:['Ignorar','Tocar em Atualizar','Desinstalar','Reiniciar'],certa:1}] },  { id:'kaizen', icone:'trending_up', titulo:'Kaizen – Melhoria Contínua', conteudo:'<p><strong>Kaizen</strong> significa "mudança para melhor". Pequenas melhorias diárias de todos.</p><div class="cartilha-destaque"><strong>Princípios:</strong><br> • Eliminar desperdícios<br> • Padronizar processos<br> • Envolver todos<br> • Focar em dados</div>', quiz:[{pergunta:'O que significa Kaizen?',opcoes:['Grande revolução','Mudança para melhor','Padronização','Controle'],certa:1},{pergunta:'Um princípio do Kaizen:',opcoes:['Grandes mudanças','Eliminar desperdícios','Centralizar','Ignorar dados'],certa:1},{pergunta:'Kaizen busca melhorias:',opcoes:['Na produção','Na gestão','Pequenas e diárias','Em crises'],certa:2}] },  { id:'5s', icone:'cleaning_services', titulo:'Os 5S – Organização', conteudo:'<p>Os <strong>5S</strong> organizam o ambiente de trabalho.</p><div class="cartilha-destaque"><b>1. Seiri:</b> Separar o útil.<br><b>2. Seiton:</b> Organizar.<br><b>3. Seiso:</b> Limpar.<br><b>4. Seiketsu:</b> Padronizar.<br><b>5. Shitsuke:</b> Disciplina.</div>', quiz:[{pergunta:'Quantos sensos?',opcoes:['3','5','7','10'],certa:1},{pergunta:'Seiri é:',opcoes:['Limpar','Organizar','Separar útil do inútil','Criar padrões'],certa:2},{pergunta:'Disciplina:',opcoes:['Seiso','Seiketsu','Shitsuke','Seiton'],certa:2}] },  { id:'pdca', icone:'cycle', titulo:'PDCA – Planejar, Fazer, Checar, Agir', conteudo:'<p>O <strong>PDCA</strong> estrutura melhorias.</p><div class="cartilha-destaque"><b>P:</b> Definir metas.<br><b>D:</b> Executar.<br><b>C:</b> Verificar.<br><b>A:</b> Padronizar.</div>', quiz:[{pergunta:'PDCA significa?',opcoes:['Planejar, Definir, Controlar, Aplicar','Planejar, Fazer, Checar, Agir','Produzir, Distribuir','Padronizar, Dirigir'],certa:1},{pergunta:'Na etapa C?',opcoes:['Executar','Verificar resultados','Padronizar','Definir metas'],certa:1},{pergunta:'PDCA é ciclo:',opcoes:['Linear','Contínuo','Para gestores','Só produção'],certa:1}] },  { id:'ferramentas', icone:'build', titulo:'Ferramentas da Qualidade', conteudo:'<p>Ferramentas para resolver problemas.</p><div class="cartilha-destaque"> • <b>Ishikawa</b> – causas raiz.<br> • <b>5 Porquês</b>.<br> • <b>Fluxograma</b>.<br> • <b>Pareto</b> – prioriza.</div>', quiz:[{pergunta:'Causas raiz:',opcoes:['Pareto','Ishikawa','Fluxograma','5 Porquês'],certa:1},{pergunta:'Ishikawa também é:',opcoes:['Causa e Efeito','Pareto','Controle','Fluxograma'],certa:0},{pergunta:'Priorizar problemas:',opcoes:['5 Porquês','Fluxograma','Pareto','Ishikawa'],certa:2}] },  { id:'seguranca', icone:'security', titulo:'Segurança do Trabalho', conteudo:'<p>Segurança é prioridade.</p><div class="cartilha-destaque"> • Usar <b>EPIs</b>.<br> • 5S.<br> • Emergência.<br> • Reportar riscos.</div>', quiz:[{pergunta:'Primeira ação ao risco?',opcoes:['Ignorar','Sinalizar','Continuar','Aguardar'],certa:1},{pergunta:'EPI é:',opcoes:['Proteção Individual','Produção Interna','Proteção Integrada','Preventivo Industrial'],certa:0},{pergunta:'Emergência:',opcoes:['Correr','Seguir plano','Aguardar','Filmar'],certa:1}] },  { id:'bpf', icone:'medication', titulo:'Boas Práticas de Fabricação', conteudo:'<p>As <strong>BPF</strong> garantem qualidade na indústria farmacêutica.</p><div class="cartilha-destaque"> • Higiene.<br> • Controle de processos.<br> • Rastreabilidade.<br> • Documentação.</div>', quiz:[{pergunta:'BPF garantem?',opcoes:['Produtividade','Qualidade','Custos','Vendas'],certa:1},{pergunta:'Princípio:',opcoes:['Qualquer roupa','Não registrar','Higiene pessoal','Sem supervisão'],certa:2},{pergunta:'Rastreabilidade:',opcoes:['Velocidade','Origem do lote','Menos pessoas','Sem doc'],certa:1}] },  { id:'sustentabilidade', icone:'eco', titulo:'Sustentabilidade', conteudo:'<p>A Braun apoia a sustentabilidade.</p><div class="cartilha-destaque"> • Energia.<br> • Água.<br> • Reciclar.<br> • Menos impressão.</div>', quiz:[{pergunta:'Contribui:',opcoes:['Luzes acesas','Resíduos corretos','Água excessiva','Imprimir'],certa:1},{pergunta:'Reduzir beneficia:',opcoes:['Ambiente','Empresa','Todos','Ninguém'],certa:2},{pergunta:'NÃO é sustentável:',opcoes:['Desligar','Reciclar','Torneira pingando','Reutilizar papel'],certa:2}] },  { id:'compliance', icone:'gavel', titulo:'Compliance – Ética', conteudo:'<p><strong>Compliance</strong> é agir com ética.</p><div class="cartilha-destaque"> • Código de Conduta.<br> • Conflito de Interesses.<br> • Anticorrupção.<br> • LGPD.<br> • Canal de Denúncia.</div>', quiz:[{pergunta:'Compliance é?',opcoes:['Cargo','Regras éticas','Treinamento','Ferramenta'],certa:1},{pergunta:'Presente de fornecedor:',opcoes:['Aceitar','Recusar e reportar','Aceitar pequeno','Dividir'],certa:1},{pergunta:'Quem segue?',opcoes:['Diretoria','RH','Todos','Fornecedores'],certa:2}] },  { id:'incendio', icone:'local_fire_department', titulo:'Prevenção de Incêndios', conteudo:'<p>Riscos elevados em indústria farmacêutica.</p><div class="cartilha-destaque"><b>Classes:</b><br> • A – sólidos<br> • B – líquidos<br> • C – elétricos (NUNCA água)<br> • D – metais<br> • K – gorduras</div><div class="cartilha-exemplo"><b>PASS:</b> Puxar, Apontar, Apertar, Varrer.</div>', quiz:[{pergunta:'Classe C (elétrico) NUNCA:',opcoes:['CO₂','Pó','Água','Pó Especial'],certa:2},{pergunta:'PASS significa?',opcoes:['Puxar, Apontar, Apertar, Varrer','Parar, Avaliar','Prevenir, Atuar','Pegar, Arremessar'],certa:0},{pergunta:'Área estéril:',opcoes:['Pó','Água','CO₂','Espuma'],certa:2}] }];let cartilhaAtiva = 'comousar';let cartilhasLidas = getJSON('braun_cartilhas_lidas', []);function openCartilhas() { closeHamburger(); renderCartilhas(); focusModal('cartilhasCard'); }function renderCartilhas() {  const tc = document.getElementById('cartilhaTabs'), pc = document.getElementById('cartilhaPanels');  tc.innerHTML = ''; pc.innerHTML = '';  const sorted = cartilhasData.slice().sort(function (a, b) {    const al = cartilhasLidas.indexOf(a.id) > -1 ? 1 : 0;    const bl = cartilhasLidas.indexOf(b.id) > -1 ? 1 : 0;    return al - bl;  });  sorted.forEach(function (cart) {    const isA = cart.id === cartilhaAtiva;    const estaL = cartilhasLidas.indexOf(cart.id) > -1;    const btn = document.createElement('button');    btn.className = 'cartilha-tab-btn' + (isA ? ' active' : '') + (estaL ? ' lida' : '');    const tc2 = cart.titulo.split('–')[0].trim() || cart.titulo;    btn.innerHTML = '<span class="material-symbols-outlined">' + cart.icone + '</span> ' + tc2;    btn.addEventListener('click', function () { cartilhaAtiva = cart.id; renderCartilhas(); });    tc.appendChild(btn);    const p = document.createElement('div');    p.className = 'cartilha-panel' + (isA ? ' active' : '');    p.id = 'panel-' + cart.id;    let qh = '';    cart.quiz.forEach(function (q, qi) {      let oh = '';      q.opcoes.forEach(function (op, oi) {        oh += '<div class="quiz-opcao" data-cart="' + cart.id + '" data-q="' + qi + '" data-o="' + oi + '" role="button" tabindex="0">' + op + '</div>';      });      qh += '<div class="quiz-pergunta">' + (qi + 1) + '. ' + q.pergunta + '</div><div class="quiz-opcoes" id="quiz-' + cart.id + '-' + qi + '">' + oh + '</div><div class="quiz-feedback" id="feedback-' + cart.id + '-' + qi + '"></div>';    });    p.innerHTML = '<div class="cartilha-titulo">' + (cart.icone ? '<span class="material-symbols-outlined" style="font-size:28px;vertical-align:middle;">' + cart.icone + '</span> ' : '') + cart.titulo + '</div><div class="cartilha-conteudo">' + cart.conteudo + '</div><button class="cartilha-btn-marcar ' + (estaL ? 'marcado' : '') + '" data-cart-id="' + cart.id + '"><span class="material-symbols-outlined">' + (estaL ? 'check_circle' : 'circle') + '</span> ' + (estaL ? 'MARCADA COMO LIDA' : 'MARCAR COMO LIDA') + '</button><div class="cartilha-quiz"><h4>&#128221; Teste seu conhecimento</h4>' + qh + '</div>';    pc.appendChild(p);  });  pc.querySelectorAll('.cartilha-btn-marcar').forEach(function (b) { b.addEventListener('click', function () { toggleCartilhaLida(b.dataset.cartId); }); });  pc.querySelectorAll('.quiz-opcao').forEach(function (el) {    const h = function () { responderQuiz(el.dataset.cart, parseInt(el.dataset.q), parseInt(el.dataset.o)); };    el.addEventListener('click', h);    el.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); h(); } });  });  atualizarProgresso();}function toggleCartilhaLida(id) {  const i = cartilhasLidas.indexOf(id);  if (i > -1) cartilhasLidas.splice(i, 1);  else {    cartilhasLidas.push(id);    if (cartilhasLidas.length === 1) salvarConquista('primeiro_passo');    if (cartilhasLidas.length === 5) salvarConquista('leitor_dedicado');    if (cartilhasLidas.length === cartilhasData.length) salvarConquista('expert_braun');  }  setStorageValue('braun_cartilhas_lidas', JSON.stringify(cartilhasLidas));  renderCartilhas(); atualizarNovidadesUI();}function atualizarProgresso() {  const t = cartilhasData.length, l = cartilhasLidas.length, p = Math.round((l / t) * 100);  document.getElementById('progressoFill').style.width = p + '%';  document.getElementById('progressoTexto').innerText = l + '/' + t;}let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0', 10) || 0;function responderQuiz(cid, qi, oi) {  const c = cartilhasData.find(function (x) { return x.id === cid; }); if (!c) return;  const q = c.quiz[qi];  const od = document.getElementById('quiz-' + cid + '-' + qi);  const fb = document.getElementById('feedback-' + cid + '-' + qi);  if (od.querySelector('.desabilitada')) return;  od.querySelectorAll('.quiz-opcao').forEach(function (e) { e.classList.add('desabilitada'); });  od.querySelectorAll('.quiz-opcao').forEach(function (e, i) {    if (i === q.certa) e.classList.add('certa');    else if (i === oi && oi !== q.certa) e.classList.add('errada');  });  if (oi === q.certa) {    fb.innerHTML = '&#9989; Correto!'; fb.className = 'quiz-feedback certo';    quizzesAcertados++; setStorageValue('braun_quizzes_acertados', quizzesAcertados);    if (quizzesAcertados === 10) salvarConquista('quiz_master');  } else { fb.innerHTML = '&#10060; Incorreto. A resposta certa é: ' + q.opcoes[q.certa]; fb.className = 'quiz-feedback errado'; }}/* ============================================================   21) NOVIDADES   ============================================================ */const novidadesData = [  { id:'nov23', titulo:'🗳️ Votação do Colaborador do Mês melhorada', descricao:'Agora o formulário de votação é preenchido automaticamente com seus dados. Digite apenas o nome do colega que você quer votar.', data:'2026-10-02', cartilhaId:null },  { id:'nov22', titulo:'🏖️ Sugestão inteligente de férias!', descricao:'Agora o app te ajuda a escolher a MELHOR data para suas férias. Você escolhe o mês e a quantidade de dias, e ele mostra as datas que rendem mais dias em casa respeitando sua escala. Acesse: Configurações → Programar Férias.', data:'2026-10-01', cartilhaId:'comousar' },  { id:'nov20', titulo:'🌞 Saudação Minimalista funcionando', descricao:'Agora o toggle "Saudação Minimalista" realmente funciona. Mostra apenas "Bom dia / Boa tarde / Boa noite".', data:'2026-10-01', cartilhaId:null },  { id:'nov19', titulo:'📦 Meus Pedidos reformulado!', descricao:'Agora você preenche a quantidade e o tamanho de cada item. O pedido vai direto por e-mail.', data:'2026-09-30', cartilhaId:null },  { id:'nov18', titulo:'📘 Nova Cartilha: Como usar o Braun OnLine', descricao:'Guia rápido com tudo o que você precisa saber.', data:'2026-09-28', cartilhaId:'comousar' },  { id:'nov17', titulo:'🔒 Backup e Restauração', descricao:'Exporte e importe todos os seus dados em JSON.', data:'2026-09-27', cartilhaId:null },  { id:'nov5', titulo:'🧯 Nova Cartilha: Prevenção de Incêndios', descricao:'Aprenda sobre classes de incêndio e método PASS.', data:'2026-07-05', cartilhaId:'incendio' },  { id:'nov1', titulo:'📘 Nova Cartilha: Compliance', descricao:'Ética, Código de Conduta, LGPD e Canal de Denúncia.', data:'2026-07-04', cartilhaId:'compliance' }];let novidadesLidas = getJSON('braun_novidades_lidas', []);function openNovidades() { closeAllModals(); renderNovidades(); focusModal('novidadesCard'); }function renderNovidades() {  const c = document.getElementById('novidadesLista'); c.innerHTML = '';  const sorted = novidadesData.slice().sort(function (a, b) { return new Date(b.data) - new Date(a.data); });  sorted.forEach(function (nov) {    const lida = novidadesLidas.indexOf(nov.id) > -1;    const card = document.createElement('div');    card.className = 'novidade-card' + (lida ? ' lida' : '');    const b = !lida ? '<span class="badge-novo">NOVO</span>' : '';    let lh = '';    if (nov.cartilhaId) lh = '<span class="link-cartilha" data-cart="' + nov.cartilhaId + '">Abrir cartilha &rarr;</span>';    card.innerHTML = '<div class="novidade-titulo">' + nov.titulo + ' ' + b + '</div><div class="novidade-desc">' + nov.descricao + '</div>' + lh + '<span class="novidade-data">' + formatarData(nov.data) + '</span>';    card.addEventListener('click', function (e) {      const l = e.target.closest('.link-cartilha');      if (l) { e.stopPropagation(); abrirCartilhaPorId(l.dataset.cart); return; }      marcarNovidadeLida(nov.id);      if (nov.cartilhaId) abrirCartilhaPorId(nov.cartilhaId);      else { renderNovidades(); atualizarNovidadesUI(); }    });    c.appendChild(card);  });  atualizarNovidadesUI();}function marcarNovidadeLida(id) {  if (novidadesLidas.indexOf(id) === -1) { novidadesLidas.push(id); setStorageValue('braun_novidades_lidas', JSON.stringify(novidadesLidas)); }  renderNovidades(); atualizarNovidadesUI();}function marcarTodasNovidadesLidas() {  novidadesData.forEach(function (n) { if (novidadesLidas.indexOf(n.id) === -1) novidadesLidas.push(n.id); });  setStorageValue('braun_novidades_lidas', JSON.stringify(novidadesLidas));  renderNovidades(); atualizarNovidadesUI();  toast('Todas as novidades marcadas como lidas.', 'info');}function atualizarNovidadesUI() {  const nl = novidadesData.length - novidadesLidas.length;  const b = document.getElementById('novidadesBadge');  const btn = document.getElementById('btn-flutuante-novidades');  const s = document.getElementById('sinoIcon');  if (nl > 0) { b.style.display = 'inline'; b.innerText = nl; btn.style.display = 'flex'; s.classList.add('animar-sino'); }  else { b.style.display = 'none'; btn.style.display = 'none'; s.classList.remove('animar-sino'); }}function formatarData(ds) { return new Date(ds + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); }function abrirCartilhaPorId(id) { closeAllModals(); cartilhaAtiva = id; openCartilhas(); }/* ============================================================   22) PESQUISA + VOZ   ============================================================ */let resultadoPesquisaAtual = null;let recognitionInstance = null;function openPesquisa() {  closeAllModals(); focusModal('pesquisaCard');  const h = new Date();  document.getElementById('pesquisaData').value = h.toISOString().split('T')[0];  document.getElementById('pesquisaDataTexto').value = '';  document.getElementById('resultadoTexto').innerHTML = 'Nenhuma pesquisa realizada.';  document.getElementById('resultadoDetalhe').innerText = '';  resultadoPesquisaAtual = null; atualizarBotaoOuvir();}function fecharPesquisa() { closeAllModals(); pararVoz(); }function atualizarBotaoOuvir() {  const b = document.getElementById('btnOuvirResultado'), i = document.getElementById('btnOuvirIcon'), t = document.getElementById('btnOuvirTexto');  if (!b) return;  const f = window.speechSynthesis && window.speechSynthesis.speaking;  if (f) { b.classList.add('parar'); i.textContent = 'stop_circle'; t.textContent = 'Parar'; }  else { b.classList.remove('parar'); i.textContent = 'volume_up'; t.textContent = 'Ouvir resposta'; }}function toggleLerResultado() { if (window.speechSynthesis && window.speechSynthesis.speaking) pararVoz(); else lerResultado(); }function pararVoz() { if (window.speechSynthesis) window.speechSynthesis.cancel(); atualizarBotaoOuvir(); }function parseDataTexto(texto) {  const meses = { janeiro:0, fevereiro:1, marco:2, 'março':2, abril:3, maio:4, junho:5, julho:6, agosto:7, setembro:8, outubro:9, novembro:10, dezembro:11, jan:0, fev:1, mar:2, abr:3, mai:4, jun:5, jul:6, ago:7, set:8, out:9, nov:10, dez:11 };  texto = texto.toLowerCase().trim();  let m = texto.match(/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{2,4})$/);  if (m) { let d = parseInt(m[1]), me = parseInt(m[2]) - 1, a = parseInt(m[3]); if (a<100) a+=2000; const dt = new Date(a, me, d); if (!isNaN(dt.getTime())) return dt; }  m = texto.match(/^(\d{1,2})\s*(?:de\s*)?([a-zçãáé]+)\s*(?:de\s*)?(\d{2,4})$/);  if (m) { let d = parseInt(m[1]), mn = m[2], a = parseInt(m[3]); if (a<100) a+=2000; if (meses[mn]!==undefined) { const dt = new Date(a, meses[mn], d); if (!isNaN(dt.getTime())) return dt; } }  m = texto.match(/^([a-zçãáé]+)\s*(?:de\s*)?(\d{2,4})$/);  if (m) { let mn = m[1], a = parseInt(m[2]); if (a<100) a+=2000; if (meses[mn]!==undefined) { const dt = new Date(a, meses[mn], 1); if (!isNaN(dt.getTime())) return dt; } }  return null;}function pesquisarData() {  const di = document.getElementById('pesquisaData').value;  let ti = document.getElementById('pesquisaDataTexto').value.trim();  let do_ = null;  if (ti) { do_ = parseDataTexto(ti); if (do_) { document.getElementById('pesquisaData').value = do_.getFullYear() + '-' + String(do_.getMonth()+1).padStart(2,'0') + '-' + String(do_.getDate()).padStart(2,'0'); } }  else if (di) { const p = di.split('-'); do_ = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); }  const rd = document.getElementById('resultadoTexto'), dd = document.getElementById('resultadoDetalhe');  if (!do_ || isNaN(do_.getTime())) { rd.innerHTML = '&#10060; Data inválida.'; dd.innerText = 'Use dd/mm/aaaa.'; resultadoPesquisaAtual = null; atualizarBotaoOuvir(); return; }  const r = currentRegion, t = currentTurma;  const trab = isTrabalhando(do_, r, t), fer = isFerias(do_);  let st, cor, ih, det;  const rn = nomeRegiao(r), tf = formatarTurmaParaVoz(t);  if (r === '1x1') det = 'Região: Escala ' + tf; else det = 'Região: ' + rn + ' · Turmas ' + tf;  if (fer) { st = 'EM FÉRIAS'; cor = 'var(--ferias)'; ih = '<span class="icone-ferias">&#9992;&#65039;</span>'; }  else if (trab) {    if (r === '1x1') st = isTurnoNoite1x1(t) ? 'TRABALHANDO (NOITE)' : 'TRABALHANDO (MANHÃ)'; else st = 'TRABALHANDO';    cor = r === '1x1' && isTurnoNoite1x1(t) ? 'var(--roxo-1x1)' : 'var(--accent)';    ih = '<span class="icone-trabalho">&#9881;&#65039;</span>';  } else { st = 'DE FOLGA'; cor = 'var(--primary)'; ih = '<span class="icone-folga">&#127754;</span>'; }  rd.style.color = cor;  rd.innerHTML = ih + '<div><strong>' + diaDaSemanaPorExtenso(do_) + ', ' + do_.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + '</strong></div><div style="font-size:1.1em;">' + st + '</div>';  dd.innerText = det;  resultadoPesquisaAtual = { data: do_, status: st, detalhes: det, ferias: fer, trabalhando: trab };  atualizarBotaoOuvir();  if (getStorageValue('braun_voice_response') !== 'false') lerResultado();}function iniciarReconhecimentoVoz() {  const ct = document.getElementById('pesquisaDataTexto'); if (!ct) return;  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { ct.placeholder = 'Sem suporte.'; toast('Navegador sem suporte a voz.', 'aviso'); return; }  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;  if (recognitionInstance) { recognitionInstance.abort(); recognitionInstance = null; }  const rec = new SR(); rec.lang = 'pt-BR'; rec.continuous = false; rec.interimResults = false;  rec.onstart = function () { ct.placeholder = 'Ouvindo...'; ct.style.borderColor = 'var(--accent)'; };  rec.onerror = function (e) { ct.placeholder = 'Toque no microfone...'; ct.style.borderColor = ''; recognitionInstance = null; if (e.error === 'not-allowed') toast('Permissão negada.', 'erro'); };  rec.onresult = function (e) { ct.value = e.results[0][0].transcript; ct.placeholder = 'Toque no microfone...'; ct.style.borderColor = ''; recognitionInstance = null; pesquisarData(); };  rec.onend = function () { ct.placeholder = 'Toque no microfone...'; ct.style.borderColor = ''; recognitionInstance = null; };  try { rec.start(); recognitionInstance = rec; } catch (e) { console.warn(e); }}function lerResultado() {  if (!resultadoPesquisaAtual) { toast('Faça uma pesquisa primeiro.', 'aviso'); return; }  const v = new SpeechSynthesisUtterance();  v.lang = 'pt-BR'; v.rate = 1.1;  const do_ = resultadoPesquisaAtual.data;  v.text = diaDaSemanaPorExtenso(do_) + ', ' + do_.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + '. ' + resultadoPesquisaAtual.status + '. ' + resultadoPesquisaAtual.detalhes + '.';  v.onend = atualizarBotaoOuvir; v.onerror = atualizarBotaoOuvir;  if (window.speechSynthesis) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(v); setTimeout(atualizarBotaoOuvir, 100); }}/* ============================================================   23) CONQUISTAS   ============================================================ */const conquistas = {  primeiro_passo: { id:'primeiro_passo', titulo:'Primeiro Passo', descricao:'Marcou a primeira cartilha como lida', icone:'&#127937;' },  leitor_dedicado: { id:'leitor_dedicado', titulo:'Leitor Dedicado', descricao:'Leu 5 cartilhas', icone:'&#128218;' },  expert_braun: { id:'expert_braun', titulo:'Expert Braun', descricao:'Completou todas as 10 cartilhas', icone:'&#127942;' },  quiz_master: { id:'quiz_master', titulo:'Quiz Master', descricao:'Acertou 10 perguntas de quiz', icone:'&#127919;' }};function getConquistas() { return getJSON('braun_conquistas', []); }function salvarConquista(id) {  const l = getConquistas();  if (l.indexOf(id) === -1) { l.push(id); setStorageValue('braun_conquistas', JSON.stringify(l)); mostrarConquistaDesbloqueada(id); }}function mostrarConquistaDesbloqueada(id) {  const c = conquistas[id]; if (!c) return;  const t = document.createElement('div');  t.style.cssText = 'position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7030A0,#00A97A);color:white;padding:16px 24px;border-radius:20px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.3);z-index:3000;display:flex;align-items:center;gap:12px;animation:bounceIn 0.6s cubic-bezier(0.68,-0.55,0.27,1.55);max-width:90%;';  t.innerHTML = '<span style="font-size:2em;">' + c.icone + '</span><div><div style="font-size:0.75em;opacity:0.85;">CONQUISTA DESBLOQUEADA</div><div style="font-size:1.1em;">' + c.titulo + '</div></div>';  document.body.appendChild(t);  setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(function () { t.remove(); }, 400); }, 3500);}function openConquistas() {  closeHamburger();  const l = getConquistas();  const c = document.getElementById('listaConquistas');  c.innerHTML = '';  Object.values(conquistas).forEach(function (co) {    const d = l.indexOf(co.id) > -1;    const card = document.createElement('div');    card.style.cssText = 'background:var(--bg);border-radius:16px;padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;opacity:' + (d?'1':'0.45') + ';';    card.innerHTML = '<div style="font-size:2.2em;">' + co.icone + '</div><div><div style="font-weight:800;font-size:1.05em;">' + co.titulo + '</div><div style="font-size:0.85em;opacity:0.7;">' + co.descricao + '</div>' + (d?'<div style="font-size:0.75em;color:var(--primary);font-weight:700;margin-top:4px;">&#10003; Desbloqueada</div>':'<div style="font-size:0.75em;opacity:0.5;margin-top:4px;">Bloqueada</div>') + '</div>';    c.appendChild(card);  });  focusModal('conquistasCard');}/* ============================================================   24) EVENT BINDING   ============================================================ */const ACTION_MAP = {  'go-greeting': goToGreeting,  'install-pwa': installPWA,  'aplicar-atualizacao': aplicarAtualizacao,  'dispensar-atualizacao': dispensarAtualizacao,  'open-novidades': openNovidades,  'open-pesquisa': openPesquisa,  'mes-anterior': function () { mudarMes(-1); },  'mes-proximo': function () { mudarMes(1); },  'ir-hoje': irParaHoje,  'close-drawer': closeHamburger,  'open-perfil': openMeuPerfil,  'open-ramais': function () { closeHamburger(); openRamais(); },  'open-colaborador': openColaboradorDoMes,  'open-pedidos': openMeusPedidos,  'open-cartilhas': openCartilhas,  'open-conquistas': openConquistas,  'open-config': function () { closeHamburger(); openConfig(); },  'toggle-dark': function () { toggleDarkMode(); closeHamburger(); },  'open-privacy': function () { closeHamburger(); openPrivacy(); },  'close-modals': closeAllModals,  'marcar-novidades': marcarTodasNovidadesLidas,  'copy-lote': copyLote,  'save-nota': saveNota,  'open-ferias': openFerias,  'sugerir-ferias': sugerirFerias,  'open-stats': openStats,  'export-ics': exportarEscalaICS,  'export-backup': exportarBackup,  'import-backup': importarBackup,  'save-ferias': saveFerias,  'confirm-clear-ferias': confirmarClearFerias,  'save-perfil-fechar': function () { salvarDadosPerfil(); closeAllModals(); },  'votar': abrirFormularioVotacao,  'votar-novamente': voltarAoVoto,  'enviar-pedido': enviarPedidoEmail,  'limpar-pedido': limparPedido,  'mic': iniciarReconhecimentoVoz,  'pesquisar': pesquisarData,  'toggle-voz': toggleLerResultado,  'fechar-pesquisa': fecharPesquisa};function bindAll() {  document.addEventListener('click', function (e) {    const el = e.target.closest('[data-action]');    if (!el) return;    const a = el.getAttribute('data-action');    const f = ACTION_MAP[a];    if (typeof f !== 'function') return;    try { f(); } catch (err) {      registrarErro('ação ' + a, err);      toast('Não foi possível concluir essa ação. Tente novamente.', 'erro', 4000);    }  });  document.querySelectorAll('.tab[data-region]').forEach(function (t) { t.addEventListener('click', function () { setRegion(t.dataset.region); }); });  const tb = document.getElementById('turmaBadge');  if (tb) {    tb.addEventListener('click', openMeuPerfil);    tb.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMeuPerfil(); } });  }  const mb = document.getElementById('menuButton'); if (mb) mb.addEventListener('click', openHamburger);  const do_ = document.getElementById('drawerOverlay'); if (do_) do_.addEventListener('click', closeHamburger);  const ov = document.getElementById('overlay'); if (ov) ov.addEventListener('click', closeAllModals);  const mg = document.getElementById('minimalGreetingToggle'); if (mg) mg.addEventListener('change', toggleMinimalGreeting);  const vr = document.getElementById('voiceResponseToggle'); if (vr) vr.addEventListener('change', toggleVoiceResponse);  const tp = document.getElementById('turmaPerfil'); if (tp) tp.addEventListener('change', salvarDadosPerfil);  const ap = document.getElementById('anoPerfil'); if (ap) ap.addEventListener('change', salvarDadosPerfil);  const bf = document.getElementById('backupFileInput'); if (bf) bf.addEventListener('change', handleBackupFile);  const pdt = document.getElementById('pesquisaDataTexto'); if (pdt) pdt.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); pesquisarData(); } });  document.addEventListener('keydown', function (e) {    if (e.key === 'Escape') { if (activeModalElement) closeAllModals(); else if (document.getElementById('hamburgerDrawer').classList.contains('open')) closeHamburger(); }  });  bindCalendarioDelegation();}/* ============================================================   25) INIT   ============================================================ */(function init() {  const st = getStorageValue('braun_turma_perfil');  if (st) {    let r, g;    if (['A','B','C','D'].indexOf(st) > -1) { r = 'BR'; g = (st === 'A' || st === 'C') ? 'AC' : 'BD'; }    else if (st.indexOf('1x1') === 0) { r = '1x1'; g = st; }    else { r = 'MNT'; g = (st === 'E' || st === 'G') ? 'EG' : 'FH'; }    currentRegion = r; currentTurma = g;    setStorageValue('braun_last_region', r);    setStorageValue('braun_turma_' + r, g);  } else {    const sr = getStorageValue('braun_last_region') || 'BR';    currentRegion = sr;    if (sr === '1x1') currentTurma = getStorageValue('braun_turma_1x1') || '1x1A';    else currentTurma = getStorageValue('braun_turma_' + sr) || (sr === 'BR' ? 'AC' : 'EG');  }  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });  const at = document.getElementById('tab-' + currentRegion);  if (at) { at.classList.add('active'); at.setAttribute('aria-selected', 'true'); }})();window.addEventListener('load', function () {  safeRun('boasVindas', boasVindas);  safeRun('bindAll', bindAll);  safeRun('startClock', startClock);  safeRun('tick', tick);  safeRun('atualizarLegenda1x1', atualizarLegenda1x1);  safeRun('gerarCalendario', gerarCalendario);  safeRun('atualizarBadgeTurma', atualizarBadgeTurma);  safeRun('preencherDadosModais', preencherDadosModais);  safeRun('atualizarNovidadesUI', atualizarNovidadesUI);  safeRun('atualizarTituloMes', atualizarTituloMes);  safeRun('atualizarBannerAvisos', atualizarBannerAvisos);});
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<meta name="theme-color" content="#00A97A">
+<title>Braun OnLine 2026/2027</title>
+<meta name="description" content="Aplicativo de escala para colaboradores Braun - ECOFLAC, MANUTENÇÃO e 1x1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="manifest" href="manifest.json">
+<link rel="preload" as="image" href="splash-screen.webp" type="image/webp">
+<link rel="apple-touch-icon" href="maskable_icon_x192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Braun OnLine">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+<script src="boot.js"></script>
+<style>
+    :root {
+        --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+        --accent: #7030A0; --amarelo: #EBC13D; --verde: #40C7A1; --border: #E0E0E0;
+        --semana-w: #00A97A; --azul-mnt: #2196F3; --ferias: #7030A0;
+        --laranja-1x1: #FF9800; --roxo-1x1: #7B1FA2;
+        --danger: #e74c3c; --success: #00A97A;
+        --bar-bg: var(--primary); --bar-border: transparent;
+    }
+    html.dark-mode {
+        --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #333333;
+        --primary: #00C48D; --semana-w: #00C48D;
+        --bar-bg: #121212; --bar-border: #333333;
+    }
+    html, body { background: var(--bg); }
+    body {
+        font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+        margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent; scroll-behavior: smooth;
+        touch-action: manipulation; -webkit-touch-callout: none;
+        width: 100%; min-height: 100vh;
+        box-shadow: none;
+    }
+    html.dark-mode body { box-shadow: none; }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+    
+    /* ===== TELA DE BOAS-VINDAS (verde + branco B. Braun) ===== */
+    .welcome-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000;
+        display: none; flex-direction: column; align-items: center; justify-content: space-between;
+        text-align: center; color: #fff; cursor: pointer; overflow: hidden; box-sizing: border-box;
+        padding: calc(env(safe-area-inset-top, 0px) + 64px) 32px calc(env(safe-area-inset-bottom, 0px) + 40px);
+        background:
+            radial-gradient(120% 70% at 88% 0%, rgba(255,255,255,0.18) 0%, transparent 55%),
+            linear-gradient(170deg, #00A97A 0%, #008F68 48%, #006B4E 100%);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .welcome-screen::before, .welcome-screen::after {
+        content: ''; position: absolute; left: 50%; top: 46%; border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.13); pointer-events: none;
+        transform: translate(-50%, -50%); animation: wRing 1.6s ease-out both;
+    }
+    .welcome-screen::before { width: 120vw; height: 120vw; max-width: 780px; max-height: 780px; }
+    .welcome-screen::after { width: 78vw; height: 78vw; max-width: 500px; max-height: 500px; border-color: rgba(255,255,255,0.2); animation-delay: 0.15s; }
+    /* ===== SPLASH (imagem) — antes da welcome ===== */
+    .splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3100; display: none; background: #00A97A; cursor: pointer; opacity: 1; transition: opacity 0.5s ease; }
+    html.splash-on .splash, .splash.is-out { display: block; }
+    .splash.is-out { opacity: 0; pointer-events: none; }
+    .splash img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    /* a welcome só começa a animar quando a splash sai */
+    html.splash-hold .welcome-screen, html.splash-hold .welcome-screen *,
+    html.splash-hold .welcome-screen::before, html.splash-hold .welcome-screen::after { animation-play-state: paused !important; }
+    html.welcome-on { background: #007F5C; }
+    html.welcome-on .welcome-screen { display: flex; }
+    .welcome-screen.hide { opacity: 0; pointer-events: none; transform: scale(1.03); }
+    .welcome-screen > * { position: relative; z-index: 1; }
+    .w-logo svg { display: block; width: 168px; max-width: 52vw; height: auto; margin: 0 auto; opacity: 0; animation: wFade 0.9s 0.1s ease forwards; }
+    .w-eyebrow {
+        margin: 0 0 18px; padding-left: 0.42em; font-size: 0.72rem; font-weight: 600;
+        letter-spacing: 0.42em; text-transform: uppercase; color: rgba(255,255,255,0.78);
+        opacity: 0; animation: wRise 0.8s 0.45s ease forwards;
+    }
+    .w-name {
+        margin: 0; font-size: clamp(2.6rem, 14vw, 4rem); font-weight: 300; line-height: 1.05;
+        letter-spacing: 0.01em; color: #fff; overflow-wrap: anywhere;
+        opacity: 0; animation: wRise 0.8s 0.65s ease forwards;
+    }
+    .w-rule { display: block; width: 0; height: 1px; margin: 26px auto 22px; background: rgba(255,255,255,0.75); animation: wRule 0.9s 1s ease forwards; }
+    .w-sub { margin: 0; font-size: 0.95rem; font-weight: 400; letter-spacing: 0.06em; color: rgba(255,255,255,0.88); opacity: 0; animation: wRise 0.8s 1.2s ease forwards; }
+    .w-foot { width: 100%; max-width: 240px; }
+    .w-hint {
+        margin: 0 0 16px; padding-left: 0.3em; font-size: 0.66rem; font-weight: 600;
+        letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.7);
+        opacity: 0; animation: wFade 0.8s 1.6s ease forwards, wPulse 2.6s 2.4s ease-in-out infinite;
+    }
+    .w-progress { height: 2px; border-radius: 2px; background: rgba(255,255,255,0.22); overflow: hidden; visibility: hidden; }
+    .welcome-screen.auto .w-progress { visibility: visible; }
+    .w-progress i { display: block; width: 100%; height: 100%; background: #fff; transform: scaleX(0); transform-origin: left; }
+    .welcome-screen.auto .w-progress i { animation: wProg 3.6s linear forwards; }
+    @keyframes wFade { to { opacity: 1; } }
+    @keyframes wRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes wRule { to { width: 56px; } }
+    @keyframes wPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.95; } }
+    @keyframes wProg { to { transform: scaleX(1); } }
+    @keyframes wRing { from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+        .welcome-screen *, .welcome-screen::before, .welcome-screen::after { animation-delay: 0s !important; }
+    }
+
+    #install-button {
+        display: none; position: fixed; top: 135px; left: 50%; transform: translateX(-50%);
+        background: var(--primary); color: white; padding: 10px 22px; border-radius: 30px;
+        font-weight: 800; font-size: 0.85em; z-index: 2000; border: 2px solid white;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3); align-items: center; gap: 8px;
+        animation: slideIn 0.5s ease; cursor: pointer;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    .hoje {
+        background: var(--accent) !important; color: white !important; z-index: 10; position: relative;
+        border: 3px solid white !important; box-shadow: 0 0 15px var(--accent); transform: scale(1.1);
+        animation: hoje-pulsar 1.5s infinite ease-in-out;
+    }
+    html.dark-mode .hoje { border-color: #1E1E1E !important; }
+    @keyframes hoje-pulsar {
+        0%   { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+        50%  { transform: scale(1.15); box-shadow: 0 0 20px var(--accent); }
+        100% { transform: scale(1.05); box-shadow: 0 0 5px var(--accent); }
+    }
+    .FERIAS { position: relative; border: 2px dashed var(--ferias) !important; box-shadow: inset 0 0 10px rgba(112,48,160,0.2); }
+    .FERIAS::before {
+        content: 'flight'; font-family: 'Material Symbols Outlined';
+        position: absolute; top: -6px; right: -6px; font-size: 16px;
+        color: var(--ferias); background: var(--card); border-radius: 50%;
+        z-index: 5; animation: plane-fly 2s infinite ease-in-out;
+        font-variation-settings: 'FILL' 1;
+    }
+    @keyframes plane-fly {
+        0%, 100% { transform: translate(0, 0) rotate(-15deg); }
+        50% { transform: translate(2px, -3px) rotate(10deg); }
+    }
+    header {
+        background: var(--bar-bg); border-bottom: 1px solid var(--bar-border); padding: 45px 18px 20px 18px; color: white; display: flex; transition: background 0.3s;
+        justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+    }
+    .brand-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .brand-logo-svg { height: 35px; width: auto; }
+    .turma-badge {
+        background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
+        border-radius: 30px; padding: 4px 14px; font-weight: 800; font-size: 0.85rem;
+        color: white; cursor: pointer; display: inline-flex; align-items: center;
+        gap: 6px; transition: background 0.2s; user-select: none; white-space: nowrap;
+    }
+    .turma-badge:active { background: rgba(255,255,255,0.35); transform: scale(0.96); }
+    .turma-badge .material-symbols-outlined { font-size: 16px; }
+    .sticky-header-block { position: sticky; top: 85px; z-index: 95; padding: 0 15px; }
+    .status-panel {
+        background: var(--card); border-radius: 25px 25px 0 0; padding: 15px 10px;
+        border: 1px solid var(--border); border-bottom: none; text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
+    }
+    .clock { font-family: 'JetBrains Mono', monospace; font-size: 2.8em; color: var(--primary); font-weight: 700; }
+    .status-msg { font-weight: 900; font-size: 1.2em; text-transform: uppercase; margin-top: 5px; }
+    .mes-nav {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--card); padding: 10px 14px; border: 1px solid var(--border);
+        border-top: none; border-bottom: none; border-radius: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
+    }
+    .mes-nav.sem-banner { border-radius: 0 0 25px 25px; border-bottom: 1px solid var(--border); }
+    .mes-nav-btn {
+        background: var(--bg); border: none; width: 42px; height: 42px;
+        border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--primary); transition: 0.2s;
+    }
+    .mes-nav-btn:active { transform: scale(0.92); background: var(--primary); color: white; }
+    .mes-nav-title { font-weight: 800; font-size: 1.05em; color: var(--text); text-transform: capitalize; flex: 1; text-align: center; }
+    .btn-hoje {
+        background: var(--primary); color: white; border: none; padding: 8px 16px;
+        border-radius: 20px; font-weight: 800; font-size: 0.8em; display: flex;
+        align-items: center; gap: 6px; cursor: pointer; margin-left: 8px; white-space: nowrap;
+    }
+    .btn-hoje:active { transform: scale(0.95); }
+    #banner-avisos {
+        display: none; background: linear-gradient(90deg, var(--accent), #9b4dca);
+        color: white; overflow: hidden; position: relative; height: 38px;
+        align-items: center; border: 1px solid var(--border); border-top: none;
+        border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0;
+    }
+    #banner-avisos.show { display: flex; }
+    #banner-avisos .banner-label {
+        background: rgba(0,0,0,0.25); padding: 0 12px; height: 100%;
+        display: flex; align-items: center; font-weight: 900; font-size: 0.72em;
+        letter-spacing: 0.5px; flex-shrink: 0; z-index: 2; text-transform: uppercase;
+    }
+    #banner-avisos .banner-label .material-symbols-outlined {
+        font-size: 18px; margin-right: 4px;
+        animation: shake-bell 1.5s ease-in-out infinite; transform-origin: top center;
+    }
+    #banner-avisos .banner-track {
+        flex: 1; overflow: hidden; height: 100%; position: relative;
+        display: flex; align-items: center;
+        mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+    }
+    #banner-avisos .banner-content {
+        display: inline-block; white-space: nowrap; padding-left: 100%;
+        font-weight: 700; font-size: 0.85em; animation: marquee-banner 30s linear infinite;
+    }
+    #banner-avisos .banner-item { margin: 0 22px; display: inline-flex; align-items: center; gap: 4px; }
+    #banner-avisos .banner-item .material-symbols-outlined { font-size: 16px; color: var(--amarelo); }
+    @keyframes marquee-banner { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    #legenda-1x1 {
+        display: none; background: var(--card); padding: 10px 14px;
+        border: 1px solid var(--border); border-top: none;
+        border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin: 0; gap: 16px; flex-wrap: wrap; justify-content: center; align-items: center;
+    }
+    .sticky-header-block.com-legenda #legenda-1x1 { display: flex; }
+    .legenda-item { display: flex; align-items: center; gap: 6px; font-size: 0.78em; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .legenda-cor { width: 16px; height: 16px; border-radius: 4px; display: inline-block; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15); }
+    .sticky-header-block.com-legenda .mes-nav,
+    .sticky-header-block.com-legenda .mes-nav.sem-banner { border-radius: 0; border-bottom: none; }
+    .sticky-header-block.com-legenda #banner-avisos { border-radius: 0; }
+    #calendario-box { margin-top: 0; padding-top: 0; }
+    .mes-container { perspective: 1000px; margin: 0 10px 25px 10px; min-height: 400px; display: flex; flex-direction: column; padding-top: 0; scroll-margin-top: 220px; }
+    #calendario-box > .mes-container:first-child { margin-top: 15px; }
+    .mes-inner { position: relative; width: 100%; flex-grow: 1; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; cursor: pointer; }
+    .mes-inner.flipped { transform: rotateY(180deg); }
+    .mes-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 22px; padding: 12px; border: 1px solid var(--border); box-sizing: border-box; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .mes-front { background: var(--card); }
+    .mes-back { transform: rotateY(180deg); background: var(--primary); color: white; overflow-y: auto; }
+    .grid { display: grid; grid-template-columns: 32px repeat(7, 1fr); gap: 7px; text-align: center; align-items: center; padding-top: 15px; }
+    .dia-label { font-size: 0.7em; font-weight: 800; opacity: 0.6; color: var(--text); text-transform: uppercase; }
+    .dia-label-w {
+        font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 900;
+        background: linear-gradient(135deg, var(--semana-w), #007d5a); color: #FFFFFF;
+        border-radius: 8px; height: 28px; display: flex; align-items: center; justify-content: center;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
+    }
+    .dia {
+        aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
+        border-radius: 10px; font-weight: 800; font-size: 1.1em; border: 2.8px solid transparent;
+        transition: 0.2s; position: relative; cursor: pointer; flex-direction: column;
+    }
+    .dia:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .AMARELO { background: var(--amarelo) !important; color: #1a1a1a !important; }
+    .VERDE { background: var(--verde) !important; color: #fff !important; }
+    .AZUL { background: var(--azul-mnt) !important; color: #fff !important; }
+    .LARANJA { background: var(--laranja-1x1) !important; color: #fff !important; }
+    .ROXO { background: var(--roxo-1x1) !important; color: #fff !important; }
+    .TRABALHO { border-color: rgba(168,0,196,0.4) !important; }
+    .HAS_NOTE::after { content: ''; position: absolute; bottom: 5px; right: 5px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; border: 1.5px solid white; }
+    
+    .tab-bar {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--bar-bg); border-top: 1px solid var(--bar-border); display: flex; height: 75px; z-index: 1000; transition: background 0.3s;
+        padding-bottom: env(safe-area-inset-bottom);
+        width: 100%;
+    }
+    .tab { flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.68em; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0 2px; }
+    .tab.active { color: #FFFFFF; }
+    .tab .material-symbols-outlined { font-size: 26px; }
+    #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
+    
+    .bottom-modal {
+        position: fixed; bottom: -110%; left: 0; right: 0;
+        background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
+        z-index: 2000; transition: bottom 0.5s; max-height: 85vh; overflow-y: auto;
+        width: 100%; box-sizing: border-box;
+    }
+    .bottom-modal.show { bottom: 0; }
+    
+    select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
+    .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+    .config-label { font-weight: 600; font-size: 0.95em; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(24px); }
+    .ramal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9em; flex-wrap: wrap; gap: 10px; }
+    .ramal-nome { font-weight: 600; flex: 1; margin-right: 10px; }
+    .ramal-numeros-container { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .ramal-badge { background: var(--bg); color: var(--primary); font-family: 'JetBrains Mono', monospace; font-weight: 800; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--primary); text-decoration: none; font-size: 0.85em; transition: 0.2s; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
+    .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
+    .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
+    .ramal-item.emergencia-destaque {
+        background: linear-gradient(90deg, rgba(231,76,60,0.12), rgba(231,76,60,0.03));
+        border-left: 4px solid #e74c3c; border-radius: 10px; padding: 12px 12px;
+        border-bottom: none; margin: 10px 0;
+        animation: emergencia-pulse 2s infinite ease-in-out;
+    }
+    .ramal-item.emergencia-destaque .ramal-nome { color: #e74c3c; font-weight: 900; font-size: 1.05em; }
+    .ramal-item.emergencia-destaque .ramal-nome::before { content: '\1F6A8  '; }
+    .ramal-item.emergencia-destaque .ramal-badge {
+        background: #e74c3c; color: white; border-color: #e74c3c;
+        font-size: 1em; font-weight: 900; padding: 10px 18px;
+        animation: emergencia-badge-pulse 1.5s infinite ease-in-out;
+    }
+    @keyframes emergencia-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); } 50% { box-shadow: 0 0 0 8px rgba(231,76,60,0); } }
+    @keyframes emergencia-badge-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    html.dark-mode .ramal-item.emergencia-destaque { background: linear-gradient(90deg, rgba(231,76,60,0.25), rgba(231,76,60,0.08)); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+    .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .stat-card-big.purple { border-color: var(--accent); }
+    .stat-card-big.teal { border-color: var(--verde); }
+    .stat-val-big { font-size: 2.2em; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+    .stat-val-big.purple { color: var(--accent); }
+    .stat-val-big.teal { color: var(--verde); }
+    .stat-lab-big { font-size: 0.75em; font-weight: 800; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+    .lote-box { background: var(--bg); border: 2px dashed var(--primary); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; position: relative; }
+    .lote-label { font-size: 0.65em; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+    .lote-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6em; font-weight: 800; color: var(--text); letter-spacing: 2px; }
+    .lote-copy { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; background: none; border: none; }
+    #btn-flutuante-novidades {
+        position: fixed; bottom: 95px; right: 20px;
+        background: var(--primary); color: white; border: none; border-radius: 50px; padding: 12px 22px;
+        font-weight: 800; font-size: 0.85em; display: none; align-items: center; gap: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 900;
+        animation: bounceIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
+        cursor: pointer; border: 2px solid rgba(255,255,255,0.4); transition: 0.2s;
+    }
+    #btn-flutuante-novidades .badge { background: #7030A0; color: white; border-radius: 50%; font-size: 0.7em; font-weight: 900; padding: 2px 8px; margin-left: 4px; }
+    @keyframes bounceIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes shake-bell {
+        0%, 100% { transform: rotate(0deg); } 10% { transform: rotate(15deg); }
+        20% { transform: rotate(-15deg); } 30% { transform: rotate(10deg); }
+        40% { transform: rotate(-10deg); } 50% { transform: rotate(5deg); }
+        60% { transform: rotate(-5deg); } 70% { transform: rotate(2deg); }
+        80% { transform: rotate(-2deg); } 90% { transform: rotate(0deg); }
+    }
+    #btn-flutuante-novidades .animar-sino { display: inline-block; animation: shake-bell 1.2s ease-in-out infinite; transform-origin: top center; }
+    .hamburger-btn { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 8px; border-radius: 8px; }
+    .hamburger-btn span { display: block; width: 22px; height: 2.5px; background: white; border-radius: 3px; transition: transform 0.3s, opacity 0.3s; }
+    #hamburgerDrawer {
+        position: fixed; top: 0; left: 0;
+        width: 82%; max-width: 320px; height: 100%;
+        background: var(--card); z-index: 3600;
+        transform: translateX(-100%);
+        transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+        display: flex; flex-direction: column;
+        box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+    }
+    #hamburgerDrawer.open { transform: translateX(0); }
+    #drawerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 3500; backdrop-filter: blur(3px); }
+    #drawerOverlay.show { display: block; }
+    .drawer-brand { background: var(--primary); padding: 50px 20px 20px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; }
+    .drawer-brand-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+    .drawer-brand-text { color: white; font-size: 1em; font-weight: 800; }
+    .drawer-brand-sub { color: rgba(255,255,255,0.7); font-size: 0.72em; font-weight: 600; margin-top: 2px; }
+    .drawer-close-btn { background: none; border: none; color: white; cursor: pointer; margin-left: auto; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .drawer-close-btn:active { background: rgba(255,255,255,0.2); }
+    .drawer-close-btn span { font-size: 24px; }
+    .drawer-menu { flex: 1; overflow-y: auto; padding: 20px 0; }
+    .drawer-section-label { font-size: 0.65em; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); opacity: 0.5; padding: 15px 20px 5px 20px; }
+    .drawer-item { display: flex; align-items: center; gap: 18px; padding: 18px 20px; cursor: pointer; transition: background 0.2s; background: none; width: 100%; text-align: left; border: none; margin-bottom: 2px; }
+    .drawer-item:active { background: rgba(0,0,0,0.05); }
+    html.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
+    .drawer-item.highlight { background: rgba(0,169,122,0.08); }
+    html.dark-mode .drawer-item.highlight { background: rgba(0,169,122,0.15); }
+    .drawer-item-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; background: transparent !important; color: var(--text) !important; }
+    .drawer-item-label { flex: 1; font-weight: 700; font-size: 1.1rem; color: var(--text); }
+    .drawer-item-sub { font-size: 0.75rem; font-weight: 500; opacity: 0.5; margin-top: 2px; color: var(--text); }
+    .drawer-item-arrow { color: var(--text); opacity: 0.3; font-size: 20px; }
+    .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--border); font-size: 0.75rem; opacity: 0.6; font-weight: 600; }
+    .qr-img { width: 120px; height: 120px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    html.dark-mode .qr-img { filter: invert(1); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+    .skip-link { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .skip-link:focus { top: 10px; left: 10px; width: auto; height: auto; background: #000; color: #fff; padding: 10px; z-index: 9999; border-radius: 8px; }
+    @supports (-webkit-touch-callout: none) {
+        .mes-inner { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+        .mes-face { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+    }
+    .cartilha-titulo { font-weight: 900; color: var(--primary); font-size: 1.5em; margin: 0 0 6px 0; }
+    .cartilha-sub { font-size: 0.9em; opacity: 0.7; margin-bottom: 18px; font-weight: 600; }
+    .cartilha-conteudo { line-height: 1.7; font-size: 0.95em; }
+    .cartilha-conteudo strong { color: var(--primary); }
+    .cartilha-destaque { background: var(--bg); border-left: 5px solid var(--primary); padding: 15px; border-radius: 10px; margin: 15px 0; }
+    .cartilha-exemplo { background: var(--bg); border-radius: 12px; padding: 15px; margin: 15px 0; border: 1px dashed var(--border); }
+    .cartilha-progresso { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .cartilha-progresso-bar { flex: 1; height: 8px; background: var(--border); border-radius: 10px; overflow: hidden; min-width: 80px; }
+    .cartilha-progresso-bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s; }
+    .cartilha-progresso-text { font-weight: 700; font-size: 0.9em; color: var(--primary); white-space: nowrap; }
+    .cartilha-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+    .cartilha-tab-btn { background: var(--bg); border: 2px solid transparent; padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 0.8em; color: var(--text); opacity: 0.7; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+    .cartilha-tab-btn.active { opacity: 1; background: var(--primary); color: white; border-color: var(--primary); }
+    .cartilha-tab-btn .material-symbols-outlined { font-size: 18px; }
+    .cartilha-tab-btn.lida { opacity: 0.5; text-decoration: line-through; }
+    .cartilha-panel { display: none; animation: fadeIn 0.3s ease; }
+    .cartilha-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .cartilha-btn-marcar { background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 18px; font-weight: 800; font-size: 1em; width: 100%; cursor: pointer; margin-top: 20px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .cartilha-btn-marcar:active { transform: scale(0.97); }
+    .cartilha-btn-marcar.marcado { background: var(--border); color: var(--text); }
+    .cartilha-quiz { margin-top: 25px; border-top: 2px solid var(--border); padding-top: 20px; }
+    .cartilha-quiz h4 { color: var(--primary); margin: 0 0 15px 0; font-size: 1.1em; }
+    .quiz-pergunta { font-weight: 700; margin: 12px 0 6px 0; }
+    .quiz-opcoes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .quiz-opcao { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
+    .quiz-opcao:active { transform: scale(0.97); }
+    .quiz-opcao.certa { border-color: var(--primary); background: rgba(0,169,122,0.15); }
+    .quiz-opcao.errada { border-color: #e74c3c; background: rgba(231,76,60,0.15); }
+    .quiz-opcao.desabilitada { pointer-events: none; opacity: 0.6; }
+    .quiz-feedback { font-weight: 700; font-size: 0.9em; margin-top: 5px; }
+    .quiz-feedback.certo { color: var(--primary); }
+    .quiz-feedback.errado { color: #e74c3c; }
+    .novidades-timeline { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+    .novidade-card { background: var(--bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
+    .novidade-card:active { transform: scale(0.98); }
+    .novidade-card.lida { opacity: 0.6; }
+    .novidade-card .novidade-titulo { font-weight: 800; font-size: 1em; display: flex; align-items: center; gap: 8px; }
+    .novidade-card .novidade-desc { font-size: 0.9em; opacity: 0.8; margin-top: 4px; line-height: 1.4; }
+    .novidade-card .novidade-data { font-size: 0.7em; opacity: 0.5; margin-top: 8px; display: block; }
+    .novidade-card .badge-novo { background: var(--primary); color: white; font-size: 0.6em; font-weight: 800; padding: 2px 10px; border-radius: 20px; margin-left: 8px; }
+    .novidade-card .link-cartilha { color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; cursor: pointer; }
+    #resultadoPesquisa { background: var(--bg); border-radius: 16px; padding: 15px; border: 1px solid var(--border); min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+    #resultadoTexto { font-weight: 800; font-size: 1.2em; color: var(--text); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .icone-folga { font-size: 3.5rem; display: inline-block; animation: onda 2.5s ease-in-out infinite; }
+    .icone-trabalho { font-size: 3.5rem; display: inline-block; animation: girar 3s linear infinite; }
+    .icone-ferias { font-size: 3.5rem; display: inline-block; animation: voar 2s ease-in-out infinite; }
+    @keyframes onda { 0% { transform: translateX(0px) rotate(0deg); } 25% { transform: translateX(8px) rotate(3deg); } 75% { transform: translateX(-8px) rotate(-3deg); } 100% { transform: translateX(0px) rotate(0deg); } }
+    @keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes voar { 0% { transform: translateX(0px) rotate(0deg); } 25% { transform: translateX(8px) rotate(-5deg); } 75% { transform: translateX(-8px) rotate(5deg); } 100% { transform: translateX(0px) rotate(0deg); } }
+    #resultadoDetalhe { font-size: 0.85em; opacity: 0.7; }
+    .btn-ouvir { background: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 1; }
+    .btn-ouvir:active { transform: scale(0.96); }
+    .btn-ouvir.parar { background: var(--danger); }
+    .btn-mic { background: var(--accent); color: white; border: none; border-radius: 50%; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+    .btn-mic:active { transform: scale(0.92); }
+    .btn-mic .material-symbols-outlined { font-size: 28px; }
+    button, .tab, .drawer-item, .dia, .turma-badge, .ramal-badge { transition: transform 0.15s ease, opacity 0.15s ease; }
+    button:active, .tab:active, .drawer-item:active, .dia:active { transform: scale(0.96); }
+    .turma-badge { position: relative; overflow: hidden; }
+    .turma-badge::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent); transform: rotate(45deg); animation: shine 4s infinite; }
+    @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
+    .hoje { box-shadow: 0 0 0 3px white, 0 0 20px var(--accent), 0 4px 12px rgba(112,48,160,0.4) !important; }
+    
+    #update-banner {
+        display: none; position: fixed; top: 0; left: 0; right: 0;
+        background: linear-gradient(135deg, #00A97A 0%, #007F5C 100%); color: white;
+        padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px 16px; z-index: 5000; align-items: center; gap: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.28); border-radius: 0 0 20px 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.28); font-weight: 700; font-size: 0.9em;
+        animation: slideDown 0.45s cubic-bezier(0.22, 1, 0.36, 1); box-sizing: border-box;
+    }
+    #update-banner .upd-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+    #update-banner .upd-txt strong { font-size: 0.95em; font-weight: 800; letter-spacing: 0.02em; }
+    #update-banner .upd-txt small { font-size: 0.75em; font-weight: 500; opacity: 0.85; }
+    #update-banner.show { display: flex; }
+    #update-banner .material-symbols-outlined { font-size: 22px; }
+    #update-banner button { background: white; color: var(--primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85em; cursor: pointer; margin-left: auto; }
+    #update-banner .close-update { background: none; color: white; padding: 4px; margin-left: 4px; border-radius: 50%; }
+    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+    
+    #toast-container {
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+        z-index: 5500; display: flex; flex-direction: column; gap: 10px;
+        pointer-events: none; width: min(92%, 420px);
+    }
+    .toast {
+        background: var(--card); color: var(--text); border: 1px solid var(--border);
+        border-radius: 16px; padding: 14px 18px; font-weight: 600; font-size: 0.92em;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25); pointer-events: auto;
+        display: flex; align-items: center; gap: 12px; line-height: 1.35;
+        animation: toastIn 0.35s cubic-bezier(0.68,-0.55,0.27,1.55);
+        border-left: 5px solid var(--primary);
+    }
+    .toast.sucesso { border-left-color: var(--success); }
+    .toast.erro { border-left-color: var(--danger); }
+    .toast.info { border-left-color: var(--accent); }
+    .toast.aviso { border-left-color: var(--amarelo); }
+    .toast .material-symbols-outlined { font-size: 22px; flex-shrink: 0; }
+    .toast.sucesso .material-symbols-outlined { color: var(--success); }
+    .toast.erro .material-symbols-outlined { color: var(--danger); }
+    .toast.info .material-symbols-outlined { color: var(--accent); }
+    .toast.aviso .material-symbols-outlined { color: var(--amarelo); }
+    .toast .toast-msg { flex: 1; }
+    .toast .toast-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .toast .toast-actions button { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 0.8em; cursor: pointer; }
+    .toast .toast-actions button.secundario { background: var(--border); color: var(--text); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .toast.saindo { animation: toastOut 0.3s ease forwards; }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(10px) scale(0.97); } }
+    .btn-modal-fechar { background:var(--border);color:var(--text);border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer; }
+    .btn-modal-salvar { background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;margin-top:15px;cursor:pointer; }
+    .btn-config { background:var(--bg);color:var(--text);border:1px solid var(--border);padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer; }
+    .btn-config:first-of-type { margin-top:15px; }
+
+    /* ===== MEUS PEDIDOS ===== */
+    .pedido-info {
+        background: var(--bg); border-radius: 18px; padding: 14px 15px;
+        margin-bottom: 15px; border: 1px solid var(--border);
+        font-size: 0.88em; line-height: 1.7;
+    }
+    .pedido-info strong { color: var(--primary); }
+    .pedido-instrucao {
+        font-size: 0.82em; opacity: 0.75; margin: 0 0 15px 0;
+        line-height: 1.4;
+    }
+    .pedido-secao {
+        background: var(--primary); color: white;
+        padding: 6px 14px; border-radius: 10px;
+        font-size: 0.72em; font-weight: 900; letter-spacing: 1px;
+        display: inline-block; margin: 18px 0 10px 0;
+    }
+    .pedido-item-row {
+        display: grid;
+        grid-template-columns: 1fr 58px 66px;
+        gap: 8px; align-items: center;
+        margin-bottom: 8px;
+    }
+    .pedido-item-nome {
+        font-weight: 700; font-size: 0.88em;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pedido-item-row input {
+        padding: 10px 6px; border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--bg); color: var(--text);
+        font-family: inherit; font-weight: 700; font-size: 0.85em;
+        text-align: center; outline: none;
+        width: 100%; box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .pedido-item-row input:focus { border-color: var(--primary); }
+    .pedido-item-row input::placeholder { opacity: 0.5; font-weight: 600; }
+    .pedido-item-row input.pedido-nome-livre {
+        text-align: left; padding: 10px 12px;
+    }
+    .pedido-item-row input[type="number"]::-webkit-outer-spin-button,
+    .pedido-item-row input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+    .pedido-item-row input[type="number"] {
+        -moz-appearance: textfield; appearance: textfield;
+    }
+    .pedido-botoes { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-pedido-limpar {
+        background: var(--bg); color: var(--text);
+        border: 1.5px solid var(--border);
+        padding: 15px 20px; border-radius: 18px;
+        font-weight: 800; font-size: 0.9em;
+        cursor: pointer; flex-shrink: 0;
+    }
+
+    @media (max-width: 480px) {
+        body { box-shadow: none; }
+    }
+</style>
+</head>
+<body>
+<div id="splash" class="splash" data-action="skip-splash" aria-hidden="true"><img src="splash-screen.webp" alt="" decoding="async" fetchpriority="high"></div>
+
+<div id="welcomeScreen" class="welcome-screen" data-action="go-greeting" role="button" tabindex="0" aria-label="Boas-vindas. Toque para continuar">
+    <div class="w-logo" aria-hidden="true"></div>
+    <div class="w-center">
+        <p class="w-eyebrow" id="wEyebrow"></p>
+        <h1 class="w-name" id="wName">Bem-vindo</h1>
+        <span class="w-rule" aria-hidden="true"></span>
+        <p class="w-sub" id="wSub">Empowering Global Health Workforce</p>
+    </div>
+    <div class="w-foot">
+        <p class="w-hint">Toque para continuar</p>
+        <div class="w-progress" aria-hidden="true"><i></i></div>
+    </div>
+</div>
+
+
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<div id="update-banner" role="status" aria-live="polite">
+    <span class="material-symbols-outlined">system_update</span>
+    <span class="upd-txt"><strong>Nova versão disponível</strong><small>Toque em Atualizar para aplicar</small></span>
+    <button data-action="aplicar-atualizacao">Atualizar</button>
+    <button class="close-update" data-action="dispensar-atualizacao" aria-label="Fechar aviso">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+</div>
+
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<button id="install-button" data-action="install-pwa">
+    <span class="material-symbols-outlined">download_for_offline</span> INSTALAR APP
+</button>
+
+<header>
+    <div class="brand-container">
+        <svg version="1.1" viewBox="0 0 172 42" class="brand-logo-svg" role="img" aria-label="B|BRAUN Sharing Expertise">
+            <title>B|BRAUN - Sharing Expertise</title>
+            <g fill="#FFFFFF">
+                <path d="M46.8,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H32.2c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H46.8z M40.4,6.6v13.4h3.9c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L40.4,6.6z"/>
+                <path d="M14.5,3.1c5.2,0,5.4,4.5,5.4,4.5c0,4.7-4,4.6-4,4.6c5.8,0,5.6,5.4,5.6,5.4c0,6.4-7.7,6.1-7.7,6.1H0c0,0,1.6-0.4,1.6-1.9V5.1c0-1.5-1.5-2-1.5-2H14.5z M8.1,6.6v13.4H12c0,0,3.4,0,3.2-2.9c0,0,0-2.4-6.3-5.1h2.5c0,0,2.7,0.1,2.7-2.8c0-2.7-2.9-2.7-2.9-2.7L8.1,6.6z"/>
+                <path d="M55.5,3.1c0,0,1.6,0.4,1.6,2v16.6c0,1.5-1.6,2-1.6,2h8.2v-17H67c0,0,3.1,0,3.1,3.2c0,3.2-2.8,3.3-2.8,3.3h-3c0,0,1.3,1.1,3,4.8c1.7,3.7,1.7,3.7,1.7,3.7c0,0,1.1,2.1,2.5,2.1h6.5c0,0-1.4-0.4-2.3-2.4c-0.9-2-0.7-1.6-1.8-4.3c-1.2-2.9-3.2-2.8-3.2-2.8s5.5-0.1,5.5-5.8c0-5.8-8.3-5.3-8.3-5.3H55.5z"/>
+                <path d="M96.1,23.7h8.2c0,0-1.2-0.3-2.1-2.6c-0.9-2.4-5.7-15.8-5.7-15.8S96,3.1,94.2,3.1h-9.1c0,0,1.9,0.4,1.3,2c-0.3,0.9-2,5.3-3.4,9h-2.1c-1.4,0-1.6,1-2.1,2.3c-0.5,1.3-1.7,2.3-1.7,2.3c0.7-0.4,3.2-0.4,3.2-0.4l1.3,0l-0.4,1.1c0,0-1.2,3.2-2.2,4.2H85l2-5.3c0.5,0,0.9,0,1.2,0c1.4-0.1,1.9-0.9,2.2-1.9c0.4-1,1.7-2.6,1.7-2.6c-0.7,0.2-2.7,0.2-2.7,0.2h-1l2.1-5.6L96.1,23.7z"/>
+                <path d="M102.4,3.1c0,0,1.6,0.4,1.6,2.1v11c0,0-0.4,7.8,9.8,7.8c10.2,0,9.9-7.4,9.9-7.4V5.2c0,0,0-2.1-1.9-2.1h-4.8c0,0,1.6,0.3,1.6,2.1v11.2c0,0,0.2,3.5-3.9,3.5c0,0-3.6,0.1-3.6-3.7v-11c0,0-0.1-2.1-1.9-2.1H102.4z"/>
+                <path d="M126.2,3.1c0,0,1.6,0.3,1.6,2.2v16.3c0,1.7-1.6,2.1-1.6,2.1h6.5V12.9l8.3,9.1c0,0,1.1,1.6,3.5,1.6h3.1V5.4c0,0,0.2-2.3-1.9-2.3H141c0,0,1.5,0.4,1.5,2.1v8.7L133,3.1H126.2z"/>
+                <rect x="26.5" width="0.8" height="26.2"/>
+            </g>
+            <g fill="#FFFFFF">
+                <path d="M37.6,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4C35.7,32.4,35,33,35,34c0,0.9,0.9,1.4,1.7,1.8L37.6,36.3z"/>
+                <polygon points="48.2,31.6 48.2,36.1 44,36.1 44,31.6 42.8,31.6 42.8,41.8 44,41.8 44,37 48.2,37 48.2,41.8 49.4,41.8 49.4,31.6"/>
+                <path d="M56,32.7L56,32.7l1.5,5h-3L56,32.7z M55.3,31.6l-3.3,10.2h1.2l1-3.2h3.6l1,3.2H60l-3.3-10.2H55.3z"/>
+                <path d="M63.9,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M62.8,41.8h1.2v-4.5H65c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2L68.2,39c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <rect x="72.1" y="31.6" width="1.2" height="10.2"/>
+                <polygon points="82.9,31.6 82.9,40.3 82.9,40.3 78.7,31.6 77.2,31.6 77.2,41.8 78.3,41.8 78.3,33.2 78.3,33.2 82.5,41.8 84,41.8 84,31.6"/>
+                <path d="M94.4,41c-0.3,0.2-1.3,1-2.9,1c-3.2,0-4.1-2.6-4.1-5.6c0-2.6,1-4.9,3.8-4.9c2,0,3.3,1.2,3.3,2.9h-1.3c0-0.9-0.5-2-2-2c-2.1,0-2.6,2.1-2.6,4c0,2,0.3,4.6,2.7,4.6c1,0,1.7-0.4,1.9-0.6V37h-2.3v-1h3.5V41z"/>
+                <polygon points="103.1,31.6 103.1,41.8 108.2,41.8 108.2,40.9 104.3,40.9 104.3,37 107.9,37 107.9,36 104.3,36 104.3,32.6 108.1,32.6 108.1,31.6"/>
+                <polygon points="116.4,31.6 114.1,35.4 111.9,31.6 110.6,31.6 113.5,36.5 110.3,41.8 111.5,41.8 114.1,37.5 116.7,41.8 118,41.8 114.8,36.5 117.6,31.6"/>
+                <path d="M121.5,32.6h1c0.8,0,2.3,0,2.3,1.9c0,1.2-0.6,1.8-2.1,1.8h-1.2V32.6z M120.3,41.8h1.2v-4.6h1.2c1.9,0,3.2-0.8,3.2-2.8c0-2.8-2.4-2.8-2.4-2.8h-2.4V41.8z"/>
+                <polygon points="128.8,31.6 128.8,41.8 133.9,41.8 133.9,40.9 130,40.9 130,37 133.6,37 133.6,36 130,36 130,32.6 133.7,32.6 133.7,31.6"/>
+                <path d="M138.1,32.6h0.9c1.2,0,2.6,0,2.6,1.7c0,1.7-1.4,2-2.8,2h-0.6V32.6z M137,41.8h1.2v-4.5h1.1c1.6,0,1.9,0.7,2.2,2.2l0.5,2.4h1.2l-0.6-2.8c-0.2-1.1-0.4-1.9-1.8-2.3v0c0.9-0.2,2.1-0.7,2.1-2.6c0-2.5-2.6-2.6-3.3-2.6h-2.5V41.8z"/>
+                <polygon points="145,31.6 145,32.6 147.5,32.6 147.5,41.8 148.6,41.8 148.6,32.6 151.1,32.6 151.1,31.6"/>
+                <rect x="153.5" y="31.6" width="1.2" height="10.2"/>
+                <path d="M161.7,36.3c1,0.6,2.2,1.2,2.2,2.8c0,2.1-1.7,2.9-3.6,2.9c-1.1,0-2.1-0.3-2.4-0.3v-1.2c0.2,0.1,1.2,0.5,2.5,0.5c1.3,0,2.2-0.6,2.2-1.7c0-1.2-0.9-1.6-1.7-2.1l-0.9-0.5c-0.9-0.5-2.2-1.1-2.2-2.6c0-1.8,1.4-2.6,3.3-2.6c1,0,1.8,0.2,2.1,0.3v1.1c-0.3-0.1-1.1-0.4-2.2-0.4c-1.2,0-1.9,0.6-1.9,1.6c0,0.9,0.9,1.4,1.7,1.8L161.7,36.3z"/>
+                <polygon points="166.9,31.6 166.9,41.8 172,41.8 172,40.9 168.1,40.9 168.1,37 171.7,37 171.7,36 168.1,36 168.1,32.6 171.9,32.6 171.9,31.6"/>
+            </g>
+        </svg>
+        <span class="turma-badge" id="turmaBadge" role="button" tabindex="0">
+            <span class="material-symbols-outlined">groups</span>
+            <span id="turmaBadgeText">Turma A</span>
+        </span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <button class="hamburger-btn" id="menuButton" aria-label="Menu principal" aria-expanded="false">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+    </div>
+</header>
+
+<main id="main-content">
+    <h1 class="sr-only">Escala Braun OnLine</h1>
+
+    <div class="sticky-header-block">
+        <div class="status-panel" aria-live="polite">
+            <div id="big-clock" class="clock">00:00:00</div>
+            <div id="status-msg" class="status-msg">---</div>
+            <div id="dias-ferias" style="display:none;margin-top:8px;font-size:0.82em;font-weight:800;color:var(--ferias);padding:6px 14px;background:rgba(112,48,160,0.1);border-radius:12px;align-items:center;justify-content:center;gap:4px;"></div>
+        </div>
+        <div class="mes-nav sem-banner" id="mesNav">
+            <button class="mes-nav-btn" data-action="mes-anterior" aria-label="Mês anterior">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <div class="mes-nav-title" id="mesNavTitle">Janeiro 2026</div>
+            <button class="btn-hoje" data-action="ir-hoje">
+                <span class="material-symbols-outlined" style="font-size:18px;">today</span>
+                HOJE
+            </button>
+            <button class="mes-nav-btn" data-action="mes-proximo" aria-label="Próximo mês">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </div>
+        <div id="banner-avisos" aria-live="polite">
+            <div class="banner-label">
+                <span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+                Avisos
+            </div>
+            <div class="banner-track">
+                <div class="banner-content" id="bannerContent"></div>
+            </div>
+        </div>
+        <div id="legenda-1x1" aria-label="Legenda das cores">
+            <div class="legenda-item"><span class="legenda-cor" style="background: var(--laranja-1x1);"></span><span>Trab. Manhã</span></div>
+            <div class="legenda-item"><span class="legenda-cor" style="background: var(--roxo-1x1);"></span><span>Trab. Noite</span></div>
+            <div class="legenda-item"><span class="legenda-cor" style="background: var(--verde);"></span><span>Folga</span></div>
+        </div>
+    </div>
+
+    <div id="calendario-box"></div>
+</main>
+
+<div class="tab-bar" role="tablist" aria-label="Selecionar escala">
+    <button class="tab" data-region="BR" id="tab-BR" role="tab" aria-selected="true"><span class="material-symbols-outlined" aria-hidden="true">factory</span>ECOFLAC</button>
+    <button class="tab" data-region="MNT" id="tab-MNT" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">engineering</span>MANUT.</button>
+    <button class="tab" data-region="1x1" id="tab-1x1" role="tab" aria-selected="false"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>1x1</button>
+    <button class="tab" data-action="open-pesquisa" id="tab-SEARCH" role="tab" aria-selected="false"><span class="material-symbols-outlined search-icon">search</span><span>BUSCAR</span></button>
+</div>
+
+<div id="drawerOverlay" aria-hidden="true"></div>
+
+<div id="hamburgerDrawer" role="dialog" aria-label="Menu lateral" aria-modal="true">
+    <div class="drawer-brand">
+        <div class="drawer-brand-icon"><span class="material-symbols-outlined" aria-hidden="true" style="color:white;font-size:22px;font-variation-settings:'FILL' 1">factory</span></div>
+        <div>
+            <div class="drawer-brand-text">Braun OnLine</div>
+            <div class="drawer-brand-sub">v3.11 · 2026/2027</div>
+        </div>
+        <button class="drawer-close-btn" data-action="close-drawer" aria-label="Fechar menu"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <div class="drawer-menu">
+        <div class="drawer-section-label">Perfil</div>
+        <button class="drawer-item" data-action="open-perfil">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128100;</div>
+            <div><div class="drawer-item-label">Meu Perfil</div><div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Contatos</div>
+        <button class="drawer-item" data-action="open-ramais">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128222;</div>
+            <div><div class="drawer-item-label">Ramais Úteis</div><div class="drawer-item-sub">Contatos internos</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Colaborador</div>
+        <button class="drawer-item" data-action="open-colaborador">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127942;</div>
+            <div><div class="drawer-item-label">Colaborador do Mês</div><div class="drawer-item-sub">Votação mensal</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-pedidos">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128230;</div>
+            <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e EPIs</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-ferias">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127958;&#65039;</div>
+            <div><div class="drawer-item-label">Programar Férias</div><div class="drawer-item-sub">Período e sugestão de datas</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Aprendizado</div>
+        <button class="drawer-item highlight" data-action="open-cartilhas">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128216;</div>
+            <div><div class="drawer-item-label">Cartilhas</div><div class="drawer-item-sub">Como usar · Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Conquistas</div>
+        <button class="drawer-item" data-action="open-conquistas">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127885;</div>
+            <div><div class="drawer-item-label">Minhas Conquistas</div><div class="drawer-item-sub">Selos e progresso</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Ferramentas</div>
+        <button class="drawer-item" data-action="open-config">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#9881;&#65039;</div>
+            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Estatísticas · Exportar · Backup</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item no-arrow" data-action="toggle-dark">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127763;</div>
+            <div><div class="drawer-item-label">Modo Escuro</div><div class="drawer-item-sub">Alterna o tema</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-privacy">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128737;&#65039;</div>
+            <div><div class="drawer-item-label">Privacidade</div><div class="drawer-item-sub">Política de dados</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <div class="drawer-section-label">Conecte-se</div>
+        <div class="drawer-item" style="cursor:default; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 15px 0;">
+            <img src="qr-code.png" alt="QR Code para acessar o Braun OnLine" class="qr-img">
+            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;">Escaneie para acessar</div>
+        </div>
+    </div>
+    <div class="drawer-footer">&copy; 2026 Braun OnLine · Todos os direitos reservados</div>
+</div>
+
+<div id="overlay" aria-hidden="true"></div>
+
+<button id="btn-flutuante-novidades" data-action="open-novidades" aria-label="Novidades">
+    <span class="material-symbols-outlined animar-sino" id="sinoIcon">notifications</span>
+    Novidades
+    <span class="badge" id="novidadesBadge" style="display:none;">0</span>
+</button>
+
+<div id="novidadesCard" class="bottom-modal" role="dialog" aria-label="Novidades" aria-modal="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128276; Novidades</h2>
+        <button data-action="marcar-novidades" style="background:none;border:none;color:var(--primary);font-weight:700;font-size:0.8em;cursor:pointer;">Marcar todas como lidas</button>
+    </div>
+    <div class="cartilha-sub">Fique por dentro das últimas atualizações e conteúdos.</div>
+    <div id="novidadesLista" class="novidades-timeline"></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="cartilhasCard" class="bottom-modal" role="dialog" aria-label="Cartilhas" aria-modal="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128216; Cartilhas</h2>
+        <span style="font-size:0.75em; opacity:0.5; font-weight:600;" id="cartilhaVersao">v1.0</span>
+    </div>
+    <div class="cartilha-sub">Aprenda sobre melhorias contínuas, qualidade, segurança, compliance, incêndio e muito mais.</div>
+    <div class="cartilha-progresso">
+        <span style="font-weight:600; font-size:0.85em;">Progresso</span>
+        <div class="cartilha-progresso-bar"><div class="cartilha-progresso-bar-fill" id="progressoFill" style="width:0%;"></div></div>
+        <span class="cartilha-progresso-text" id="progressoTexto">0/10</span>
+    </div>
+    <div class="cartilha-tabs" id="cartilhaTabs"></div>
+    <div id="cartilhaPanels"></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
+    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <button class="material-symbols-outlined lote-copy" data-action="copy-lote" aria-label="Copiar lote">content_copy</button>
+    </div>
+    <label for="noteInput" class="sr-only">Anotação</label>
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
+    <button data-action="save-nota" class="btn-modal-salvar">SALVAR</button>
+</div>
+
+<div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
+    <div class="config-item">
+        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
+        <label class="switch"><input type="checkbox" id="minimalGreetingToggle" aria-label="Saudação minimalista"><span class="slider" aria-hidden="true"></span></label>
+    </div>
+    <div class="config-item">
+        <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
+        <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
+    </div>
+    <button data-action="open-stats" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA</button>
+    <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
+    <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
+    <button data-action="import-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span> IMPORTAR BACKUP (JSON)</button>
+    <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
+    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">FECHAR</button>
+</div>
+
+<div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏖️ Programar Férias</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div>
+            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
+            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
+            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        </div>
+        <button data-action="save-ferias" class="btn-modal-salvar">SALVAR PERÍODO</button>
+        <button data-action="confirm-clear-ferias" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;cursor:pointer;">LIMPAR FÉRIAS</button>
+    </div>
+
+    <div style="margin-top:25px;padding-top:20px;border-top:2px solid var(--border);">
+        <div style="font-weight:900;color:var(--primary);font-size:1.05em;margin-bottom:6px;">💡 Qual a melhor data?</div>
+        <p style="font-size:0.82em;opacity:0.75;margin:0 0 14px 0;line-height:1.5;">
+            Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.
+        </p>
+        <div style="margin-bottom:10px;">
+            <select id="feriasMes" style="width:100%;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;font-size:0.95em;"></select>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:stretch;">
+            <input type="number" id="feriasDuracao" min="5" max="60" value="30" style="flex:1;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;text-align:center;font-size:1em;">
+            <button data-action="sugerir-ferias" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;font-size:0.9em;">Sugerir</button>
+        </div>
+        <div id="sugestoesFerias"></div>
+    </div>
+
+    <button data-action="close-modals" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">VOLTAR</button>
+</div>
+
+<div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
+    <div id="stats-content"></div>
+    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">VOLTAR</button>
+</div>
+
+<div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
+    <div class="ramal-secao">URGÊNCIAS &amp; SERVIÇOS</div>
+    <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
+    <div class="ramal-item emergencia-destaque"><span class="ramal-nome">Emergência</span><div class="ramal-numeros-container"><a href="tel:26023222" class="ramal-badge">3222</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
+    <div class="ramal-secao">ADMINISTRAÇÃO &amp; RH</div>
+    <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
+    <div class="ramal-secao">ECOFLAC - PRODUÇÃO &amp; QUALIDADE</div>
+    <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Esterilização / Farmacêuticos</span><div class="ramal-numeros-container"><a href="tel:26023432" class="ramal-badge">3432</a> <a href="tel:26023408" class="ramal-badge">3408</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
+    <div class="ramal-secao">MANUTENÇÃO &amp; APOIO</div>
+    <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
+    <div class="ramal-secao">CONTATOS NOMINAIS &amp; OUTROS</div>
+    <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
+    <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;">Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.</p>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Dados armazenados no dispositivo:</b> nome, matrícula, turma, ano, setor, anotações, férias, preferências e progresso em cartilhas são salvos exclusivamente no seu navegador (localStorage). Nada disso é enviado para servidores nossos ou de terceiros.</p>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Serviços de terceiros:</b> utilizamos apenas o Google Fonts para tipografia. Nenhum dado pessoal ou de uso é enviado a terceiros.</p>
+    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Seus direitos (LGPD):</b> você pode exportar todos os seus dados locais via "Exportar Backup (JSON)" em Configurações e apagá-los limpando os dados do navegador.</p>
+    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">ENTENDI</button>
+</div>
+
+<div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
+    <div style="display:flex;flex-direction:column;gap:15px;">
+        <div><label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label><input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+        <div><label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label><input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+        <div>
+            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma / Escala</label>
+            <select id="turmaPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <optgroup label="ECOFLAC">
+                    <option value="A">Turma A (Manhã - ECOFLAC)</option>
+                    <option value="B">Turma B (Manhã - ECOFLAC)</option>
+                    <option value="C">Turma C (Noite - ECOFLAC)</option>
+                    <option value="D">Turma D (Noite - ECOFLAC)</option>
+                </optgroup>
+                <optgroup label="MANUTENÇÃO">
+                    <option value="E">Turma E (Manhã - Manutenção)</option>
+                    <option value="F">Turma F (Manhã - Manutenção)</option>
+                    <option value="G">Turma G (Noite - Manutenção)</option>
+                    <option value="H">Turma H (Noite - Manutenção)</option>
+                </optgroup>
+                <optgroup label="1x1">
+                    <option value="1x1A">1x1 Manhã - Equipe A</option>
+                    <option value="1x1B">1x1 Manhã - Equipe B</option>
+                    <option value="1x1C">1x1 Noite - Equipe A</option>
+                    <option value="1x1D">1x1 Noite - Equipe B</option>
+                </optgroup>
+            </select>
+        </div>
+        <div>
+            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
+            <select id="anoPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
+        <div><label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label><input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+    </div>
+    <button data-action="save-perfil-fechar" class="btn-modal-salvar">SALVAR E FECHAR</button>
+</div>
+
+<div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
+
+    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+        <div style="font-size:0.7em;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Seus dados (votante)</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.9em;">
+            <div><span style="opacity:0.6;">Turma:</span> <strong id="votacaoTurma">---</strong></div>
+            <div><span style="opacity:0.6;">Matrícula:</span> <strong id="votacaoMatricula">---</strong></div>
+        </div>
+    </div>
+
+    <div id="votoFormBloco">
+        <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
+       <label for="votoNome" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:8px;">EM QUEM VOCÊ VOTA</label>
+            <input type="text" id="votoNome" placeholder="Digite o nome do colega" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--card);color:var(--text);font-weight:800;font-size:1em;">
+        </div>
+
+        <div style="background:rgba(112,48,160,0.08);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:15px;">
+            <div style="font-size:0.75em;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔒 Privacidade</div>
+            <div style="font-size:0.82em;line-height:1.5;opacity:0.85;">
+                Seu voto fica registrado com a sua <strong>matrícula</strong> apenas para <strong>evitar votos duplicados</strong>. Só o RH tem acesso aos votos individuais — nenhum colega vê em quem você votou.
+            </div>
+        </div>
+
+        <button data-action="votar" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);cursor:pointer;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span> VOTAR AGORA
+        </button>
+    </div>
+
+    <div id="votoAgradecimento" style="display:none;text-align:center;padding:24px 10px;">
+        <div style="font-size:3.5em;margin-bottom:12px;">🎉</div>
+        <div style="font-weight:900;color:var(--primary);font-size:1.3em;margin-bottom:8px;">Obrigado pelo seu voto!</div>
+        <div style="font-size:0.9em;opacity:0.75;line-height:1.5;margin-bottom:20px;">
+            O formulário foi aberto em outra aba.<br>
+            <strong>Não esqueça de enviar sua resposta lá para confirmar o voto.</strong>
+        </div>
+        <button data-action="votar-novamente" style="background:var(--bg);color:var(--text);border:2px solid var(--border);padding:14px 20px;border-radius:18px;font-weight:800;font-size:0.9em;cursor:pointer;">
+            Voltar
+        </button>
+    </div>
+
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:15px;">&#128230; Meus Pedidos</h2>
+
+    <div class="pedido-info">
+        <div><strong>Nome:</strong> <span id="pedidoNome">---</span></div>
+        <div><strong>Matrícula:</strong> <span id="pedidoMatricula">---</span></div>
+        <div><strong>Turma:</strong> <span id="pedidoTurma">---</span> &middot; <strong>Ano:</strong> <span id="pedidoAno">---</span></div>
+    </div>
+
+    <p class="pedido-instrucao">Preencha a <strong>quantidade</strong> e o <strong>tamanho</strong> dos itens que precisa. Só os itens com quantidade serão enviados.</p>
+
+    <div class="pedido-secao">&#128085; UNIFORMES</div>
+
+    <div class="pedido-item-row" data-item="Camisa" data-secao="uniformes">
+        <span class="pedido-item-nome">Camisa</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Camisa">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Camisa">
+    </div>
+    <div class="pedido-item-row" data-item="Calça" data-secao="uniformes">
+        <span class="pedido-item-nome">Calça</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça">
+    </div>
+    <div class="pedido-item-row" data-item="Jaleco" data-secao="uniformes">
+        <span class="pedido-item-nome">Jaleco</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Jaleco">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Jaleco">
+    </div>
+    <div class="pedido-item-row" data-item="Boné / Touca" data-secao="uniformes">
+        <span class="pedido-item-nome">Boné / Touca</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Boné ou Touca">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Boné ou Touca">
+    </div>
+    <div class="pedido-item-row" data-item="Meias" data-secao="uniformes">
+        <span class="pedido-item-nome">Meias</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Meias">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Meias">
+    </div>
+
+    <div class="pedido-secao">&#129509; EQUIPAMENTOS DE PROTEÇÃO</div>
+
+    <div class="pedido-item-row" data-item="Botina" data-secao="epis">
+        <span class="pedido-item-nome">Botina</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Botina">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Botina">
+    </div>
+    <div class="pedido-item-row" data-item="Luva" data-secao="epis">
+        <span class="pedido-item-nome">Luva</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Luva">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Luva">
+    </div>
+    <div class="pedido-item-row" data-item="Óculos de Proteção" data-secao="epis">
+        <span class="pedido-item-nome">Óculos Proteção</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Óculos de Proteção">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Óculos de Proteção">
+    </div>
+    <div class="pedido-item-row" data-item="Protetor Auricular" data-secao="epis">
+        <span class="pedido-item-nome">Protetor Auricular</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Protetor Auricular">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Protetor Auricular">
+    </div>
+
+    <div class="pedido-secao">&#128230; OUTRO ITEM</div>
+
+    <div class="pedido-item-row pedido-item-livre" data-secao="outros">
+        <input type="text" maxlength="40" placeholder="Nome do item" class="pedido-nome-livre" aria-label="Nome do outro item">
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade do outro item">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho do outro item">
+    </div>
+
+    <div style="margin-top:20px;">
+        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">OBSERVAÇÕES</label>
+        <textarea id="pedidoObs" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    </div>
+
+    <div class="pedido-botoes">
+        <button data-action="limpar-pedido" class="btn-pedido-limpar" aria-label="Limpar todos os campos">Limpar</button>
+        <button data-action="enviar-pedido" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;flex:1;font-size:1.05em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);cursor:pointer;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span> ENVIAR POR E-MAIL
+        </button>
+    </div>
+
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<div id="pesquisaCard" class="bottom-modal" role="dialog" aria-label="Pesquisar escala" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">&#128269; Pesquisar data</h2>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="width:100%;"><input type="date" id="pesquisaData" class="input-date" style="width:100%;box-sizing:border-box;"></div>
+        <div style="display:flex;gap:10px;align-items:center;width:100%;">
+            <input type="text" id="pesquisaDataTexto" placeholder="dd/mm/aaaa ou fale a data" style="flex:1;min-width:60px;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;font-size:0.9em;">
+            <button data-action="mic" class="btn-mic" aria-label="Pesquisar por voz"><span class="material-symbols-outlined">mic</span></button>
+            <button data-action="pesquisar" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;height:54px;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:20px;">search</span> Buscar
+            </button>
+        </div>
+    </div>
+    <div id="resultadoPesquisa" style="background:var(--bg);border-radius:16px;padding:15px;border:1px solid var(--border);min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;margin-top:15px;">
+        <div id="resultadoTexto" style="font-weight:800;font-size:1.2em;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:8px;">Nenhuma pesquisa realizada.</div>
+        <div id="resultadoDetalhe" style="font-size:0.85em;opacity:0.7;"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:15px;">
+        <button data-action="toggle-voz" id="btnOuvirResultado" class="btn-ouvir">
+            <span class="material-symbols-outlined" id="btnOuvirIcon">volume_up</span>
+            <span id="btnOuvirTexto">Ouvir resposta</span>
+        </button>
+        <button data-action="fechar-pesquisa" style="background:var(--border);color:var(--text);border:none;padding:12px 16px;border-radius:18px;font-weight:800;cursor:pointer;flex:1;">Fechar</button>
+    </div>
+</div>
+
+<div id="conquistasCard" class="bottom-modal" role="dialog" aria-label="Conquistas" aria-modal="true">
+    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">&#127885; Minhas Conquistas</h2>
+    <div id="listaConquistas" style="display:flex;flex-direction:column;gap:12px;margin-top:15px;"></div>
+    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
