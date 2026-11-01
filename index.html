@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="manifest" href="manifest.json">
-<link rel="preload" as="image" href="splash-screen.webp" type="image/webp">
 <link rel="apple-touch-icon" href="maskable_icon_x192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -270,13 +269,29 @@
     .tab .material-symbols-outlined { font-size: 26px; }
     #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1500; backdrop-filter: blur(5px); }
     
+    /* Abas (modais) em TELA CHEIA, sem cantos arredondados */
     .bottom-modal {
-        position: fixed; bottom: -110%; left: 0; right: 0;
-        background: var(--card); border-radius: 35px 35px 0 0; padding: 30px 25px;
-        z-index: 2000; transition: bottom 0.5s; max-height: 85vh; overflow-y: auto;
-        width: 100%; box-sizing: border-box;
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        width: 100%; height: 100%; max-height: none; box-sizing: border-box;
+        background: var(--card); border-radius: 0;
+        padding: 0 22px calc(env(safe-area-inset-bottom, 0px) + 32px);
+        z-index: 2000; overflow-y: auto; overscroll-behavior: contain;
+        transform: translateY(100%); visibility: hidden;
+        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.4s;
     }
-    .bottom-modal.show { bottom: 0; }
+    .bottom-modal.show { transform: translateY(0); visibility: visible; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s; }
+    .modal-bar {
+        position: sticky; top: 0; z-index: 5; display: flex; justify-content: flex-start; align-items: center;
+        margin: 0 -22px 6px -22px; padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 8px 14px;
+        background: var(--card);
+    }
+    .modal-x {
+        height: 44px; padding: 0 12px 0 8px; gap: 8px; border: none; border-radius: 0; background: transparent;
+        color: var(--primary); display: flex; align-items: center; cursor: pointer;
+        font-family: inherit; font-size: 1.05em; font-weight: 800; letter-spacing: 0.01em;
+    }
+    .modal-x:active { opacity: 0.55; }
+    .modal-x .material-symbols-outlined { font-size: 28px; }
     
     select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
     .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
@@ -737,10 +752,26 @@
             <div><div class="drawer-item-label">Minhas Conquistas</div><div class="drawer-item-sub">Selos e progresso</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
+        <div class="drawer-section-label">Novidades</div>
+        <button class="drawer-item" data-action="open-novidades">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128276;</div>
+            <div><div class="drawer-item-label">Novidades</div><div class="drawer-item-sub">O que mudou no app</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
         <div class="drawer-section-label">Ferramentas</div>
+        <button class="drawer-item" data-action="open-pesquisa">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128269;</div>
+            <div><div class="drawer-item-label">Pesquisar Escala</div><div class="drawer-item-sub">Consulte qualquer data e turma</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
+        <button class="drawer-item" data-action="open-stats">
+            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128202;</div>
+            <div><div class="drawer-item-label">Estatísticas da Escala</div><div class="drawer-item-sub">Dias trabalhados e folgas</div></div>
+            <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
+        </button>
         <button class="drawer-item" data-action="open-config">
             <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#9881;&#65039;</div>
-            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Estatísticas · Exportar · Backup</div></div>
+            <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Exportar · Backup · Preferências</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item no-arrow" data-action="toggle-dark">
@@ -818,7 +849,6 @@
         <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
         <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
     </div>
-    <button data-action="open-stats" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">analytics</span> ESTATÍSTICAS DA ESCALA</button>
     <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
     <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
     <button data-action="import-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span> IMPORTAR BACKUP (JSON)</button>
