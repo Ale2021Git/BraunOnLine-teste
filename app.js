@@ -23,7 +23,7 @@ const BACKUP_KEYS = [
   'braun_nome_completo','braun_matricula','braun_turma_perfil','braun_ano','braun_setor',
   'braun_last_region','braun_turma_BR','braun_turma_MNT','braun_turma_1x1',
   'braun_ferias_inicio','braun_ferias_fim','braun_dark_mode',
-  'braun_minimal_greeting','braun_voice_response','braun_haptic',
+  'braun_minimal_greeting','braun_voice_response','braun_voz_genero','braun_voz_nome','braun_haptic',
   'braun_cartilhas_lidas','braun_conquistas','braun_quizzes_acertados',
   'braun_novidades_lidas','logs_v26'
 ];
@@ -410,7 +410,7 @@ if ('serviceWorker' in navigator) {
 }
 function mostrarBannerQuandoLivre() {
   const w = document.getElementById('welcomeScreen');
-  const aberta = (w && w.style.display === 'flex' && !w.classList.contains('hide')) || document.documentElement.classList.contains('splash-on');
+  const aberta = (w && w.style.display === 'flex' && !w.classList.contains('hide'));
   if (aberta) { setTimeout(mostrarBannerQuandoLivre, 400); return; }
   mostrarBannerAtualizacao();
 }
@@ -697,6 +697,7 @@ function openConfig() {
   const tgVoz = document.getElementById('voiceResponseToggle');
   if (tgMin) tgMin.checked = getStorageValue('braun_minimal_greeting') === 'true';
   if (tgVoz) tgVoz.checked = getStorageValue('braun_voice_response') !== 'false';
+  atualizarUIVoz();
   focusModal('configCard');
 }
 function openFerias() {
@@ -1049,31 +1050,6 @@ function scrollToToday() {
 var welcomeTimer = null;
 var welcomeMostrado = false;
 var welcomeIniciarTimer = null;
-function fecharSplash() {
-  const root = document.documentElement;
-  const sp = document.getElementById('splash');
-  root.classList.remove('splash-hold');
-  if (welcomeIniciarTimer) welcomeIniciarTimer();
-  if (!sp || sp.classList.contains('is-out')) { if (!sp) root.classList.remove('splash-on'); return; }
-  sp.classList.add('is-out');
-  setTimeout(function () { root.classList.remove('splash-on'); if (sp.parentNode) sp.parentNode.removeChild(sp); atualizarThemeColorSeLivre(); }, 550);
-}
-function atualizarThemeColorSeLivre() {
-  const w = document.getElementById('welcomeScreen');
-  const welcomeAberta = w && w.style.display === 'flex' && !w.classList.contains('hide');
-  if (!welcomeAberta) atualizarThemeColor();
-}
-function agendarSplash() {
-  if (!document.getElementById('splash')) { document.documentElement.classList.remove('splash-hold', 'splash-on'); return; }
-  const img = document.getElementById('splash').querySelector('img');
-  if (img) {
-    if (img.complete && img.naturalWidth === 0) { fecharSplash(); return; }
-    img.addEventListener('error', fecharSplash);
-  }
-  // tempo mínimo de exibição contado desde o início da navegação
-  const espera = Math.max(0, 1600 - performance.now());
-  setTimeout(fecharSplash, espera);
-}
 function goToGreeting() {
   const w = document.getElementById('welcomeScreen');
   if (!w || w.classList.contains('hide')) return;
@@ -1125,8 +1101,7 @@ function boasVindas() {
       if (welcomeTimer) return;
       welcomeTimer = setTimeout(goToGreeting, 3600);
     };
-    // com a splash na tela, o relógio da welcome só começa quando ela sair
-    if (!document.documentElement.classList.contains('splash-hold')) welcomeIniciarTimer();
+    welcomeIniciarTimer();
   }
 }
 
@@ -1425,14 +1400,110 @@ function iniciarReconhecimentoVoz() {
   rec.onend = function () { ct.placeholder = 'Toque no microfone...'; ct.style.borderColor = ''; recognitionInstance = null; };
   try { rec.start(); recognitionInstance = rec; } catch (e) { console.warn(e); }
 }
+/* ---------- Voz da resposta: feminina / masculina, usando as melhores vozes do aparelho ---------- */
+function vozesPt() {
+  if (!window.speechSynthesis) return [];
+  const todas = window.speechSynthesis.getVoices() || [];
+  const pt = todas.filter(function (v) { return /^pt([-_]|$)/i.test(v.lang || ''); });
+  const br = pt.filter(function (v) { return /^pt[-_]br/i.test(v.lang || ''); });
+  return br.length ? br : pt;
+}
+function pontuarVoz(v) {
+  const n = ((v.name || '') + ' ' + (v.voiceURI || '')).toLowerCase();
+  let p = 0;
+  if (/natural|neural|online|premium|enhanced|wavenet|studio/.test(n)) p += 6;
+  if (/network|google|microsoft|siri/.test(n)) p += 3;
+  if (v.localService === false) p += 2;
+  if (/compact|espeak|robot/.test(n)) p -= 5;
+  return p;
+}
+function generoVoz(v) {
+  const n = ((v.name || '') + ' ' + (v.voiceURI || '')).toLowerCase();
+  if (/female|feminin|francisca|thalita|maria|luciana|fernanda|vit[oó]ria|camila|joana|helena|raquel|\bafs\b|[-_]f\d|smt-f/.test(n)) return 'f';
+  if (/\bmale\b|masculin|antonio|ant[oô]nio|felipe|donato|jorge|ricardo|daniel|\bptd\b|[-_]m\d|smt-m/.test(n)) return 'm';
+  return '';
+}
+function obterGeneroVoz() { return getStorageValue('braun_voz_genero') === 'm' ? 'm' : 'f'; }
+function escolherVoz(g) {
+  const lista = vozesPt().sort(function (a, b) { return pontuarVoz(b) - pontuarVoz(a); });
+  const salva = getStorageValue('braun_voz_nome');
+  if (salva && salva !== 'auto') {
+    const v = lista.filter(function (x) { return x.voiceURI === salva; })[0];
+    if (v) return { voz: v, tom: 1, rate: 1 };
+  }
+  const doGenero = lista.filter(function (v) { return generoVoz(v) === g; })[0];
+  if (doGenero) return { voz: doGenero, tom: 1, rate: 1 };
+  // Sem voz do gênero escolhido: usa a melhor voz e ajusta o tom
+  const base = lista[0] || null;
+  const gb = base ? generoVoz(base) : '';
+  let tom = 1;
+  if (gb && gb !== g) tom = g === 'm' ? 0.78 : 1.2;
+  else if (!gb) tom = g === 'm' ? 0.78 : 1;
+  return { voz: base, tom: tom, rate: tom === 1 ? 1 : 0.97 };
+}
+function falar(texto) {
+  if (!window.speechSynthesis) { toast('Navegador sem suporte a voz.', 'aviso'); return; }
+  const esc = escolherVoz(obterGeneroVoz());
+  const frases = texto.match(/[^.!?]+[.!?]?/g) || [texto];
+  window.speechSynthesis.cancel();
+  frases.forEach(function (f, i) {
+    const t = f.trim(); if (!t) return;
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = (esc.voz && esc.voz.lang) || 'pt-BR';
+    if (esc.voz) u.voice = esc.voz;
+    u.rate = esc.rate; u.pitch = esc.tom;
+    if (i === frases.length - 1) { u.onend = atualizarBotaoOuvir; u.onerror = atualizarBotaoOuvir; }
+    window.speechSynthesis.speak(u);
+  });
+  setTimeout(atualizarBotaoOuvir, 100);
+}
+function textoNaturalResultado(r) {
+  const d = r.data, dia = d.getDate();
+  const mes = d.toLocaleDateString('pt-BR', { month: 'long' });
+  const cab = diaDaSemanaPorExtenso(d) + ', ' + (dia === 1 ? 'primeiro' : dia) + ' de ' + mes + ' de ' + d.getFullYear() + '.';
+  let sit;
+  if (r.ferias) sit = 'Nesse dia, você está de férias.';
+  else if (r.trabalhando) sit = /NOITE/.test(r.status) ? 'Nesse dia, você trabalha, no turno da noite.' : /MANH/.test(r.status) ? 'Nesse dia, você trabalha, no turno da manhã.' : 'Nesse dia, você trabalha.';
+  else sit = 'Nesse dia, você está de folga.';
+  const det = (r.detalhes || '').replace(/\s*·\s*/g, '. ').replace(/1x1/gi, 'um por um').replace(/^Região:\s*/i, 'Região ') + '.';
+  return cab + ' ' + sit + ' ' + det;
+}
 function lerResultado() {
   if (!resultadoPesquisaAtual) { toast('Faça uma pesquisa primeiro.', 'aviso'); return; }
-  const v = new SpeechSynthesisUtterance();
-  v.lang = 'pt-BR'; v.rate = 1.1;
-  const do_ = resultadoPesquisaAtual.data;
-  v.text = diaDaSemanaPorExtenso(do_) + ', ' + do_.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + '. ' + resultadoPesquisaAtual.status + '. ' + resultadoPesquisaAtual.detalhes + '.';
-  v.onend = atualizarBotaoOuvir; v.onerror = atualizarBotaoOuvir;
-  if (window.speechSynthesis) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(v); setTimeout(atualizarBotaoOuvir, 100); }
+  falar(textoNaturalResultado(resultadoPesquisaAtual));
+}
+function testarVoz() {
+  falar(obterGeneroVoz() === 'm'
+    ? 'Olá! Esta é a voz masculina do Braun Online. Sua escala na palma da mão.'
+    : 'Olá! Esta é a voz feminina do Braun Online. Sua escala na palma da mão.');
+}
+function definirGeneroVoz(g) {
+  setStorageValue('braun_voz_genero', g);
+  setStorageValue('braun_voz_nome', 'auto');
+  atualizarUIVoz(); testarVoz();
+}
+function atualizarUIVoz() {
+  const g = obterGeneroVoz();
+  const f = document.getElementById('vozFem'), m = document.getElementById('vozMasc');
+  if (f) f.setAttribute('aria-checked', g === 'f' ? 'true' : 'false');
+  if (m) m.setAttribute('aria-checked', g === 'm' ? 'true' : 'false');
+  const sel = document.getElementById('vozEspecifica');
+  if (sel) {
+    const atual = getStorageValue('braun_voz_nome') || 'auto';
+    sel.innerHTML = '';
+    const o0 = document.createElement('option'); o0.value = 'auto'; o0.textContent = 'Automática (melhor voz do aparelho)'; sel.appendChild(o0);
+    vozesPt().sort(function (a, b) { return pontuarVoz(b) - pontuarVoz(a); }).forEach(function (v) {
+      const o = document.createElement('option'); o.value = v.voiceURI;
+      o.textContent = v.name + (v.localService === false ? ' · online' : '');
+      sel.appendChild(o);
+    });
+    sel.value = atual; if (sel.value !== atual) sel.value = 'auto';
+  }
+  const info = document.getElementById('vozInfo');
+  if (info) {
+    const e = escolherVoz(g);
+    info.textContent = e.voz ? 'Voz em uso: ' + e.voz.name + (e.tom !== 1 ? ' (tom ajustado)' : '') : 'Nenhuma voz em português encontrada neste aparelho.';
+  }
 }
 
 /* ============================================================
@@ -1477,7 +1548,9 @@ function openConquistas() {
    ============================================================ */
 const ACTION_MAP = {
   'go-greeting': goToGreeting,
-  'skip-splash': fecharSplash,
+  'voz-fem': function () { definirGeneroVoz('f'); },
+  'voz-masc': function () { definirGeneroVoz('m'); },
+  'testar-voz': testarVoz,
   'install-pwa': installPWA,
   'aplicar-atualizacao': aplicarAtualizacao,
   'dispensar-atualizacao': dispensarAtualizacao,
@@ -1541,6 +1614,8 @@ function bindAll() {
   const ov = document.getElementById('overlay'); if (ov) ov.addEventListener('click', closeAllModals);
   const mg = document.getElementById('minimalGreetingToggle'); if (mg) mg.addEventListener('change', toggleMinimalGreeting);
   const vr = document.getElementById('voiceResponseToggle'); if (vr) vr.addEventListener('change', toggleVoiceResponse);
+  const ve = document.getElementById('vozEspecifica'); if (ve) ve.addEventListener('change', function () { setStorageValue('braun_voz_nome', ve.value); atualizarUIVoz(); testarVoz(); });
+  if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); window.speechSynthesis.addEventListener('voiceschanged', atualizarUIVoz); } catch (e) {} }
   const tp = document.getElementById('turmaPerfil'); if (tp) tp.addEventListener('change', salvarDadosPerfil);
   const ap = document.getElementById('anoPerfil'); if (ap) ap.addEventListener('change', salvarDadosPerfil);
   const bf = document.getElementById('backupFileInput'); if (bf) bf.addEventListener('change', handleBackupFile);
@@ -1575,7 +1650,6 @@ function bindAll() {
   if (at) { at.classList.add('active'); at.setAttribute('aria-selected', 'true'); }
 })();
 
-safeRun('agendarSplash', agendarSplash);
 safeRun('boasVindas', boasVindas);
 
 // Inicialização não depende mais do evento 'load' (que espera TODOS os recursos: imagens, fontes...).

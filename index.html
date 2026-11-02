@@ -69,14 +69,6 @@
     }
     .welcome-screen::before { width: 120vw; height: 120vw; max-width: 780px; max-height: 780px; }
     .welcome-screen::after { width: 78vw; height: 78vw; max-width: 500px; max-height: 500px; border-color: rgba(255,255,255,0.2); animation-delay: 0.15s; }
-    /* ===== SPLASH (imagem) — antes da welcome ===== */
-    .splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3100; display: none; background: #00A97A; cursor: pointer; opacity: 1; transition: opacity 0.5s ease; }
-    html.splash-on .splash, .splash.is-out { display: block; }
-    .splash.is-out { opacity: 0; pointer-events: none; }
-    .splash img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-    /* a welcome só começa a animar quando a splash sai */
-    html.splash-hold .welcome-screen, html.splash-hold .welcome-screen *,
-    html.splash-hold .welcome-screen::before, html.splash-hold .welcome-screen::after { animation-play-state: paused !important; }
     html.welcome-on { background: #007F5C; }
     html.welcome-on .welcome-screen { display: flex; }
     .welcome-screen.hide { opacity: 0; pointer-events: none; transform: scale(1.03); }
@@ -296,6 +288,12 @@
     select, .input-date { appearance: none; background: var(--card); color: var(--text); border: 2.5px solid var(--border); padding: 14px; border-radius: 18px; font-weight: 800; font-size: 0.9em; outline: none; transition: 0.2s; font-family: inherit; }
     .config-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
     .config-label { font-weight: 600; font-size: 0.95em; }
+    .voz-bloco { padding: 15px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .voz-seg { display: flex; border: 1.5px solid var(--primary); border-radius: 14px; overflow: hidden; }
+    .voz-opt { flex: 1; padding: 13px 8px; background: transparent; color: var(--primary); border: none; font-family: inherit; font-weight: 800; font-size: 0.95em; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+    .voz-opt[aria-checked="true"] { background: var(--primary); color: #fff; }
+    .voz-select { width: 100%; padding: 12px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.9em; }
+    .voz-info { font-size: 0.78em; opacity: 0.7; }
     .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -574,8 +572,6 @@
 </style>
 </head>
 <body>
-<div id="splash" class="splash" data-action="skip-splash" aria-hidden="true"><img src="splash-screen.webp" alt="" decoding="async" fetchpriority="high"></div>
-
 <div id="welcomeScreen" class="welcome-screen" data-action="go-greeting" role="button" tabindex="0" aria-label="Boas-vindas. Toque para continuar">
     <div class="w-logo" aria-hidden="true"></div>
     <div class="w-center">
@@ -848,6 +844,16 @@
     <div class="config-item">
         <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
         <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
+    </div>
+    <div class="voz-bloco">
+        <span class="config-label">Voz da resposta<br><small style="font-weight:400;opacity:0.7;">Quem lê o resultado da pesquisa.</small></span>
+        <div class="voz-seg" role="radiogroup" aria-label="Tipo de voz">
+            <button type="button" id="vozFem" class="voz-opt" role="radio" aria-checked="true" data-action="voz-fem"><span class="material-symbols-outlined" aria-hidden="true">woman</span> Feminina</button>
+            <button type="button" id="vozMasc" class="voz-opt" role="radio" aria-checked="false" data-action="voz-masc"><span class="material-symbols-outlined" aria-hidden="true">man</span> Masculina</button>
+        </div>
+        <select id="vozEspecifica" class="voz-select" aria-label="Voz do aparelho"></select>
+        <span id="vozInfo" class="voz-info" aria-live="polite"></span>
+        <button type="button" data-action="testar-voz" class="btn-config" style="margin-top:0;"><span class="material-symbols-outlined" aria-hidden="true">record_voice_over</span> TESTAR VOZ</button>
     </div>
     <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
     <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
