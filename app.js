@@ -23,7 +23,7 @@ const BACKUP_KEYS = [
   'braun_nome_completo','braun_matricula','braun_turma_perfil','braun_ano','braun_setor',
   'braun_last_region','braun_turma_BR','braun_turma_MNT','braun_turma_1x1',
   'braun_ferias_inicio','braun_ferias_fim','braun_dark_mode',
-  'braun_minimal_greeting','braun_voice_response','braun_voz_genero','braun_voz_nome_f','braun_voz_nome_m','braun_haptic',
+  'braun_minimal_greeting','braun_voice_response','braun_voz_genero','braun_voz_nome','braun_haptic',
   'braun_cartilhas_lidas','braun_conquistas','braun_quizzes_acertados',
   'braun_novidades_lidas','logs_v26'
 ];
@@ -658,15 +658,7 @@ function saveNota() {
   closeAllModals(); gerarCalendario(); atualizarBannerAvisos();
   toast('Anotação salva.', 'sucesso');
 }
-function atualizarSaudacaoMenu() {
-  const el = document.getElementById('dwSaud'); if (!el) return;
-  const nc = (getStorageValue('braun_nome_completo') || '').trim();
-  if (!nc) { el.textContent = 'Olá!'; return; }
-  const p = nc.split(/\s+/)[0];
-  el.textContent = 'Olá, ' + p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() + '!';
-}
 function openHamburger() {
-  atualizarSaudacaoMenu();
   document.getElementById('hamburgerDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('show');
   const mb = document.getElementById('menuButton'); if (mb) mb.setAttribute('aria-expanded', 'true');
@@ -1434,24 +1426,15 @@ function generoVoz(v) {
 function obterGeneroVoz() { return getStorageValue('braun_voz_genero') === 'm' ? 'm' : 'f'; }
 function escolherVoz(g) {
   const lista = vozesPt().sort(function (a, b) { return pontuarVoz(b) - pontuarVoz(a); });
-  // 1) voz que o usuário escolheu para este gênero
-  const salva = getStorageValue('braun_voz_nome_' + g);
+  const salva = getStorageValue('braun_voz_nome');
   if (salva && salva !== 'auto') {
     const v = lista.filter(function (x) { return x.voiceURI === salva; })[0];
     if (v) return { voz: v, tom: 1, rate: 1 };
   }
-  // 2) voz que o nome indica ser do gênero pedido
   const doGenero = lista.filter(function (v) { return generoVoz(v) === g; })[0];
   if (doGenero) return { voz: doGenero, tom: 1, rate: 1 };
-  // 3) masculina sem pista pelo nome: usa OUTRA voz diferente da feminina, se o aparelho tiver mais de uma
-  if (g === 'm') {
-    const fem = escolherVoz('f').voz;
-    const outra = lista.filter(function (v) { return v !== fem && generoVoz(v) !== 'f'; })[0]
-      || lista.filter(function (v) { return v !== fem; })[0];
-    if (outra) return { voz: outra, tom: 0.9, rate: 1 };
-  }
-  // 4) só uma voz: usa a melhor e ajusta o tom (muitas vozes online ignoram o tom)
-  const base = lista.filter(function (v) { return generoVoz(v) !== (g === 'f' ? 'm' : 'f'); })[0] || lista[0] || null;
+  // Sem voz do gênero escolhido: usa a melhor voz e ajusta o tom
+  const base = lista[0] || null;
   const gb = base ? generoVoz(base) : '';
   let tom = 1;
   if (gb && gb !== g) tom = g === 'm' ? 0.78 : 1.2;
@@ -1496,28 +1479,22 @@ function testarVoz() {
 }
 function definirGeneroVoz(g) {
   setStorageValue('braun_voz_genero', g);
+  setStorageValue('braun_voz_nome', 'auto');
   atualizarUIVoz(); testarVoz();
-}
-function rotuloVoz(v, i) {
-  const uri = String(v.voiceURI || '');
-  let cod = uri && uri !== v.name ? uri.replace(/^.*?-x-/i, '') : '';
-  if (cod.length > 28) cod = cod.slice(0, 28) + '…';
-  const gen = generoVoz(v) === 'f' ? ' ♀' : generoVoz(v) === 'm' ? ' ♂' : '';
-  return (i + 1) + '. ' + v.name + (cod ? ' [' + cod + ']' : '') + (v.localService === false ? ' · online' : '') + gen;
 }
 function atualizarUIVoz() {
   const g = obterGeneroVoz();
   const f = document.getElementById('vozFem'), m = document.getElementById('vozMasc');
   if (f) f.setAttribute('aria-checked', g === 'f' ? 'true' : 'false');
   if (m) m.setAttribute('aria-checked', g === 'm' ? 'true' : 'false');
-  const lista = vozesPt().sort(function (a, b) { return pontuarVoz(b) - pontuarVoz(a); });
   const sel = document.getElementById('vozEspecifica');
   if (sel) {
-    const atual = getStorageValue('braun_voz_nome_' + g) || 'auto';
+    const atual = getStorageValue('braun_voz_nome') || 'auto';
     sel.innerHTML = '';
-    const o0 = document.createElement('option'); o0.value = 'auto'; o0.textContent = 'Automática'; sel.appendChild(o0);
-    lista.forEach(function (v, i) {
-      const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = rotuloVoz(v, i);
+    const o0 = document.createElement('option'); o0.value = 'auto'; o0.textContent = 'Automática (melhor voz do aparelho)'; sel.appendChild(o0);
+    vozesPt().sort(function (a, b) { return pontuarVoz(b) - pontuarVoz(a); }).forEach(function (v) {
+      const o = document.createElement('option'); o.value = v.voiceURI;
+      o.textContent = v.name + (v.localService === false ? ' · online' : '');
       sel.appendChild(o);
     });
     sel.value = atual; if (sel.value !== atual) sel.value = 'auto';
@@ -1525,10 +1502,7 @@ function atualizarUIVoz() {
   const info = document.getElementById('vozInfo');
   if (info) {
     const e = escolherVoz(g);
-    let t = e.voz ? 'Voz em uso: ' + e.voz.name + (e.tom !== 1 ? ' (tom ajustado)' : '') + '.' : 'Nenhuma voz em português encontrada neste aparelho.';
-    if (lista.length <= 1) t += ' Este aparelho tem só 1 voz em português, então a masculina pode soar igual. Instale outra em Configurações > Conversão de texto em voz.';
-    else t += ' ♀/♂ é um palpite pelo nome; escolha a voz na lista e ouça.';
-    info.textContent = t;
+    info.textContent = e.voz ? 'Voz em uso: ' + e.voz.name + (e.tom !== 1 ? ' (tom ajustado)' : '') : 'Nenhuma voz em português encontrada neste aparelho.';
   }
 }
 
@@ -1640,7 +1614,7 @@ function bindAll() {
   const ov = document.getElementById('overlay'); if (ov) ov.addEventListener('click', closeAllModals);
   const mg = document.getElementById('minimalGreetingToggle'); if (mg) mg.addEventListener('change', toggleMinimalGreeting);
   const vr = document.getElementById('voiceResponseToggle'); if (vr) vr.addEventListener('change', toggleVoiceResponse);
-  const ve = document.getElementById('vozEspecifica'); if (ve) ve.addEventListener('change', function () { setStorageValue('braun_voz_nome_' + obterGeneroVoz(), ve.value); atualizarUIVoz(); testarVoz(); });
+  const ve = document.getElementById('vozEspecifica'); if (ve) ve.addEventListener('change', function () { setStorageValue('braun_voz_nome', ve.value); atualizarUIVoz(); testarVoz(); });
   if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); window.speechSynthesis.addEventListener('voiceschanged', atualizarUIVoz); } catch (e) {} }
   const tp = document.getElementById('turmaPerfil'); if (tp) tp.addEventListener('change', salvarDadosPerfil);
   const ap = document.getElementById('anoPerfil'); if (ap) ap.addEventListener('change', salvarDadosPerfil);
