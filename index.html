@@ -307,21 +307,21 @@
     .ramal-badge:active { transform: scale(0.95); background: var(--primary); color: white; }
     .ramal-secao { background: var(--primary); color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 800; margin: 20px 0 5px 0; }
     .ramal-item.emergencia-destaque {
-        background: linear-gradient(90deg, rgba(231,76,60,0.12), rgba(231,76,60,0.03));
-        border-left: 4px solid #e74c3c; border-radius: 10px; padding: 12px 12px;
+        background: linear-gradient(90deg, rgba(112,48,160,0.12), rgba(112,48,160,0.03));
+        border-left: 4px solid var(--accent); border-radius: 10px; padding: 12px 12px;
         border-bottom: none; margin: 10px 0;
         animation: emergencia-pulse 2s infinite ease-in-out;
     }
-    .ramal-item.emergencia-destaque .ramal-nome { color: #e74c3c; font-weight: 900; font-size: 1.05em; }
+    .ramal-item.emergencia-destaque .ramal-nome { color: var(--accent-txt); font-weight: 900; font-size: 1.05em; }
     .ramal-item.emergencia-destaque .ramal-nome::before { content: '\1F6A8  '; }
     .ramal-item.emergencia-destaque .ramal-badge {
-        background: #e74c3c; color: white; border-color: #e74c3c;
+        background: var(--accent); color: white; border-color: var(--accent);
         font-size: 1em; font-weight: 900; padding: 10px 18px;
         animation: emergencia-badge-pulse 1.5s infinite ease-in-out;
     }
-    @keyframes emergencia-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); } 50% { box-shadow: 0 0 0 8px rgba(231,76,60,0); } }
+    @keyframes emergencia-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(112,48,160,0.4); } 50% { box-shadow: 0 0 0 8px rgba(112,48,160,0); } }
     @keyframes emergencia-badge-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-    html.dark-mode .ramal-item.emergencia-destaque { background: linear-gradient(90deg, rgba(231,76,60,0.25), rgba(231,76,60,0.08)); }
+    html.dark-mode .ramal-item.emergencia-destaque { background: linear-gradient(90deg, rgba(112,48,160,0.35), rgba(112,48,160,0.12)); }
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
     .stat-card-big { background: var(--bg); padding: 20px 10px; border-radius: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .stat-card-big.purple { border-color: var(--accent); }
@@ -424,6 +424,73 @@
     .cartilha-btn-marcar { background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 18px; font-weight: 800; font-size: 1em; width: 100%; cursor: pointer; margin-top: 20px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
     .cartilha-btn-marcar:active { transform: scale(0.97); }
     .cartilha-btn-marcar.marcado { background: var(--border); color: var(--text); }
+    /* ===== CARTILHAS v2 — biblioteca, leitura e quiz por etapas ===== */
+    .ct-wrap { max-width: 720px; margin: 0 auto; }
+    .ct-oculto { display: none !important; }
+    .ct-eyebrow { display: inline-block; color: var(--accent-txt); font-weight: 900; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; }
+    .ct-eyebrow::after { content: ''; display: block; width: 26px; height: 2px; background: var(--accent-txt); margin-top: 5px; }
+    .ct-h1 { margin: 10px 0 6px; font-weight: 900; font-size: 1.9rem; color: var(--primary); line-height: 1.1; }
+    .ct-lead { margin: 0 0 18px; font-size: 0.95rem; line-height: 1.55; opacity: 0.8; }
+    .ct-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .ct-stat { background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 6px; text-align: center; }
+    .ct-stat b { display: block; font-size: 1.3rem; color: var(--primary); font-weight: 900; line-height: 1.1; }
+    .ct-stat span { font-size: 0.66rem; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ct-barra { height: 8px; background: var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .ct-barra i { display: block; height: 100%; background: var(--primary); transition: width 0.5s; }
+    .ct-continuar { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: linear-gradient(135deg, var(--primary), #007F5C); color: #fff; border: none; border-radius: 16px; padding: 16px; cursor: pointer; font-family: inherit; }
+    .ct-continuar:active { transform: scale(0.985); }
+    .ct-c-ico { width: 46px; height: 46px; border-radius: 12px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ct-continuar small { display: block; font-size: 0.7rem; opacity: 0.9; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    .ct-continuar strong { display: block; font-size: 1.05rem; margin-top: 2px; line-height: 1.25; }
+    .ct-parabens { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1.5px solid var(--accent); border-radius: 16px; padding: 14px 16px; color: var(--accent-txt); }
+    .ct-grupo-titulo { display: flex; align-items: center; justify-content: space-between; margin: 24px 0 10px; }
+    .ct-grupo-titulo span:first-child { color: var(--accent-txt); font-weight: 900; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .ct-grupo-titulo span:last-child { font-size: 0.75rem; font-weight: 700; opacity: 0.6; }
+    .ct-card { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--card); color: var(--text); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; font-family: inherit; }
+    .ct-card:active { transform: scale(0.985); }
+    .ct-card-icon { width: 46px; height: 46px; border-radius: 12px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ct-card.lida .ct-card-icon { background: var(--accent); }
+    .ct-card-body { flex: 1; min-width: 0; display: block; }
+    .ct-card-titulo { display: block; font-weight: 800; font-size: 1rem; line-height: 1.25; }
+    .ct-card-resumo { display: block; font-size: 0.82rem; opacity: 0.7; margin-top: 3px; line-height: 1.4; }
+    .ct-card-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 0.72rem; font-weight: 700; opacity: 0.65; }
+    .ct-card-meta > span, .ct-leitura-meta > span { display: inline-flex; align-items: center; gap: 3px; }
+    .ct-card-meta .material-symbols-outlined, .ct-leitura-meta .material-symbols-outlined { font-size: 15px; }
+    .ct-card-status { color: var(--accent-txt); flex-shrink: 0; display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; font-weight: 800; gap: 2px; }
+    .ct-leitura-titulo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.5rem; color: var(--primary); line-height: 1.15; margin: 10px 0 10px; }
+    .ct-leitura-titulo .material-symbols-outlined { font-size: 32px; flex-shrink: 0; }
+    .ct-leitura-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 0.8rem; font-weight: 700; opacity: 0.85; margin-bottom: 18px; }
+    .ct-chip { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; }
+    .ct-chip.lida { background: var(--accent); color: #fff; }
+    .ct-chip.nova { background: var(--border); color: var(--text); }
+    .cartilha-conteudo h4 { color: var(--accent-txt); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; margin: 22px 0 8px; font-weight: 900; }
+    .cartilha-conteudo ul { margin: 8px 0 12px; padding-left: 20px; }
+    .cartilha-conteudo li { margin-bottom: 6px; }
+    .ct-alerta { background: var(--bg); border-left: 5px solid var(--accent); padding: 14px; border-radius: 10px; margin: 16px 0; }
+    .ct-tabela { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 6px 0; }
+    .ct-tabela th, .ct-tabela td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .ct-tabela th { color: var(--accent-txt); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .ct-quiz { margin: 28px 0 8px; padding: 18px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 18px; }
+    .ct-quiz-titulo { margin: 10px 0 4px; font-size: 1.15rem; font-weight: 900; color: var(--primary); }
+    .ct-quiz-txt { margin: 0; font-size: 0.9rem; opacity: 0.8; line-height: 1.5; }
+    .ct-quiz-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .ct-quiz-pos { font-size: 0.78rem; font-weight: 800; opacity: 0.7; }
+    .ct-quiz-seg { display: flex; gap: 4px; margin-bottom: 16px; }
+    .ct-quiz-seg i { flex: 1; height: 5px; border-radius: 4px; background: var(--border); }
+    .ct-quiz-seg i.ok { background: var(--primary); }
+    .ct-quiz-seg i.erro { background: #e74c3c; }
+    .ct-quiz-seg i.atual { background: var(--accent); }
+    button.quiz-opcao { width: 100%; text-align: left; color: var(--text); font-family: inherit; line-height: 1.4; }
+    .quiz-opcao.desabilitada.certa, .quiz-opcao.desabilitada.errada { opacity: 1; }
+    .ct-resultado { text-align: center; padding: 8px 0 4px; }
+    .ct-resultado .nota { font-size: 2.8rem; font-weight: 900; color: var(--primary); line-height: 1.1; }
+    .ct-resultado p { margin: 6px 0 0; font-weight: 600; }
+    .ct-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 18px; border: none; border-radius: 16px; font-weight: 800; font-size: 1rem; cursor: pointer; font-family: inherit; margin-top: 12px; }
+    .ct-btn:active { transform: scale(0.98); }
+    .ct-btn.primario { background: var(--primary); color: #fff; }
+    .ct-btn.roxo { background: var(--accent); color: #fff; }
+    .ct-btn.secundario { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .ct-btn.texto { background: transparent; color: var(--accent-txt); }
     .cartilha-quiz { margin-top: 25px; border-top: 2px solid var(--border); padding-top: 20px; }
     .cartilha-quiz h4 { color: var(--primary); margin: 0 0 15px 0; font-size: 1.1em; }
     .quiz-pergunta { font-weight: 700; margin: 12px 0 6px 0; }
@@ -817,19 +884,18 @@
 </div>
 
 <div id="cartilhasCard" class="bottom-modal" role="dialog" aria-label="Cartilhas" aria-modal="true">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128216; Cartilhas</h2>
-        <span style="font-size:0.75em; opacity:0.5; font-weight:600;" id="cartilhaVersao">v1.0</span>
+    <div class="ct-wrap">
+        <div id="ctLista">
+            <div class="ct-eyebrow">Aprendizado</div>
+            <h2 class="ct-h1">Cartilhas</h2>
+            <p class="ct-lead">Conteúdos objetivos sobre melhoria contínua, qualidade, segurança e cultura Braun. Leia, teste seus conhecimentos no quiz e conquiste selos.</p>
+            <div id="ctResumo"></div>
+            <div id="ctContinuar"></div>
+            <div id="ctGrupos"></div>
+            <div class="cartilha-sub" id="cartilhaVersao" style="margin:22px 0 0;text-align:center;font-size:0.75em;opacity:0.5;">Biblioteca de cartilhas · v2.0</div>
+        </div>
+        <div id="ctLeitura" class="ct-oculto"></div>
     </div>
-    <div class="cartilha-sub">Aprenda sobre melhorias contínuas, qualidade, segurança, compliance, incêndio e muito mais.</div>
-    <div class="cartilha-progresso">
-        <span style="font-weight:600; font-size:0.85em;">Progresso</span>
-        <div class="cartilha-progresso-bar"><div class="cartilha-progresso-bar-fill" id="progressoFill" style="width:0%;"></div></div>
-        <span class="cartilha-progresso-text" id="progressoTexto">0/10</span>
-    </div>
-    <div class="cartilha-tabs" id="cartilhaTabs"></div>
-    <div id="cartilhaPanels"></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
 </div>
 
 <div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">

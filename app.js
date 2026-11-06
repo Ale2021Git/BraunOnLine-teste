@@ -24,7 +24,7 @@ const BACKUP_KEYS = [
   'braun_last_region','braun_turma_BR','braun_turma_MNT','braun_turma_1x1',
   'braun_ferias_inicio','braun_ferias_fim','braun_dark_mode',
   'braun_minimal_greeting','braun_voice_response','braun_voz_genero','braun_voz_nome_f','braun_voz_nome_m','braun_haptic',
-  'braun_cartilhas_lidas','braun_conquistas','braun_quizzes_acertados',
+  'braun_cartilhas_lidas','braun_conquistas','braun_quizzes_acertados','braun_quiz_ok','braun_quiz_melhor',
   'braun_novidades_lidas','logs_v26'
 ];
 
@@ -1177,61 +1177,201 @@ function exportarEscalaICS() {
    20) CARTILHAS
    ============================================================ */
 const cartilhasData = [
-  { id:'comousar', icone:'help', titulo:'Como usar o Braun OnLine', conteudo:'<p>Bem-vindo ao <strong>Braun OnLine</strong>! Este guia rápido mostra tudo.</p><div class="cartilha-destaque"><strong>📅 Ver sua escala</strong><br>Dias coloridos mostram sua escala. Use as abas no rodapé para alternar entre <b>ECOFLAC</b>, <b>MANUT.</b> e <b>1x1</b>.</div><div class="cartilha-destaque"><strong>✏️ Anotações</strong><br>Toque em qualquer dia para escrever um lembrete.</div><div class="cartilha-destaque"><strong>🏖️ Programar férias</strong><br>Use a ferramenta de <b>Sugestão</b> para descobrir as datas que rendem mais dias em casa!</div><div class="cartilha-destaque"><strong>📦 Meus Pedidos</strong><br>Menu ☰ → Meus Pedidos. Preencha quantidade e tamanho, envie por e-mail.</div><div class="cartilha-destaque"><strong>💾 Backup</strong><br>Menu ☰ → Configurações → Exportar Backup (JSON).</div><p><strong>Dica:</strong> Sempre que aparecer um aviso verde no topo da tela, toque em <b>Atualizar</b>.</p>', quiz:[{pergunta:'Como você faz backup?',opcoes:['Tocando no calendário','Menu ☰ → Configurações → Exportar Backup','Reiniciando','Falando com supervisor'],certa:1},{pergunta:'Onde programa férias?',opcoes:['Nas Cartilhas','No Meu Perfil','No menu ☰ → Programar Férias','Não dá'],certa:2},{pergunta:'O que fazer quando aparecer o aviso verde de nova versão no topo?',opcoes:['Ignorar','Tocar em Atualizar','Desinstalar','Reiniciar'],certa:1},{pergunta:'Quais abas do rodapé alternam a escala?',opcoes:['Perfil, Pedidos e Férias','ECOFLAC, MANUT. e 1x1','Kaizen, 5S e PDCA','Hoje, Mês e Ano'],certa:1},{pergunta:'Como criar um lembrete em um dia?',opcoes:['Pelo menu Privacidade','Tocando no dia e escrevendo a anotação','Exportando o backup','Não é possível'],certa:1},{pergunta:'Para que serve a Sugestão de férias?',opcoes:['Calcular salário','Descobrir datas que rendem mais dias em casa','Trocar de turma','Enviar pedidos'],certa:1},{pergunta:'Como enviar um pedido de uniforme ou EPI?',opcoes:['Ligando para o RH','Preenchendo quantidade e tamanho e enviando por e-mail','Pelo QR Code','Não é possível'],certa:1}] },
-  { id:'kaizen', icone:'trending_up', titulo:'Kaizen – Melhoria Contínua', conteudo:'<p><strong>Kaizen</strong> significa "mudança para melhor". Pequenas melhorias diárias de todos.</p><div class="cartilha-destaque"><strong>Princípios:</strong><br> • Eliminar desperdícios<br> • Padronizar processos<br> • Envolver todos<br> • Focar em dados</div>', quiz:[{pergunta:'O que significa Kaizen?',opcoes:['Grande revolução','Mudança para melhor','Padronização','Controle'],certa:1},{pergunta:'Um princípio do Kaizen:',opcoes:['Grandes mudanças','Eliminar desperdícios','Centralizar','Ignorar dados'],certa:1},{pergunta:'Kaizen busca melhorias:',opcoes:['Na produção','Na gestão','Pequenas e diárias','Em crises'],certa:2},{pergunta:'Quem participa das melhorias no Kaizen?',opcoes:['Só a diretoria','Todos os colaboradores','Apenas consultores','Somente a qualidade'],certa:1},{pergunta:'Focar em dados significa:',opcoes:['Decidir por intuição','Basear decisões em medições e fatos','Ignorar indicadores','Esperar o problema piorar'],certa:1},{pergunta:'Padronizar processos ajuda a:',opcoes:['Aumentar a variação','Manter o ganho da melhoria','Eliminar treinamentos','Reduzir a comunicação'],certa:1}] },
-  { id:'5s', icone:'cleaning_services', titulo:'Os 5S – Organização', conteudo:'<p>Os <strong>5S</strong> organizam o ambiente de trabalho.</p><div class="cartilha-destaque"><b>1. Seiri:</b> Separar o útil.<br><b>2. Seiton:</b> Organizar.<br><b>3. Seiso:</b> Limpar.<br><b>4. Seiketsu:</b> Padronizar.<br><b>5. Shitsuke:</b> Disciplina.</div>', quiz:[{pergunta:'Quantos sensos?',opcoes:['3','5','7','10'],certa:1},{pergunta:'Seiri é:',opcoes:['Limpar','Organizar','Separar útil do inútil','Criar padrões'],certa:2},{pergunta:'Disciplina:',opcoes:['Seiso','Seiketsu','Shitsuke','Seiton'],certa:2},{pergunta:'Seiton significa:',opcoes:['Limpar','Organizar','Padronizar','Disciplina'],certa:1},{pergunta:'Qual senso é o Seiso?',opcoes:['Limpeza','Descarte','Padronização','Disciplina'],certa:0},{pergunta:'Seiketsu é o senso de:',opcoes:['Separar','Limpar','Padronizar','Organizar'],certa:2}] },
-  { id:'pdca', icone:'cycle', titulo:'PDCA – Planejar, Fazer, Checar, Agir', conteudo:'<p>O <strong>PDCA</strong> estrutura melhorias.</p><div class="cartilha-destaque"><b>P:</b> Definir metas.<br><b>D:</b> Executar.<br><b>C:</b> Verificar.<br><b>A:</b> Padronizar.</div>', quiz:[{pergunta:'PDCA significa?',opcoes:['Planejar, Definir, Controlar, Aplicar','Planejar, Fazer, Checar, Agir','Produzir, Distribuir','Padronizar, Dirigir'],certa:1},{pergunta:'Na etapa C?',opcoes:['Executar','Verificar resultados','Padronizar','Definir metas'],certa:1},{pergunta:'PDCA é ciclo:',opcoes:['Linear','Contínuo','Para gestores','Só produção'],certa:1},{pergunta:'Na etapa P (Plan) se faz:',opcoes:['Executar a ação','Definir metas e planejar','Verificar resultados','Padronizar'],certa:1},{pergunta:'A letra D do PDCA é:',opcoes:['Definir','Decidir','Fazer (executar)','Documentar'],certa:2},{pergunta:'Na etapa A (Act), o resultado bom deve ser:',opcoes:['Esquecido','Escondido','Cancelado','Padronizado'],certa:3}] },
-  { id:'ferramentas', icone:'build', titulo:'Ferramentas da Qualidade', conteudo:'<p>Ferramentas para resolver problemas.</p><div class="cartilha-destaque"> • <b>Ishikawa</b> – causas raiz.<br> • <b>5 Porquês</b>.<br> • <b>Fluxograma</b>.<br> • <b>Pareto</b> – prioriza.</div>', quiz:[{pergunta:'Causas raiz:',opcoes:['Pareto','Ishikawa','Fluxograma','5 Porquês'],certa:1},{pergunta:'Ishikawa também é:',opcoes:['Causa e Efeito','Pareto','Controle','Fluxograma'],certa:0},{pergunta:'Priorizar problemas:',opcoes:['5 Porquês','Fluxograma','Pareto','Ishikawa'],certa:2},{pergunta:'O diagrama de Pareto serve para:',opcoes:['Priorizar os problemas mais relevantes','Desenhar o fluxo','Registrar presença','Medir temperatura'],certa:0},{pergunta:'Os 5 Porquês buscam:',opcoes:['Culpados','A causa raiz, perguntando "por quê?" repetidamente','Aumentar prazos','Mais documentos'],certa:1},{pergunta:'O fluxograma representa:',opcoes:['Gastos mensais','Causas e efeitos','As etapas de um processo','Pesos de peças'],certa:2}] },
-  { id:'seguranca', icone:'security', titulo:'Segurança do Trabalho', conteudo:'<p>Segurança é prioridade.</p><div class="cartilha-destaque"> • Usar <b>EPIs</b>.<br> • 5S.<br> • Emergência.<br> • Reportar riscos.</div>', quiz:[{pergunta:'Primeira ação ao risco?',opcoes:['Ignorar','Sinalizar','Continuar','Aguardar'],certa:1},{pergunta:'EPI é:',opcoes:['Proteção Individual','Produção Interna','Proteção Integrada','Preventivo Industrial'],certa:0},{pergunta:'Emergência:',opcoes:['Correr','Seguir plano','Aguardar','Filmar'],certa:1},{pergunta:'Quando usar o EPI?',opcoes:['Só em inspeções','Sempre que a atividade exigir','Só com supervisor presente','Nunca em áreas limpas'],certa:1},{pergunta:'Piso molhado sem sinalização deve ser:',opcoes:['Ignorado','Atravessado rápido','Reportado e sinalizado','Coberto com papel'],certa:2},{pergunta:'Por que reportar quase-acidentes?',opcoes:['Para punir alguém','Para prevenir acidentes reais','Para aumentar a papelada','Não é necessário'],certa:1}] },
-  { id:'bpf', icone:'medication', titulo:'Boas Práticas de Fabricação', conteudo:'<p>As <strong>BPF</strong> garantem qualidade na indústria farmacêutica.</p><div class="cartilha-destaque"> • Higiene.<br> • Controle de processos.<br> • Rastreabilidade.<br> • Documentação.</div>', quiz:[{pergunta:'BPF garantem?',opcoes:['Produtividade','Qualidade','Custos','Vendas'],certa:1},{pergunta:'Princípio:',opcoes:['Qualquer roupa','Não registrar','Higiene pessoal','Sem supervisão'],certa:2},{pergunta:'Rastreabilidade:',opcoes:['Velocidade','Origem do lote','Menos pessoas','Sem doc'],certa:1},{pergunta:'BPF significa:',opcoes:['Boas Práticas de Fabricação','Boletim de Produção Final','Base de Processos Fixos','Bom Procedimento Fabril'],certa:0},{pergunta:'A documentação nas BPF serve para:',opcoes:['Ocupar espaço','Evidenciar o que foi feito','Substituir o treinamento','Dispensar controles'],certa:1},{pergunta:'Um erro de registro deve ser corrigido:',opcoes:['Apagando com corretivo','Rasgando a folha','Conforme procedimento, sem apagar o dado original','Ignorando'],certa:2}] },
-  { id:'sustentabilidade', icone:'eco', titulo:'Sustentabilidade', conteudo:'<p>A Braun apoia a sustentabilidade.</p><div class="cartilha-destaque"> • Energia.<br> • Água.<br> • Reciclar.<br> • Menos impressão.</div>', quiz:[{pergunta:'Contribui:',opcoes:['Luzes acesas','Resíduos corretos','Água excessiva','Imprimir'],certa:1},{pergunta:'Reduzir beneficia:',opcoes:['Ambiente','Empresa','Todos','Ninguém'],certa:2},{pergunta:'NÃO é sustentável:',opcoes:['Desligar','Reciclar','Torneira pingando','Reutilizar papel'],certa:2},{pergunta:'Qual atitude economiza energia?',opcoes:['Deixar equipamentos ligados','Desligar luzes e equipamentos sem uso','Aumentar a iluminação','Abrir janelas com o ar ligado'],certa:1},{pergunta:'Reduzir a impressão ajuda a:',opcoes:['Aumentar resíduos','Elevar o consumo','Gastar menos papel e recursos','Nada'],certa:2},{pergunta:'Resíduo reciclável deve ir para:',opcoes:['O lixo comum','A coleta seletiva correta','A queima','A gaveta'],certa:1}] },
-  { id:'compliance', icone:'gavel', titulo:'Compliance – Ética', conteudo:'<p><strong>Compliance</strong> é agir com ética.</p><div class="cartilha-destaque"> • Código de Conduta.<br> • Conflito de Interesses.<br> • Anticorrupção.<br> • LGPD.<br> • Canal de Denúncia.</div>', quiz:[{pergunta:'Compliance é?',opcoes:['Cargo','Regras éticas','Treinamento','Ferramenta'],certa:1},{pergunta:'Presente de fornecedor:',opcoes:['Aceitar','Recusar e reportar','Aceitar pequeno','Dividir'],certa:1},{pergunta:'Quem segue?',opcoes:['Diretoria','RH','Todos','Fornecedores'],certa:2},{pergunta:'A LGPD trata de:',opcoes:['Proteção de dados pessoais','Segurança contra incêndio','Escala de turnos','Uniformes'],certa:0},{pergunta:'Conflito de interesses ocorre quando:',opcoes:['Duas equipes se reúnem','Há troca de turma','Interesse pessoal interfere na decisão profissional','Chega uma máquina nova'],certa:2},{pergunta:'O Canal de Denúncia serve para:',opcoes:['Pedir férias','Reportar condutas antiéticas','Trocar escala','Pedir uniforme'],certa:1}] },
-  { id:'incendio', icone:'local_fire_department', titulo:'Prevenção de Incêndios', conteudo:'<p>Riscos elevados em indústria farmacêutica.</p><div class="cartilha-destaque"><b>Classes:</b><br> • A – sólidos<br> • B – líquidos<br> • C – elétricos (NUNCA água)<br> • D – metais<br> • K – gorduras</div><div class="cartilha-exemplo"><b>PASS:</b> Puxar, Apontar, Apertar, Varrer.</div>', quiz:[{pergunta:'Classe C (elétrico) NUNCA:',opcoes:['CO₂','Pó','Água','Pó Especial'],certa:2},{pergunta:'PASS significa?',opcoes:['Puxar, Apontar, Apertar, Varrer','Parar, Avaliar','Prevenir, Atuar','Pegar, Arremessar'],certa:0},{pergunta:'Área estéril:',opcoes:['Pó','Água','CO₂','Espuma'],certa:2},{pergunta:'Classe B envolve:',opcoes:['Sólidos comuns','Metais','Líquidos inflamáveis','Equipamentos elétricos'],certa:2},{pergunta:'Incêndio em gorduras é classe:',opcoes:['A','C','D','K'],certa:3},{pergunta:'O primeiro passo do PASS é:',opcoes:['Puxar o pino','Apontar','Apertar','Varrer'],certa:0}] }
+  { id:'comousar', icone:'help', titulo:'Como usar o Braun OnLine', conteudo:'<p>Bem-vindo ao <strong>Braun OnLine</strong>! Este guia mostra, em poucos minutos, como aproveitar cada recurso do app.</p><h4>Sua escala</h4><div class="cartilha-destaque"><strong>📅 Calendário</strong><br>Os dias coloridos mostram a sua escala. Use as abas do rodapé para alternar entre <b>ECOFLAC</b>, <b>MANUT.</b> e <b>1x1</b>, e a aba <b>BUSCAR</b> para consultar qualquer data.</div><div class="cartilha-destaque"><strong>✏️ Anotações</strong><br>Toque em qualquer dia para escrever um lembrete.</div><h4>Ferramentas do dia a dia</h4><ul><li><b>Programar férias:</b> a ferramenta de Sugestão mostra as datas que rendem mais dias em casa.</li><li><b>Meus Pedidos:</b> preencha quantidade e tamanho e envie por e-mail (menu ☰ → Meus Pedidos).</li><li><b>Ramais Úteis:</b> contatos internos e o ramal de emergência.</li><li><b>Estatísticas:</b> dias trabalhados e folgas na sua escala.</li></ul><h4>Tudo no menu ☰</h4><p>O menu reúne todas as telas do app: Perfil, Ramais, Colaborador do Mês, Pedidos, Férias, Cartilhas, Conquistas, Novidades, Pesquisar Escala, Estatísticas e Configurações. Em cada tela, o botão <b>Voltar</b>, no canto superior esquerdo, leva de volta ao app.</p><h4>Seus dados</h4><div class="ct-alerta"><strong>💾 Backup:</strong> menu ☰ → Configurações → Exportar Backup (JSON). Guarde o arquivo para recuperar seus dados se trocar de aparelho.<br><br><strong>🔔 Atualizações:</strong> sempre que aparecer um aviso verde no topo da tela, toque em <b>Atualizar</b>.</div>', quiz:[{pergunta:'Como você faz backup?',opcoes:['Tocando no calendário','Menu ☰ → Configurações → Exportar Backup','Reiniciando','Falando com supervisor'],certa:1},{pergunta:'Onde programa férias?',opcoes:['Nas Cartilhas','No Meu Perfil','No menu ☰ → Programar Férias','Não dá'],certa:2},{pergunta:'O que fazer quando aparecer o aviso verde de nova versão no topo?',opcoes:['Ignorar','Tocar em Atualizar','Desinstalar','Reiniciar'],certa:1},{pergunta:'Quais abas do rodapé alternam a escala?',opcoes:['Perfil, Pedidos e Férias','ECOFLAC, MANUT. e 1x1','Kaizen, 5S e PDCA','Hoje, Mês e Ano'],certa:1},{pergunta:'Como criar um lembrete em um dia?',opcoes:['Pelo menu Privacidade','Tocando no dia e escrevendo a anotação','Exportando o backup','Não é possível'],certa:1},{pergunta:'Para que serve a Sugestão de férias?',opcoes:['Calcular salário','Descobrir datas que rendem mais dias em casa','Trocar de turma','Enviar pedidos'],certa:1},{pergunta:'Como enviar um pedido de uniforme ou EPI?',opcoes:['Ligando para o RH','Preenchendo quantidade e tamanho e enviando por e-mail','Pelo QR Code','Não é possível'],certa:1},{pergunta:'Qual botão leva de volta ao app a partir de qualquer tela?',opcoes:['Hoje','Atualizar','Voltar, no canto superior esquerdo','Buscar'],certa:2},{pergunta:'Como consultar a escala de uma data qualquer?',opcoes:['Pela aba BUSCAR do rodapé','Pedindo ao RH','Apagando o calendário','Não é possível'],certa:0},{pergunta:'Onde ficam o Colaborador do Mês e as Conquistas?',opcoes:['Só no rodapé','No menu ☰','Dentro do Backup','Não existem no app'],certa:1},{pergunta:'Por que exportar o backup?',opcoes:['Para trocar de turma','Para liberar a bateria','Para acelerar o app','Para recuperar seus dados se trocar de aparelho'],certa:3}] },
+  { id:'kaizen', icone:'trending_up', titulo:'Kaizen – Melhoria Contínua', conteudo:'<p><strong>Kaizen</strong> significa “mudança para melhor”. É a prática de melhorar um pouco a cada dia, com a participação de todos, da operação à liderança.</p><h4>Princípios</h4><div class="cartilha-destaque"> • Eliminar desperdícios<br> • Padronizar processos<br> • Envolver todos<br> • Focar em dados</div><h4>Os 7 desperdícios</h4><ul><li>Superprodução</li><li>Espera</li><li>Transporte desnecessário</li><li>Processamento excessivo</li><li>Estoque excessivo</li><li>Movimentação desnecessária</li><li>Defeitos e retrabalho</li></ul><h4>No dia a dia</h4><div class="cartilha-exemplo"><b>Gemba:</b> vá até onde o trabalho acontece, observe e converse com quem executa a tarefa.<br><br><b>Exemplo:</b> reorganizar a bancada para reduzir a movimentação já é um Kaizen.</div><div class="ct-alerta">Toda ideia conta: uma melhoria pequena, repetida por muita gente, gera grandes resultados.</div>', quiz:[{pergunta:'O que significa Kaizen?',opcoes:['Grande revolução','Mudança para melhor','Padronização','Controle'],certa:1},{pergunta:'Um princípio do Kaizen:',opcoes:['Grandes mudanças','Eliminar desperdícios','Centralizar','Ignorar dados'],certa:1},{pergunta:'Kaizen busca melhorias:',opcoes:['Na produção','Na gestão','Pequenas e diárias','Em crises'],certa:2},{pergunta:'Quem participa das melhorias no Kaizen?',opcoes:['Só a diretoria','Todos os colaboradores','Apenas consultores','Somente a qualidade'],certa:1},{pergunta:'Focar em dados significa:',opcoes:['Decidir por intuição','Basear decisões em medições e fatos','Ignorar indicadores','Esperar o problema piorar'],certa:1},{pergunta:'Padronizar processos ajuda a:',opcoes:['Aumentar a variação','Manter o ganho da melhoria','Eliminar treinamentos','Reduzir a comunicação'],certa:1},{pergunta:'Qual destes é um dos 7 desperdícios?',opcoes:['Trabalho em equipe','Treinamento','Espera','Organização'],certa:2},{pergunta:'Gemba é:',opcoes:['Um tipo de relatório','O local onde o trabalho acontece','Uma ferramenta de estoque','Um prêmio interno'],certa:1},{pergunta:'Reorganizar a bancada para reduzir a movimentação é um exemplo de:',opcoes:['Kaizen','Retrabalho','Burocracia','Desperdício'],certa:0},{pergunta:'Em qual desperdício se enquadra o retrabalho?',opcoes:['Transporte','Estoque','Espera','Defeitos'],certa:3}] },
+  { id:'5s', icone:'cleaning_services', titulo:'Os 5S – Organização', conteudo:'<p>Os <strong>5S</strong> organizam o ambiente de trabalho e criam hábitos que ajudam na segurança, na qualidade e na produtividade.</p><h4>Os cinco sensos</h4><div style="overflow-x:auto"><table class="ct-tabela"><tr><th>Senso</th><th>Significado</th><th>Na prática</th></tr><tr><td><b>1. Seiri</b></td><td>Utilização</td><td>Separar o útil do inútil e descartar o que não é necessário</td></tr><tr><td><b>2. Seiton</b></td><td>Organização</td><td>Um lugar para cada coisa, e cada coisa em seu lugar</td></tr><tr><td><b>3. Seiso</b></td><td>Limpeza</td><td>Manter limpo e eliminar a fonte da sujeira</td></tr><tr><td><b>4. Seiketsu</b></td><td>Padronização</td><td>Criar regras e rotinas para manter os três primeiros</td></tr><tr><td><b>5. Shitsuke</b></td><td>Disciplina</td><td>Cumprir os padrões como hábito</td></tr></table></div><div class="ct-alerta">Os 5S são a base de qualquer melhoria: sem organização e disciplina, os ganhos não se mantêm.</div>', quiz:[{pergunta:'Quantos sensos?',opcoes:['3','5','7','10'],certa:1},{pergunta:'Seiri é:',opcoes:['Limpar','Organizar','Separar útil do inútil','Criar padrões'],certa:2},{pergunta:'Disciplina:',opcoes:['Seiso','Seiketsu','Shitsuke','Seiton'],certa:2},{pergunta:'Seiton significa:',opcoes:['Limpar','Organizar','Padronizar','Disciplina'],certa:1},{pergunta:'Qual senso é o Seiso?',opcoes:['Limpeza','Descarte','Padronização','Disciplina'],certa:0},{pergunta:'Seiketsu é o senso de:',opcoes:['Separar','Limpar','Padronizar','Organizar'],certa:2},{pergunta:'Qual senso trata de cumprir os padrões como hábito?',opcoes:['Seiri','Seiso','Shitsuke','Seiton'],certa:2},{pergunta:'“Um lugar para cada coisa e cada coisa em seu lugar” é o senso de:',opcoes:['Seiton (organização)','Seiri (utilização)','Seiso (limpeza)','Seiketsu (padronização)'],certa:0},{pergunta:'Eliminar a fonte da sujeira faz parte do senso de:',opcoes:['Utilização (Seiri)','Disciplina (Shitsuke)','Limpeza (Seiso)','Padronização (Seiketsu)'],certa:2},{pergunta:'Por que os 5S ajudam na segurança?',opcoes:['Eliminam a necessidade de EPIs','Ambientes organizados reduzem riscos','Dispensam treinamento','Não têm relação com segurança'],certa:1}] },
+  { id:'pdca', icone:'cycle', titulo:'PDCA – Planejar, Fazer, Checar, Agir', conteudo:'<p>O <strong>PDCA</strong> (Plan, Do, Check, Act) é um ciclo que estrutura melhorias e resolve problemas de forma organizada e repetível.</p><h4>As quatro etapas</h4><div class="cartilha-destaque"><b>P – Planejar:</b> identificar o problema, definir metas e planejar as ações.<br><b>D – Fazer:</b> executar o plano, em pequena escala se possível.<br><b>C – Checar:</b> verificar os resultados comparando com a meta.<br><b>A – Agir:</b> padronizar o que funcionou ou corrigir o que falhou.</div><h4>Ciclo contínuo</h4><p>Ao final do A, o ciclo recomeça: cada volta deixa o processo melhor que a anterior.</p><div class="cartilha-exemplo"><b>Exemplo:</b> o setor tem muitas paradas por falta de material.<br><b>P:</b> medir as paradas e definir a meta de redução.<br><b>D:</b> testar um novo ponto de abastecimento.<br><b>C:</b> comparar as paradas antes e depois.<br><b>A:</b> se reduziu, padronizar.</div>', quiz:[{pergunta:'PDCA significa?',opcoes:['Planejar, Definir, Controlar, Aplicar','Planejar, Fazer, Checar, Agir','Produzir, Distribuir','Padronizar, Dirigir'],certa:1},{pergunta:'Na etapa C?',opcoes:['Executar','Verificar resultados','Padronizar','Definir metas'],certa:1},{pergunta:'PDCA é ciclo:',opcoes:['Linear','Contínuo','Para gestores','Só produção'],certa:1},{pergunta:'Na etapa P (Plan) se faz:',opcoes:['Executar a ação','Definir metas e planejar','Verificar resultados','Padronizar'],certa:1},{pergunta:'A letra D do PDCA é:',opcoes:['Definir','Decidir','Fazer (executar)','Documentar'],certa:2},{pergunta:'Na etapa A (Act), o resultado bom deve ser:',opcoes:['Esquecido','Escondido','Cancelado','Padronizado'],certa:3},{pergunta:'Comparar os resultados com a meta acontece na etapa:',opcoes:['P (Planejar)','D (Fazer)','C (Checar)','A (Agir)'],certa:2},{pergunta:'Se a ação deu certo, o que fazer na etapa A?',opcoes:['Padronizar','Descartar o resultado','Reiniciar sem registrar','Esconder o plano'],certa:0},{pergunta:'Testar a solução em pequena escala acontece em:',opcoes:['P (Planejar)','D (Fazer)','C (Checar)','A (Agir)'],certa:1},{pergunta:'Ao terminar a etapa A, o ciclo:',opcoes:['Termina para sempre','Vira apenas um relatório','Só se repete uma vez','Recomeça, buscando uma nova melhoria'],certa:3}] },
+  { id:'ferramentas', icone:'build', titulo:'Ferramentas da Qualidade', conteudo:'<p>As <strong>ferramentas da qualidade</strong> ajudam a entender problemas, encontrar a causa raiz e decidir o que atacar primeiro.</p><h4>As principais</h4><div style="overflow-x:auto"><table class="ct-tabela"><tr><th>Ferramenta</th><th>Para que serve</th></tr><tr><td><b>Ishikawa</b> (espinha de peixe)</td><td>Organiza as possíveis causas de um problema</td></tr><tr><td><b>5 Porquês</b></td><td>Pergunta “por quê?” várias vezes até chegar à causa raiz</td></tr><tr><td><b>Pareto</b></td><td>Mostra que poucas causas geram a maioria dos problemas (regra 80/20) e ajuda a priorizar</td></tr><tr><td><b>Fluxograma</b></td><td>Desenha as etapas de um processo</td></tr><tr><td><b>Folha de verificação</b></td><td>Registra quantas vezes algo acontece</td></tr><tr><td><b>Histograma</b></td><td>Mostra como os dados se distribuem</td></tr></table></div><div class="cartilha-exemplo"><b>6M do Ishikawa:</b> Método, Máquina, Material, Mão de obra, Meio ambiente e Medição.</div>', quiz:[{pergunta:'Causas raiz:',opcoes:['Pareto','Ishikawa','Fluxograma','5 Porquês'],certa:1},{pergunta:'Ishikawa também é:',opcoes:['Causa e Efeito','Pareto','Controle','Fluxograma'],certa:0},{pergunta:'Priorizar problemas:',opcoes:['5 Porquês','Fluxograma','Pareto','Ishikawa'],certa:2},{pergunta:'O diagrama de Pareto serve para:',opcoes:['Priorizar os problemas mais relevantes','Desenhar o fluxo','Registrar presença','Medir temperatura'],certa:0},{pergunta:'Os 5 Porquês buscam:',opcoes:['Culpados','A causa raiz, perguntando "por quê?" repetidamente','Aumentar prazos','Mais documentos'],certa:1},{pergunta:'O fluxograma representa:',opcoes:['Gastos mensais','Causas e efeitos','As etapas de um processo','Pesos de peças'],certa:2},{pergunta:'Os 6M do Ishikawa são:',opcoes:['Método, Máquina, Material, Mão de obra, Meio ambiente e Medição','Mercado, Marca, Meta, Mídia, Moeda e Mês','Manhã, Meio-dia, Metade, Mais, Menos e Média','Motor, Mola, Metal, Molde, Marcha e Manual'],certa:0},{pergunta:'A regra 80/20 está ligada ao diagrama de:',opcoes:['Fluxo','Pareto','Dispersão','Ishikawa'],certa:1},{pergunta:'Qual ferramenta registra quantas vezes algo acontece?',opcoes:['Fluxograma','Ishikawa','Folha de verificação','5 Porquês'],certa:2},{pergunta:'Os 5 Porquês terminam quando:',opcoes:['Se encontra um culpado','Passa um dia','Se escreve o relatório','Se chega à causa raiz'],certa:3}] },
+  { id:'seguranca', icone:'security', titulo:'Segurança do Trabalho', conteudo:'<p>Segurança é <strong>prioridade</strong>: nenhuma tarefa é tão urgente que justifique correr riscos.</p><h4>Atitudes essenciais</h4><div class="cartilha-destaque"> • Usar os <b>EPIs</b> exigidos pela atividade<br> • Manter o ambiente organizado (5S)<br> • Conhecer as rotas de fuga e o ramal de emergência<br> • Reportar riscos e quase-acidentes</div><h4>EPI e EPC</h4><ul><li><b>EPI</b> – Equipamento de Proteção Individual: luvas, óculos, protetor auricular, calçado de segurança. Deve estar em bom estado e ser usado corretamente.</li><li><b>EPC</b> – Equipamento de Proteção Coletiva: protege várias pessoas, como proteções de máquinas e sinalizações.</li></ul><h4>Quase-acidente</h4><p>É um evento que <b>poderia</b> ter causado lesão, mas não causou. Reportar permite corrigir a causa antes que alguém se machuque.</p><div class="ct-alerta"><b>Em caso de emergência:</b> mantenha a calma, acione o ramal de emergência (veja em <b>Ramais Úteis</b>) e siga as orientações da brigada.</div>', quiz:[{pergunta:'Primeira ação ao risco?',opcoes:['Ignorar','Sinalizar','Continuar','Aguardar'],certa:1},{pergunta:'EPI é:',opcoes:['Proteção Individual','Produção Interna','Proteção Integrada','Preventivo Industrial'],certa:0},{pergunta:'Emergência:',opcoes:['Correr','Seguir plano','Aguardar','Filmar'],certa:1},{pergunta:'Quando usar o EPI?',opcoes:['Só em inspeções','Sempre que a atividade exigir','Só com supervisor presente','Nunca em áreas limpas'],certa:1},{pergunta:'Piso molhado sem sinalização deve ser:',opcoes:['Ignorado','Atravessado rápido','Reportado e sinalizado','Coberto com papel'],certa:2},{pergunta:'Por que reportar quase-acidentes?',opcoes:['Para punir alguém','Para prevenir acidentes reais','Para aumentar a papelada','Não é necessário'],certa:1},{pergunta:'EPC significa:',opcoes:['Equipamento de Proteção Coletiva','Equipamento Pessoal de Controle','Evento de Prevenção Contínua','Entrada de Pessoal Controlada'],certa:0},{pergunta:'Um quase-acidente é:',opcoes:['Qualquer acidente leve','Um evento que poderia ter causado lesão, mas não causou','Uma falha de relatório','Um treinamento'],certa:1},{pergunta:'Se o seu EPI estiver danificado, você deve:',opcoes:['Usar assim mesmo','Guardar no armário','Trocar e reportar antes de iniciar a tarefa','Emprestar a um colega'],certa:2},{pergunta:'Em caso de emergência, onde encontrar o ramal certo?',opcoes:['Nas Conquistas','No Backup','Nas Estatísticas','Em Ramais Úteis'],certa:3}] },
+  { id:'bpf', icone:'medication', titulo:'Boas Práticas de Fabricação', conteudo:'<p>As <strong>Boas Práticas de Fabricação (BPF)</strong> garantem que os medicamentos sejam produzidos de forma consistente e segura, conforme os padrões de qualidade e a regulamentação da Anvisa.</p><h4>Pilares</h4><div class="cartilha-destaque"> • Higiene e paramentação correta<br> • Controle de processos<br> • Rastreabilidade (lotes)<br> • Documentação</div><h4>Documentação correta (ALCOA)</h4><ul><li><b>A</b>tribuível: quem fez, assinou</li><li><b>L</b>egível</li><li><b>C</b>ontemporâneo: registrado na hora</li><li><b>O</b>riginal</li><li><b>A</b>curado</li></ul><div class="ct-alerta"><b>Regra de ouro:</b> se não foi registrado, não foi feito. Erros se corrigem conforme o procedimento, sem apagar o dado original.</div>', quiz:[{pergunta:'BPF garantem?',opcoes:['Produtividade','Qualidade','Custos','Vendas'],certa:1},{pergunta:'Princípio:',opcoes:['Qualquer roupa','Não registrar','Higiene pessoal','Sem supervisão'],certa:2},{pergunta:'Rastreabilidade:',opcoes:['Velocidade','Origem do lote','Menos pessoas','Sem doc'],certa:1},{pergunta:'BPF significa:',opcoes:['Boas Práticas de Fabricação','Boletim de Produção Final','Base de Processos Fixos','Bom Procedimento Fabril'],certa:0},{pergunta:'A documentação nas BPF serve para:',opcoes:['Ocupar espaço','Evidenciar o que foi feito','Substituir o treinamento','Dispensar controles'],certa:1},{pergunta:'Um erro de registro deve ser corrigido:',opcoes:['Apagando com corretivo','Rasgando a folha','Conforme procedimento, sem apagar o dado original','Ignorando'],certa:2},{pergunta:'No ALCOA, “contemporâneo” significa:',opcoes:['Registrar no momento em que a atividade é feita','Registrar no fim do mês','Registrar só em caso de erro','Registrar a lápis'],certa:0},{pergunta:'Para que serve o número de lote?',opcoes:['Decorar a embalagem','Marcar o turno','Rastrear a origem e o destino do produto','Calcular horas extras'],certa:2},{pergunta:'A paramentação correta serve para:',opcoes:['Substituir o treinamento','Proteger o produto e o colaborador contra contaminação','Economizar água','Padronizar a cor do uniforme'],certa:1},{pergunta:'Qual órgão regula as BPF no Brasil?',opcoes:['Detran','INSS','Anatel','Anvisa'],certa:3}] },
+  { id:'sustentabilidade', icone:'eco', titulo:'Sustentabilidade', conteudo:'<p>Sustentabilidade é atender às necessidades de hoje sem comprometer as das próximas gerações. Pequenas atitudes diárias fazem diferença.</p><h4>No dia a dia</h4><div class="cartilha-destaque"> • <b>Energia:</b> desligue luzes e equipamentos sem uso<br> • <b>Água:</b> evite desperdício e comunique vazamentos<br> • <b>Resíduos:</b> separe e descarte corretamente<br> • <b>Papel:</b> imprima só o necessário</div><h4>Os 5R</h4><p><b>Repensar, Recusar, Reduzir, Reutilizar e Reciclar.</b> Reduzir e reutilizar vêm antes de reciclar.</p><h4>Coleta seletiva</h4><div style="overflow-x:auto"><table class="ct-tabela"><tr><th>Cor</th><th>Resíduo</th></tr><tr><td>Azul</td><td>Papel</td></tr><tr><td>Vermelho</td><td>Plástico</td></tr><tr><td>Verde</td><td>Vidro</td></tr><tr><td>Amarelo</td><td>Metal</td></tr><tr><td>Marrom</td><td>Orgânicos</td></tr><tr><td>Cinza</td><td>Não reciclável ou misturado</td></tr></table></div>', quiz:[{pergunta:'Contribui:',opcoes:['Luzes acesas','Resíduos corretos','Água excessiva','Imprimir'],certa:1},{pergunta:'Reduzir beneficia:',opcoes:['Ambiente','Empresa','Todos','Ninguém'],certa:2},{pergunta:'NÃO é sustentável:',opcoes:['Desligar','Reciclar','Torneira pingando','Reutilizar papel'],certa:2},{pergunta:'Qual atitude economiza energia?',opcoes:['Deixar equipamentos ligados','Desligar luzes e equipamentos sem uso','Aumentar a iluminação','Abrir janelas com o ar ligado'],certa:1},{pergunta:'Reduzir a impressão ajuda a:',opcoes:['Aumentar resíduos','Elevar o consumo','Gastar menos papel e recursos','Nada'],certa:2},{pergunta:'Resíduo reciclável deve ir para:',opcoes:['O lixo comum','A coleta seletiva correta','A queima','A gaveta'],certa:1},{pergunta:'Na coleta seletiva, qual cor identifica o papel?',opcoes:['Azul','Vermelho','Verde','Amarelo'],certa:0},{pergunta:'Na coleta seletiva, qual cor identifica o vidro?',opcoes:['Azul','Amarelo','Vermelho','Verde'],certa:3},{pergunta:'Entre os 5R, o que vem antes de reciclar?',opcoes:['Descartar','Reduzir e reutilizar','Queimar','Misturar os resíduos'],certa:1},{pergunta:'Ao ver um vazamento de água, você deve:',opcoes:['Ignorar','Esperar secar','Comunicar para que seja corrigido','Cobrir com papel'],certa:2}] },
+  { id:'compliance', icone:'gavel', titulo:'Compliance – Ética', conteudo:'<p><strong>Compliance</strong> é agir de acordo com as leis, as normas internas e os princípios éticos, em todas as relações de trabalho.</p><h4>Temas principais</h4><div class="cartilha-destaque"> • <b>Código de Conduta:</b> orienta como agir<br> • <b>Conflito de interesses:</b> quando um interesse pessoal interfere na decisão profissional<br> • <b>Anticorrupção:</b> não oferecer nem aceitar vantagens indevidas<br> • <b>LGPD:</b> proteção de dados pessoais<br> • <b>Canal de Denúncia:</b> relato de condutas antiéticas</div><h4>LGPD na prática</h4><ul><li>Acesse apenas os dados de que precisa para trabalhar</li><li>Não compartilhe dados pessoais sem autorização</li><li>Proteja senhas e documentos</li></ul><div class="ct-alerta"><b>Na dúvida, pergunte.</b> Use o Canal de Denúncia para relatar condutas antiéticas; quem relata de boa-fé não pode sofrer retaliação.</div>', quiz:[{pergunta:'Compliance é?',opcoes:['Cargo','Regras éticas','Treinamento','Ferramenta'],certa:1},{pergunta:'Presente de fornecedor:',opcoes:['Aceitar','Recusar e reportar','Aceitar pequeno','Dividir'],certa:1},{pergunta:'Quem segue?',opcoes:['Diretoria','RH','Todos','Fornecedores'],certa:2},{pergunta:'A LGPD trata de:',opcoes:['Proteção de dados pessoais','Segurança contra incêndio','Escala de turnos','Uniformes'],certa:0},{pergunta:'Conflito de interesses ocorre quando:',opcoes:['Duas equipes se reúnem','Há troca de turma','Interesse pessoal interfere na decisão profissional','Chega uma máquina nova'],certa:2},{pergunta:'O Canal de Denúncia serve para:',opcoes:['Pedir férias','Reportar condutas antiéticas','Trocar escala','Pedir uniforme'],certa:1},{pergunta:'A Lei Anticorrupção proíbe:',opcoes:['Trabalhar em equipe','Oferecer ou aceitar vantagem indevida','Cumprir metas','Participar de treinamentos'],certa:1},{pergunta:'Ao lidar com dados pessoais, o correto é:',opcoes:['Compartilhar com quem pedir','Guardar em qualquer arquivo','Acessar só o necessário para o trabalho','Publicar em grupos de mensagem'],certa:2},{pergunta:'Se tiver dúvida sobre uma conduta, o melhor é:',opcoes:['Perguntar à área responsável antes de agir','Agir e ver o que acontece','Esperar alguém reclamar','Ignorar a dúvida'],certa:0},{pergunta:'O Código de Conduta serve para:',opcoes:['Calcular a escala','Controlar o estoque','Registrar anotações','Orientar como agir de forma ética'],certa:3}] },
+  { id:'incendio', icone:'local_fire_department', titulo:'Prevenção de Incêndios', conteudo:'<p>Em uma indústria farmacêutica há materiais inflamáveis e equipamentos elétricos, por isso prevenir é essencial.</p><h4>Classes de incêndio</h4><div style="overflow-x:auto"><table class="ct-tabela"><tr><th>Classe</th><th>Material</th></tr><tr><td><b>A</b></td><td>Sólidos comuns, como papel e madeira</td></tr><tr><td><b>B</b></td><td>Líquidos inflamáveis</td></tr><tr><td><b>C</b></td><td>Equipamentos elétricos energizados (<b>NUNCA água</b>)</td></tr><tr><td><b>D</b></td><td>Metais</td></tr><tr><td><b>K</b></td><td>Óleos e gorduras</td></tr></table></div><h4>Método PASS</h4><div class="cartilha-destaque"><b>P</b>uxar o pino<br><b>A</b>pontar para a base do fogo<br><b>A</b>pertar o gatilho<br><b>V</b>arrer de um lado a outro</div><h4>Em caso de incêndio</h4><ul><li>Acione o alarme e o ramal de emergência</li><li>Se não houver risco, tente controlar o fogo com o extintor adequado</li><li>Abandone a área pela rota de fuga e siga ao ponto de encontro</li><li><b>Nunca use o elevador</b></li></ul><div class="ct-alerta"><b>Prevenção:</b> não bloqueie extintores, hidrantes e saídas; mantenha as áreas limpas e organizadas.</div>', quiz:[{pergunta:'Classe C (elétrico) NUNCA:',opcoes:['CO₂','Pó','Água','Pó Especial'],certa:2},{pergunta:'PASS significa?',opcoes:['Puxar, Apontar, Apertar, Varrer','Parar, Avaliar','Prevenir, Atuar','Pegar, Arremessar'],certa:0},{pergunta:'Área estéril:',opcoes:['Pó','Água','CO₂','Espuma'],certa:2},{pergunta:'Classe B envolve:',opcoes:['Sólidos comuns','Metais','Líquidos inflamáveis','Equipamentos elétricos'],certa:2},{pergunta:'Incêndio em gorduras é classe:',opcoes:['A','C','D','K'],certa:3},{pergunta:'O primeiro passo do PASS é:',opcoes:['Puxar o pino','Apontar','Apertar','Varrer'],certa:0},{pergunta:'A classe A de incêndio envolve:',opcoes:['Líquidos inflamáveis','Sólidos comuns, como papel e madeira','Equipamentos elétricos','Metais'],certa:1},{pergunta:'Em caso de incêndio, o elevador deve ser:',opcoes:['Usado, por ser mais rápido','Usado apenas se estiver vazio','Evitado: use sempre as escadas','Reservado aos gestores'],certa:2},{pergunta:'Qual destes itens nunca deve ser bloqueado?',opcoes:['Extintores, hidrantes e saídas','Apenas a copa','Apenas armários','Nenhum deles'],certa:0},{pergunta:'Depois de acionar o alarme e deixar a área, você vai para:',opcoes:['O posto de trabalho','O ponto de encontro','A porta do prédio','O estacionamento, sem avisar'],certa:1}] }
 ];
 
-let cartilhaAtiva = 'comousar';
+const CART_META = {
+  'comousar': { g:'inicio', r:'Escala, anotações, férias, pedidos, backup e atalhos do menu.' },
+  'kaizen': { g:'melhoria', r:'Cultura de pequenas melhorias diárias, feitas por todos.' },
+  '5s': { g:'melhoria', r:'Cinco sensos para um ambiente organizado, limpo e seguro.' },
+  'pdca': { g:'melhoria', r:'Ciclo de quatro etapas para resolver problemas e manter resultados.' },
+  'ferramentas': { g:'melhoria', r:'Ishikawa, 5 Porquês, Pareto e fluxograma para achar causas e priorizar.' },
+  'seguranca': { g:'seguranca', r:'EPIs, riscos, quase-acidentes e atitudes seguras no dia a dia.' },
+  'incendio': { g:'seguranca', r:'Classes de fogo, extintores, método PASS e rota de fuga.' },
+  'bpf': { g:'seguranca', r:'Higiene, processos, rastreabilidade e documentação na fabricação.' },
+  'compliance': { g:'cultura', r:'Ética, Código de Conduta, LGPD e Canal de Denúncia.' },
+  'sustentabilidade': { g:'cultura', r:'Energia, água, resíduos e consumo consciente.' },
+};
+const CART_GRUPOS = [
+  { id:'inicio', nome:'Primeiros passos' },
+  { id:'melhoria', nome:'Melhoria contínua' },
+  { id:'seguranca', nome:'Segurança e qualidade' },
+  { id:'cultura', nome:'Cultura e responsabilidade' }
+];
+cartilhasData.forEach(function (c) { const m = CART_META[c.id] || { g:'inicio', r:'' }; c.grupo = m.g; c.resumo = m.r; });
+
+let cartilhaAtiva = null;          // null = biblioteca; id = leitura
+let ctQuiz = null;                 // { id, i, acertos, res:[], sel, estado:'pergunta'|'resposta'|'fim' }
 let cartilhasLidas = getJSON('braun_cartilhas_lidas', []);
+let quizOk = getJSON('braun_quiz_ok', []);          // acertos únicos: 'cartilha:indice'
+let quizMelhor = getJSON('braun_quiz_melhor', {});  // melhor nota por cartilha
+let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0', 10) || 0;
 
 function openCartilhas() { closeHamburger(); renderCartilhas(); focusModal('cartilhasCard'); }
-function renderCartilhas() {
-  const tc = document.getElementById('cartilhaTabs'), pc = document.getElementById('cartilhaPanels');
-  tc.innerHTML = ''; pc.innerHTML = '';
-  const sorted = cartilhasData.slice().sort(function (a, b) {
-    const al = cartilhasLidas.indexOf(a.id) > -1 ? 1 : 0;
-    const bl = cartilhasLidas.indexOf(b.id) > -1 ? 1 : 0;
-    return al - bl;
-  });
-  sorted.forEach(function (cart) {
-    const isA = cart.id === cartilhaAtiva;
-    const estaL = cartilhasLidas.indexOf(cart.id) > -1;
-    const btn = document.createElement('button');
-    btn.className = 'cartilha-tab-btn' + (isA ? ' active' : '') + (estaL ? ' lida' : '');
-    const tc2 = cart.titulo.split('–')[0].trim() || cart.titulo;
-    btn.innerHTML = '<span class="material-symbols-outlined">' + cart.icone + '</span> ' + tc2;
-    btn.addEventListener('click', function () { cartilhaAtiva = cart.id; renderCartilhas(); });
-    tc.appendChild(btn);
-    const p = document.createElement('div');
-    p.className = 'cartilha-panel' + (isA ? ' active' : '');
-    p.id = 'panel-' + cart.id;
-    let qh = '';
-    cart.quiz.forEach(function (q, qi) {
-      let oh = '';
-      q.opcoes.forEach(function (op, oi) {
-        oh += '<div class="quiz-opcao" data-cart="' + cart.id + '" data-q="' + qi + '" data-o="' + oi + '" role="button" tabindex="0">' + op + '</div>';
-      });
-      qh += '<div class="quiz-pergunta">' + (qi + 1) + '. ' + q.pergunta + '</div><div class="quiz-opcoes" id="quiz-' + cart.id + '-' + qi + '">' + oh + '</div><div class="quiz-feedback" id="feedback-' + cart.id + '-' + qi + '"></div>';
-    });
-    p.innerHTML = '<div class="cartilha-titulo">' + (cart.icone ? '<span class="material-symbols-outlined" style="font-size:28px;vertical-align:middle;">' + cart.icone + '</span> ' : '') + cart.titulo + '</div><div class="cartilha-conteudo">' + cart.conteudo + '</div><button class="cartilha-btn-marcar ' + (estaL ? 'marcado' : '') + '" data-cart-id="' + cart.id + '"><span class="material-symbols-outlined">' + (estaL ? 'check_circle' : 'circle') + '</span> ' + (estaL ? 'MARCADA COMO LIDA' : 'MARCAR COMO LIDA') + '</button><div class="cartilha-quiz"><h4>&#128221; Teste seu conhecimento</h4>' + qh + '</div>';
-    pc.appendChild(p);
-  });
-  pc.querySelectorAll('.cartilha-btn-marcar').forEach(function (b) { b.addEventListener('click', function () { toggleCartilhaLida(b.dataset.cartId); }); });
-  pc.querySelectorAll('.quiz-opcao').forEach(function (el) {
-    const h = function () { responderQuiz(el.dataset.cart, parseInt(el.dataset.q), parseInt(el.dataset.o)); };
-    el.addEventListener('click', h);
-    el.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); h(); } });
-  });
-  atualizarProgresso();
+function abrirCartilha(id) { cartilhaAtiva = id; ctQuiz = null; renderCartilhas(); const c = document.getElementById('cartilhasCard'); if (c) c.scrollTop = 0; }
+function voltarBibliotecaCartilhas() { cartilhaAtiva = null; ctQuiz = null; renderCartilhas(); const c = document.getElementById('cartilhasCard'); if (c) c.scrollTop = 0; }
+function cartilhaPorId(id) { return cartilhasData.filter(function (c) { return c.id === id; })[0] || null; }
+function ctLida(id) { return cartilhasLidas.indexOf(id) > -1; }
+function totalPerguntas() { return cartilhasData.reduce(function (n, c) { return n + c.quiz.length; }, 0); }
+function minutosLeitura(c) {
+  const t = String(c.conteudo).replace(/<[^>]+>/g, ' ');
+  return Math.max(1, Math.round(t.split(/\s+/).filter(Boolean).length / 150));
 }
+function nomeGrupo(id) { const g = CART_GRUPOS.filter(function (x) { return x.id === id; })[0]; return g ? g.nome : ''; }
+function icoCt(nome) { return '<span class="material-symbols-outlined" aria-hidden="true">' + nome + '</span>'; }
+
+function renderCartilhas(manterScroll) {
+  const card = document.getElementById('cartilhasCard'); if (!card) return;
+  const y = card.scrollTop;
+  const lista = document.getElementById('ctLista'), leitura = document.getElementById('ctLeitura');
+  const voltar = card.querySelector('.modal-x');
+  if (voltar) voltar.setAttribute('data-action', cartilhaAtiva ? 'cartilha-lista' : 'close-modals');
+  if (cartilhaAtiva && cartilhaPorId(cartilhaAtiva)) {
+    lista.classList.add('ct-oculto'); leitura.classList.remove('ct-oculto');
+    renderCartilhaLeitura(cartilhaPorId(cartilhaAtiva));
+  } else {
+    cartilhaAtiva = null;
+    leitura.classList.add('ct-oculto'); lista.classList.remove('ct-oculto');
+    renderCartilhasLista();
+  }
+  if (manterScroll) card.scrollTop = y;
+}
+
+function renderCartilhasLista() {
+  const tot = cartilhasData.length, lidas = cartilhasLidas.length, pct = Math.round((lidas / tot) * 100);
+  const el = document.getElementById('ctResumo');
+  el.innerHTML =
+    '<div class="ct-stats">' +
+      '<div class="ct-stat"><b>' + lidas + '/' + tot + '</b><span>Lidas</span></div>' +
+      '<div class="ct-stat"><b>' + quizOk.length + '/' + totalPerguntas() + '</b><span>Acertos no quiz</span></div>' +
+      '<div class="ct-stat"><b>' + pct + '%</b><span>Progresso</span></div>' +
+    '</div>' +
+    '<div class="ct-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="Progresso de leitura"><i style="width:' + pct + '%"></i></div>';
+  const prox = cartilhasData.filter(function (c) { return !ctLida(c.id); })[0];
+  const cont = document.getElementById('ctContinuar');
+  cont.innerHTML = prox
+    ? '<button type="button" class="ct-continuar" data-ct="abrir" data-cart="' + prox.id + '"><span class="ct-c-ico">' + icoCt(lidas ? 'play_arrow' : 'rocket_launch') + '</span><span><small>' + (lidas ? 'Continuar de onde parou' : 'Comece por aqui') + '</small><strong>' + prox.titulo + '</strong></span></button>'
+    : '<div class="ct-parabens">' + icoCt('emoji_events') + '<span><b>Parabéns!</b> Você concluiu todas as cartilhas.</span></div>';
+  const g = document.getElementById('ctGrupos');
+  g.innerHTML = CART_GRUPOS.map(function (gr) {
+    const itens = cartilhasData.filter(function (c) { return c.grupo === gr.id; });
+    if (!itens.length) return '';
+    const l = itens.filter(function (c) { return ctLida(c.id); }).length;
+    return '<div class="ct-grupo-titulo"><span>' + gr.nome + '</span><span>' + l + '/' + itens.length + '</span></div>' +
+      itens.map(function (c) {
+        const lida = ctLida(c.id), melhor = quizMelhor[c.id];
+        return '<button type="button" class="ct-card' + (lida ? ' lida' : '') + '" data-ct="abrir" data-cart="' + c.id + '">' +
+          '<span class="ct-card-icon">' + icoCt(c.icone) + '</span>' +
+          '<span class="ct-card-body">' +
+            '<span class="ct-card-titulo">' + c.titulo + '</span>' +
+            '<span class="ct-card-resumo">' + c.resumo + '</span>' +
+            '<span class="ct-card-meta"><span>' + icoCt('schedule') + minutosLeitura(c) + ' min</span><span>' + icoCt('quiz') + c.quiz.length + ' perguntas</span>' +
+              (melhor !== undefined ? '<span>' + icoCt('military_tech') + 'Melhor: ' + melhor + '/' + c.quiz.length + '</span>' : '') + '</span>' +
+          '</span>' +
+          '<span class="ct-card-status">' + (lida ? icoCt('check_circle') + 'Lida' : icoCt('chevron_right')) + '</span>' +
+        '</button>';
+      }).join('');
+  }).join('');
+}
+
+function renderCartilhaLeitura(c) {
+  const lida = ctLida(c.id), melhor = quizMelhor[c.id];
+  const i = cartilhasData.indexOf(c), prox = cartilhasData[i + 1] || null;
+  document.getElementById('ctLeitura').innerHTML =
+    '<div class="ct-eyebrow">' + nomeGrupo(c.grupo) + '</div>' +
+    '<h2 class="ct-leitura-titulo">' + icoCt(c.icone) + '<span>' + c.titulo + '</span></h2>' +
+    '<div class="ct-leitura-meta"><span class="ct-chip ' + (lida ? 'lida' : 'nova') + '">' + (lida ? 'Lida' : 'Não lida') + '</span>' +
+      '<span>' + icoCt('schedule') + minutosLeitura(c) + ' min de leitura</span><span>' + icoCt('quiz') + c.quiz.length + ' perguntas</span>' +
+      (melhor !== undefined ? '<span>' + icoCt('military_tech') + 'Melhor: ' + melhor + '/' + c.quiz.length + '</span>' : '') + '</div>' +
+    '<div class="cartilha-conteudo">' + c.conteudo + '</div>' +
+    '<section class="ct-quiz" id="ctQuiz" aria-live="polite"></section>' +
+    '<button type="button" class="ct-btn ' + (lida ? 'secundario' : 'roxo') + '" data-ct="marcar" data-cart="' + c.id + '">' + icoCt(lida ? 'undo' : 'check_circle') + (lida ? 'Desmarcar como lida' : 'Marcar como lida') + '</button>' +
+    (prox ? '<button type="button" class="ct-btn secundario" data-ct="abrir" data-cart="' + prox.id + '">Próxima: ' + prox.titulo.split('–')[0].trim() + icoCt('arrow_forward') + '</button>' : '') +
+    '<button type="button" class="ct-btn texto" data-ct="lista">' + icoCt('apps') + 'Ver todas as cartilhas</button>';
+  renderCtQuiz();
+}
+
+/* ---------- Quiz por etapas ---------- */
+function renderCtQuiz() {
+  const box = document.getElementById('ctQuiz'); if (!box) return;
+  const c = cartilhaPorId(cartilhaAtiva); if (!c) return;
+  const n = c.quiz.length;
+  if (!ctQuiz) {
+    const melhor = quizMelhor[c.id];
+    box.innerHTML = '<div class="ct-eyebrow">Quiz</div><h3 class="ct-quiz-titulo">Teste seus conhecimentos</h3>' +
+      '<p class="ct-quiz-txt">' + n + ' perguntas sobre este tema.' + (melhor !== undefined ? ' Seu melhor resultado: <b>' + melhor + '/' + n + '</b>.' : '') + '</p>' +
+      '<button type="button" class="ct-btn primario" data-ct="quiz-iniciar">' + icoCt('play_arrow') + (melhor !== undefined ? 'Refazer quiz' : 'Iniciar quiz') + '</button>';
+    return;
+  }
+  const seg = function () {
+    let h = '<div class="ct-quiz-seg" aria-hidden="true">';
+    for (let k = 0; k < n; k++) {
+      const cl = ctQuiz.res[k] === true ? 'ok' : ctQuiz.res[k] === false ? 'erro' : (k === ctQuiz.i && ctQuiz.estado !== 'fim' ? 'atual' : '');
+      h += '<i class="' + cl + '"></i>';
+    }
+    return h + '</div>';
+  };
+  if (ctQuiz.estado === 'fim') {
+    const pct = Math.round((ctQuiz.acertos / n) * 100);
+    const msg = pct >= 90 ? 'Excelente! Você domina o tema.' : pct >= 70 ? 'Muito bom! Falta pouco para a nota máxima.' : pct >= 50 ? 'Bom começo. Releia os pontos principais e tente de novo.' : 'Releia a cartilha com calma e refaça o quiz.';
+    box.innerHTML = '<div class="ct-eyebrow">Resultado</div>' + seg() +
+      '<div class="ct-resultado"><div class="nota">' + ctQuiz.acertos + '/' + n + '</div><p>' + msg + '</p></div>' +
+      '<button type="button" class="ct-btn primario" data-ct="quiz-refazer">' + icoCt('replay') + 'Refazer quiz</button>';
+    return;
+  }
+  const q = c.quiz[ctQuiz.i], resp = ctQuiz.estado === 'resposta';
+  let ops = '';
+  q.opcoes.forEach(function (op, oi) {
+    let cl = 'quiz-opcao';
+    if (resp) { cl += ' desabilitada'; if (oi === q.certa) cl += ' certa'; else if (oi === ctQuiz.sel) cl += ' errada'; }
+    ops += '<button type="button" class="' + cl + '" data-ct="quiz-opcao" data-o="' + oi + '"' + (resp ? ' disabled' : '') + '>' + op + '</button>';
+  });
+  let fb = '';
+  if (resp) {
+    const ok = ctQuiz.sel === q.certa;
+    fb = '<div class="quiz-feedback ' + (ok ? 'certo' : 'errado') + '">' + (ok ? 'Correto!' : 'Incorreto. A resposta certa é: ' + q.opcoes[q.certa]) + '</div>' +
+      '<button type="button" class="ct-btn primario" data-ct="quiz-proxima">' + (ctQuiz.i + 1 < n ? 'Próxima pergunta' : 'Ver resultado') + icoCt('arrow_forward') + '</button>';
+  }
+  box.innerHTML = '<div class="ct-quiz-topo"><span class="ct-eyebrow">Quiz</span><span class="ct-quiz-pos">Pergunta ' + (ctQuiz.i + 1) + ' de ' + n + '</span></div>' + seg() +
+    '<div class="quiz-pergunta">' + q.pergunta + '</div><div class="quiz-opcoes">' + ops + '</div>' + fb;
+}
+function iniciarCtQuiz() { ctQuiz = { id: cartilhaAtiva, i: 0, acertos: 0, res: [], sel: -1, estado: 'pergunta' }; renderCtQuiz(); const b = document.getElementById('ctQuiz'); if (b && b.scrollIntoView) b.scrollIntoView({ block: 'start' }); }
+function registrarAcertoUnico(id, qi) {
+  const k = id + ':' + qi;
+  if (quizOk.indexOf(k) > -1) return;
+  quizOk.push(k); setStorageValue('braun_quiz_ok', JSON.stringify(quizOk));
+  quizzesAcertados++; setStorageValue('braun_quizzes_acertados', quizzesAcertados);
+  if (quizzesAcertados === 10) salvarConquista('quiz_master');
+}
+function responderCtQuiz(oi) {
+  if (!ctQuiz || ctQuiz.estado !== 'pergunta') return;
+  const c = cartilhaPorId(ctQuiz.id); if (!c) return;
+  const ok = oi === c.quiz[ctQuiz.i].certa;
+  ctQuiz.estado = 'resposta'; ctQuiz.sel = oi; ctQuiz.res[ctQuiz.i] = ok;
+  if (ok) { ctQuiz.acertos++; registrarAcertoUnico(c.id, ctQuiz.i); }
+  renderCtQuiz();
+}
+function proximaCtPergunta() {
+  if (!ctQuiz || ctQuiz.estado !== 'resposta') return;
+  const c = cartilhaPorId(ctQuiz.id); if (!c) return;
+  if (ctQuiz.i + 1 < c.quiz.length) { ctQuiz.i++; ctQuiz.estado = 'pergunta'; ctQuiz.sel = -1; }
+  else {
+    ctQuiz.estado = 'fim';
+    if (quizMelhor[c.id] === undefined || ctQuiz.acertos > quizMelhor[c.id]) { quizMelhor[c.id] = ctQuiz.acertos; setStorageValue('braun_quiz_melhor', JSON.stringify(quizMelhor)); }
+  }
+  renderCtQuiz();
+  const b = document.getElementById('ctQuiz'); if (b && b.scrollIntoView) b.scrollIntoView({ block: 'start' });
+}
+
 function toggleCartilhaLida(id) {
   const i = cartilhasLidas.indexOf(id);
   if (i > -1) cartilhasLidas.splice(i, 1);
@@ -1242,30 +1382,20 @@ function toggleCartilhaLida(id) {
     if (cartilhasLidas.length === cartilhasData.length) salvarConquista('expert_braun');
   }
   setStorageValue('braun_cartilhas_lidas', JSON.stringify(cartilhasLidas));
-  renderCartilhas(); atualizarNovidadesUI();
+  renderCartilhas(true); atualizarNovidadesUI();
 }
-function atualizarProgresso() {
-  const t = cartilhasData.length, l = cartilhasLidas.length, p = Math.round((l / t) * 100);
-  document.getElementById('progressoFill').style.width = p + '%';
-  document.getElementById('progressoTexto').innerText = l + '/' + t;
-}
-let quizzesAcertados = parseInt(getStorageValue('braun_quizzes_acertados') || '0', 10) || 0;
-function responderQuiz(cid, qi, oi) {
-  const c = cartilhasData.find(function (x) { return x.id === cid; }); if (!c) return;
-  const q = c.quiz[qi];
-  const od = document.getElementById('quiz-' + cid + '-' + qi);
-  const fb = document.getElementById('feedback-' + cid + '-' + qi);
-  if (od.querySelector('.desabilitada')) return;
-  od.querySelectorAll('.quiz-opcao').forEach(function (e) { e.classList.add('desabilitada'); });
-  od.querySelectorAll('.quiz-opcao').forEach(function (e, i) {
-    if (i === q.certa) e.classList.add('certa');
-    else if (i === oi && oi !== q.certa) e.classList.add('errada');
+function bindCartilhas() {
+  const card = document.getElementById('cartilhasCard'); if (!card) return;
+  card.addEventListener('click', function (e) {
+    const el = e.target.closest('[data-ct]'); if (!el || !card.contains(el)) return;
+    const a = el.getAttribute('data-ct');
+    if (a === 'abrir') abrirCartilha(el.getAttribute('data-cart'));
+    else if (a === 'marcar') toggleCartilhaLida(el.getAttribute('data-cart'));
+    else if (a === 'lista') voltarBibliotecaCartilhas();
+    else if (a === 'quiz-iniciar' || a === 'quiz-refazer') iniciarCtQuiz();
+    else if (a === 'quiz-opcao') responderCtQuiz(parseInt(el.getAttribute('data-o'), 10));
+    else if (a === 'quiz-proxima') proximaCtPergunta();
   });
-  if (oi === q.certa) {
-    fb.innerHTML = '&#9989; Correto!'; fb.className = 'quiz-feedback certo';
-    quizzesAcertados++; setStorageValue('braun_quizzes_acertados', quizzesAcertados);
-    if (quizzesAcertados === 10) salvarConquista('quiz_master');
-  } else { fb.innerHTML = '&#10060; Incorreto. A resposta certa é: ' + q.opcoes[q.certa]; fb.className = 'quiz-feedback errado'; }
 }
 
 /* ============================================================
@@ -1325,7 +1455,7 @@ function atualizarNovidadesUI() {
   else { b.style.display = 'none'; btn.style.display = 'none'; s.classList.remove('animar-sino'); }
 }
 function formatarData(ds) { return new Date(ds + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); }
-function abrirCartilhaPorId(id) { closeAllModals(); cartilhaAtiva = id; openCartilhas(); }
+function abrirCartilhaPorId(id) { closeAllModals(); cartilhaAtiva = id; ctQuiz = null; openCartilhas(); }
 
 /* ============================================================
    22) PESQUISA + VOZ
@@ -1582,7 +1712,8 @@ const ACTION_MAP = {
   'open-ramais': function () { closeHamburger(); openRamais(); },
   'open-colaborador': openColaboradorDoMes,
   'open-pedidos': openMeusPedidos,
-  'open-cartilhas': openCartilhas,
+  'open-cartilhas': function () { cartilhaAtiva = null; ctQuiz = null; openCartilhas(); },
+  'cartilha-lista': voltarBibliotecaCartilhas,
   'open-conquistas': openConquistas,
   'open-config': function () { closeHamburger(); openConfig(); },
   'toggle-dark': function () { toggleDarkMode(); closeHamburger(); },
@@ -1677,6 +1808,7 @@ function iniciarApp() {
   if (appIniciado) return;
   appIniciado = true;
   safeRun('prepararModais', prepararModais);
+  safeRun('bindCartilhas', bindCartilhas);
   safeRun('boasVindas', boasVindas);
   safeRun('bindAll', bindAll);
   safeRun('startClock', startClock);
