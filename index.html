@@ -313,7 +313,6 @@
         animation: emergencia-pulse 2s infinite ease-in-out;
     }
     .ramal-item.emergencia-destaque .ramal-nome { color: var(--accent-txt); font-weight: 900; font-size: 1.05em; }
-    .ramal-item.emergencia-destaque .ramal-nome::before { content: '\1F6A8  '; }
     .ramal-item.emergencia-destaque .ramal-badge {
         background: var(--accent); color: white; border-color: var(--accent);
         font-size: 1em; font-weight: 900; padding: 10px 18px;
@@ -380,7 +379,8 @@
     html.dark-mode .drawer-item:active { background: rgba(255,255,255,0.05); }
     .drawer-item.highlight { background: rgba(0,169,122,0.08); }
     html.dark-mode .drawer-item.highlight { background: rgba(0,169,122,0.15); }
-    .drawer-item-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; background: transparent !important; color: var(--text) !important; }
+    .drawer-item-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--primary) !important; color: #fff !important; }
+    .drawer-item-icon .material-symbols-outlined { font-size: 24px; }
     .drawer-item-label { flex: 1; font-weight: 700; font-size: 1.1rem; color: var(--text); }
     .drawer-item-sub { font-size: 0.75rem; font-weight: 500; opacity: 0.5; margin-top: 2px; color: var(--text); }
     .drawer-item-arrow { color: var(--text); opacity: 0.3; font-size: 20px; }
@@ -424,6 +424,51 @@
     .cartilha-btn-marcar { background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 18px; font-weight: 800; font-size: 1em; width: 100%; cursor: pointer; margin-top: 20px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
     .cartilha-btn-marcar:active { transform: scale(0.97); }
     .cartilha-btn-marcar.marcado { background: var(--border); color: var(--text); }
+    /* ===== PADRÃO DE TELAS (mesmo estilo das Cartilhas) ===== */
+    .pg-wrap { max-width: 720px; margin: 0 auto; }
+    .pg-eyebrow { display: inline-block; color: var(--accent-txt); font-weight: 900; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; }
+    .pg-eyebrow::after { content: ''; display: block; width: 26px; height: 2px; background: var(--accent-txt); margin-top: 5px; }
+    .pg-h1 { margin: 10px 0 6px; font-weight: 900; font-size: 1.9rem; color: var(--primary); line-height: 1.1; }
+    .pg-lead { margin: 0 0 18px; font-size: 0.95rem; line-height: 1.55; opacity: 0.8; }
+    .pg-ico { width: 46px; height: 46px; border-radius: 12px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .pg-ico.sm { width: 34px; height: 34px; border-radius: 10px; }
+    .pg-ico.sm .material-symbols-outlined { font-size: 20px; }
+    .pg-secao { display: flex; align-items: center; justify-content: space-between; margin: 24px 0 10px; color: var(--accent-txt); font-weight: 900; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .pg-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+    .pg-card h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 800; }
+    .pg-card p { margin: 0; font-size: 0.9rem; line-height: 1.6; opacity: 0.85; }
+    .pg-linha { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; }
+    .pg-linha-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .pg-linha-txt b { font-weight: 800; font-size: 1rem; }
+    .pg-linha-txt small { font-size: 0.8rem; opacity: 0.7; line-height: 1.4; }
+    .pg-acao { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--card); color: var(--text); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; font-family: inherit; }
+    .pg-acao:active { transform: scale(0.985); }
+    .pg-acao > span:nth-child(2) { flex: 1; min-width: 0; }
+    .pg-acao b { display: block; font-weight: 800; font-size: 1rem; }
+    .pg-acao small { display: block; font-size: 0.8rem; opacity: 0.7; margin-top: 2px; line-height: 1.4; }
+    .pg-acao .pg-seta { color: var(--accent-txt); flex-shrink: 0; }
+    .pg-form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 8px; }
+    .pg-label { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-txt); margin-bottom: 7px; }
+    .pg-label .material-symbols-outlined { font-size: 18px; color: var(--primary); }
+    .pg-input { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-weight: 700; font-size: 1rem; }
+    .pg-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,169,122,0.22); }
+    .pg-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 18px; border: none; border-radius: 16px; font-weight: 800; font-size: 1rem; cursor: pointer; font-family: inherit; margin-top: 14px; }
+    .pg-btn:active { transform: scale(0.98); }
+    .pg-btn.primario { background: var(--primary); color: #fff; }
+    .pg-btn.secundario { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .pg-busca { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--bg); padding: 0 12px; margin-bottom: 4px; }
+    .pg-busca:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,169,122,0.22); }
+    .pg-busca .material-symbols-outlined { color: var(--primary); }
+    .pg-busca input { flex: 1; min-width: 0; border: none; background: transparent; color: var(--text); font-family: inherit; font-weight: 600; font-size: 1rem; padding: 14px 0; outline: none; }
+    .pg-vazio { text-align: center; padding: 28px 10px; opacity: 0.7; font-weight: 600; }
+    /* Voz da resposta como cartão */
+    .voz-bloco { padding: 14px; border: 1.5px solid var(--border); border-radius: 16px; background: var(--card); margin-bottom: 10px; }
+    /* Ramais no padrão */
+    .ramal-secao { display: flex; align-items: center; gap: 10px; background: transparent; color: var(--accent-txt); padding: 0; border-radius: 0; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.14em; margin: 26px 0 10px 0; }
+    .ramal-qtd { margin-left: auto; font-size: 0.75rem; font-weight: 700; opacity: 0.6; letter-spacing: 0; }
+    .ramal-item { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+    .ramal-item.emergencia-destaque { border: 1.5px solid var(--accent); border-left-width: 4px; border-radius: 14px; margin: 0 0 8px 0; }
+    .ramal-item.emergencia-destaque .ramal-nome { display: flex; align-items: center; gap: 6px; }
     /* ===== CARTILHAS v2 — biblioteca, leitura e quiz por etapas ===== */
     .ct-wrap { max-width: 720px; margin: 0 auto; }
     .ct-oculto { display: none !important; }
@@ -786,73 +831,73 @@
     <div class="drawer-menu">
         <div class="drawer-section-label">Perfil</div>
         <button class="drawer-item" data-action="open-perfil">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128100;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">person</span></div>
             <div><div class="drawer-item-label">Meu Perfil</div><div class="drawer-item-sub">Nome · Matrícula · Turma · Ano · Setor</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Contatos</div>
         <button class="drawer-item" data-action="open-ramais">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128222;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">call</span></div>
             <div><div class="drawer-item-label">Ramais Úteis</div><div class="drawer-item-sub">Contatos internos</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Colaborador</div>
         <button class="drawer-item" data-action="open-colaborador">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127942;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">emoji_events</span></div>
             <div><div class="drawer-item-label">Colaborador do Mês</div><div class="drawer-item-sub">Votação mensal</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item" data-action="open-pedidos">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128230;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">inventory_2</span></div>
             <div><div class="drawer-item-label">Meus Pedidos</div><div class="drawer-item-sub">Uniformes e EPIs</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item" data-action="open-ferias">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127958;&#65039;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">beach_access</span></div>
             <div><div class="drawer-item-label">Programar Férias</div><div class="drawer-item-sub">Período e sugestão de datas</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Aprendizado</div>
         <button class="drawer-item highlight" data-action="open-cartilhas">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128216;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">menu_book</span></div>
             <div><div class="drawer-item-label">Cartilhas</div><div class="drawer-item-sub">Como usar · Kaizen · 5S · PDCA · Qualidade · Segurança · BPF · Sustentabilidade · Compliance · Incêndio</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Conquistas</div>
         <button class="drawer-item" data-action="open-conquistas">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127885;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">military_tech</span></div>
             <div><div class="drawer-item-label">Minhas Conquistas</div><div class="drawer-item-sub">Selos e progresso</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Novidades</div>
         <button class="drawer-item" data-action="open-novidades">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128276;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">notifications</span></div>
             <div><div class="drawer-item-label">Novidades</div><div class="drawer-item-sub">O que mudou no app</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <div class="drawer-section-label">Ferramentas</div>
         <button class="drawer-item" data-action="open-pesquisa">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128269;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">search</span></div>
             <div><div class="drawer-item-label">Pesquisar Escala</div><div class="drawer-item-sub">Consulte qualquer data e turma</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item" data-action="open-stats">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128202;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">bar_chart</span></div>
             <div><div class="drawer-item-label">Estatísticas da Escala</div><div class="drawer-item-sub">Dias trabalhados e folgas</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item" data-action="open-config">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#9881;&#65039;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">settings</span></div>
             <div><div class="drawer-item-label">Configurações</div><div class="drawer-item-sub">Exportar · Backup · Preferências</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item no-arrow" data-action="toggle-dark">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#127763;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">dark_mode</span></div>
             <div><div class="drawer-item-label">Modo Escuro</div><div class="drawer-item-sub">Alterna o tema</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
         <button class="drawer-item" data-action="open-privacy">
-            <div class="drawer-item-icon" aria-hidden="true" style="font-size:24px;">&#128737;&#65039;</div>
+            <div class="drawer-item-icon" aria-hidden="true"><span class="material-symbols-outlined">shield</span></div>
             <div><div class="drawer-item-label">Privacidade</div><div class="drawer-item-sub">Política de dados</div></div>
             <span class="material-symbols-outlined drawer-item-arrow" aria-hidden="true">chevron_right</span>
         </button>
@@ -911,30 +956,37 @@
 </div>
 
 <div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Configurações</h2>
-    <div class="config-item">
-        <span class="config-label">Saudação Minimalista<br><small style="font-weight:400;opacity:0.7;">Não exibe trabalho/folga ao entrar.</small></span>
-        <label class="switch"><input type="checkbox" id="minimalGreetingToggle" aria-label="Saudação minimalista"><span class="slider" aria-hidden="true"></span></label>
-    </div>
-    <div class="config-item">
-        <span class="config-label">Resposta por voz<br><small style="font-weight:400;opacity:0.7;">Ler resultado automaticamente.</small></span>
-        <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
-    </div>
-    <div class="voz-bloco">
-        <span class="config-label">Voz da resposta<br><small style="font-weight:400;opacity:0.7;">Quem lê o resultado da pesquisa.</small></span>
-        <div class="voz-seg" role="radiogroup" aria-label="Tipo de voz">
-            <button type="button" id="vozFem" class="voz-opt" role="radio" aria-checked="true" data-action="voz-fem"><span class="material-symbols-outlined" aria-hidden="true">woman</span> Feminina</button>
-            <button type="button" id="vozMasc" class="voz-opt" role="radio" aria-checked="false" data-action="voz-masc"><span class="material-symbols-outlined" aria-hidden="true">man</span> Masculina</button>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Preferências</div>
+        <h2 class="pg-h1">Configurações</h2>
+        <p class="pg-lead">Ajuste o app ao seu jeito e mantenha seus dados seguros.</p>
+        <div class="pg-secao"><span>Geral</span></div>
+        <div class="pg-linha">
+            <span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">visibility_off</span></span>
+            <span class="pg-linha-txt"><b>Saudação minimalista</b><small>Não exibe trabalho/folga ao entrar.</small></span>
+            <label class="switch"><input type="checkbox" id="minimalGreetingToggle" aria-label="Saudação minimalista"><span class="slider" aria-hidden="true"></span></label>
         </div>
-        <select id="vozEspecifica" class="voz-select" aria-label="Voz do aparelho"></select>
-        <span id="vozInfo" class="voz-info" aria-live="polite"></span>
-        <button type="button" data-action="testar-voz" class="btn-config" style="margin-top:0;"><span class="material-symbols-outlined" aria-hidden="true">record_voice_over</span> TESTAR VOZ</button>
+        <div class="pg-linha">
+            <span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">volume_up</span></span>
+            <span class="pg-linha-txt"><b>Resposta por voz</b><small>Ler resultado automaticamente.</small></span>
+            <label class="switch"><input type="checkbox" id="voiceResponseToggle" aria-label="Resposta por voz" checked><span class="slider" aria-hidden="true"></span></label>
+        </div>
+        <div class="pg-secao"><span>Voz da resposta</span></div>
+        <div class="voz-bloco">
+            <div class="voz-seg" role="radiogroup" aria-label="Tipo de voz">
+                <button type="button" id="vozFem" class="voz-opt" role="radio" aria-checked="true" data-action="voz-fem"><span class="material-symbols-outlined" aria-hidden="true">woman</span> Feminina</button>
+                <button type="button" id="vozMasc" class="voz-opt" role="radio" aria-checked="false" data-action="voz-masc"><span class="material-symbols-outlined" aria-hidden="true">man</span> Masculina</button>
+            </div>
+            <select id="vozEspecifica" class="voz-select" aria-label="Voz do aparelho"></select>
+            <span id="vozInfo" class="voz-info" aria-live="polite"></span>
+            <button type="button" data-action="testar-voz" class="pg-btn secundario" style="margin-top:0;"><span class="material-symbols-outlined" aria-hidden="true">record_voice_over</span>Testar voz</button>
+        </div>
+        <div class="pg-secao"><span>Dados e backup</span></div>
+        <button type="button" data-action="export-ics" class="pg-acao"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span></span><span><b>Exportar escala (.ICS)</b><small>Calendário para Google, Outlook ou Apple.</small></span><span class="material-symbols-outlined pg-seta" aria-hidden="true">chevron_right</span></button>
+        <button type="button" data-action="export-backup" class="pg-acao"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span></span><span><b>Exportar backup (JSON)</b><small>Guarde seus dados em um arquivo.</small></span><span class="material-symbols-outlined pg-seta" aria-hidden="true">chevron_right</span></button>
+        <button type="button" data-action="import-backup" class="pg-acao"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span></span><span><b>Importar backup (JSON)</b><small>Restaure seus dados a partir de um arquivo.</small></span><span class="material-symbols-outlined pg-seta" aria-hidden="true">chevron_right</span></button>
+        <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
     </div>
-    <button data-action="export-ics" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> EXPORTAR ESCALA (.ICS)</button>
-    <button data-action="export-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span> EXPORTAR BACKUP (JSON)</button>
-    <button data-action="import-backup" class="btn-config"><span class="material-symbols-outlined" aria-hidden="true">cloud_download</span> IMPORTAR BACKUP (JSON)</button>
-    <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
-    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">FECHAR</button>
 </div>
 
 <div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
@@ -977,21 +1029,25 @@
 </div>
 
 <div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:10px;">Ramais Úteis</h2>
-    <div class="ramal-secao">URGÊNCIAS &amp; SERVIÇOS</div>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Contatos</div>
+        <h2 class="pg-h1">Ramais Úteis</h2>
+        <p class="pg-lead">Toque em um ramal para ligar. Use a busca para achar por setor, nome ou número.</p>
+        <div class="pg-busca"><span class="material-symbols-outlined" aria-hidden="true">search</span><input type="search" id="ramaisBusca" placeholder="Buscar setor, nome ou ramal" aria-label="Buscar ramal"></div>
+        <div class="ramal-secao"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">emergency</span></span><span>URGÊNCIAS &amp; SERVIÇOS</span><span class="ramal-qtd"></span></div>
     <div class="ramal-item"><span class="ramal-nome">Portaria Frente / Lateral</span><div class="ramal-numeros-container"><a href="tel:26023211" class="ramal-badge">3211</a> <a href="tel:26023214" class="ramal-badge">3214</a></div></div>
-    <div class="ramal-item emergencia-destaque"><span class="ramal-nome">Emergência</span><div class="ramal-numeros-container"><a href="tel:26023222" class="ramal-badge">3222</a></div></div>
+    <div class="ramal-item emergencia-destaque"><span class="ramal-nome"><span class="material-symbols-outlined" aria-hidden="true">emergency</span>Emergência</span><div class="ramal-numeros-container"><a href="tel:26023222" class="ramal-badge">3222</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Serviço Médico</span><div class="ramal-numeros-container"><a href="tel:26023160" class="ramal-badge">3160</a> <a href="tel:26023245" class="ramal-badge">3245</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Segurança do Trabalho</span><div class="ramal-numeros-container"><a href="tel:26023356" class="ramal-badge">3356</a> <a href="tel:26023144" class="ramal-badge">3144</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Cozinha / Padaria / Restaurante</span><div class="ramal-numeros-container"><a href="tel:26023297" class="ramal-badge">3297</a> <a href="tel:26023532" class="ramal-badge">3532</a> <a href="tel:26023470" class="ramal-badge">3470</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Banco Itaú</span><div class="ramal-numeros-container"><a href="tel:26023110" class="ramal-badge">3110</a></div></div>
-    <div class="ramal-secao">ADMINISTRAÇÃO &amp; RH</div>
+        <div class="ramal-secao"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span></span><span>ADMINISTRAÇÃO &amp; RH</span><span class="ramal-qtd"></span></div>
     <div class="ramal-item"><span class="ramal-nome">DP (Depto Pessoal)</span><div class="ramal-numeros-container"><a href="tel:26023357" class="ramal-badge">3357</a> <a href="tel:26023396" class="ramal-badge">3396</a> <a href="tel:26023521" class="ramal-badge">3521</a> <a href="tel:26023397" class="ramal-badge">3397</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">RH Geral / Nanda / Figueredo</span><div class="ramal-numeros-container"><a href="tel:26023123" class="ramal-badge">3123</a> <a href="tel:26023279" class="ramal-badge">3279</a> <a href="tel:26023483" class="ramal-badge">3483</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Administração (Rosimar/Rubens)</span><div class="ramal-numeros-container"><a href="tel:26023436" class="ramal-badge">3436</a> <a href="tel:26023269" class="ramal-badge">3269</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Administr. (Adriana/Rafael)</span><div class="ramal-numeros-container"><a href="tel:26023467" class="ramal-badge">3467</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Bradesco Saúde / CoopBraun</span><div class="ramal-numeros-container"><a href="tel:26023180" class="ramal-badge">3180</a> <a href="tel:26023284" class="ramal-badge">3284</a> <a href="tel:26023298" class="ramal-badge">3298</a> <a href="tel:976218473" class="ramal-badge" style="background:#25D366;color:white;border-color:#25D366;">97621-8473</a></div></div>
-    <div class="ramal-secao">ECOFLAC - PRODUÇÃO &amp; QUALIDADE</div>
+        <div class="ramal-secao"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">precision_manufacturing</span></span><span>ECOFLAC - PRODUÇÃO &amp; QUALIDADE</span><span class="ramal-qtd"></span></div>
     <div class="ramal-item"><span class="ramal-nome">Eng. de Produção / Ricardo</span><div class="ramal-numeros-container"><a href="tel:26023174" class="ramal-badge">3174</a> <a href="tel:26023237" class="ramal-badge">3237</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Controle (Biol/Fis/Quim)</span><div class="ramal-numeros-container"><a href="tel:26023430" class="ramal-badge">3430</a> <a href="tel:26023343" class="ramal-badge">3343</a> <a href="tel:26023429" class="ramal-badge">3429</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Envasamento 1 ao 5</span><div class="ramal-numeros-container"><a href="tel:26023431" class="ramal-badge">3431</a> <a href="tel:26023422" class="ramal-badge">3422</a> <a href="tel:26023434" class="ramal-badge">3434</a> <a href="tel:26023561" class="ramal-badge">3561</a> <a href="tel:26023713" class="ramal-badge">3713</a></div></div>
@@ -999,39 +1055,47 @@
     <div class="ramal-item"><span class="ramal-nome">Rotulagem / Robô</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023571" class="ramal-badge">3571</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 2</span><div class="ramal-numeros-container"><a href="tel:26023270" class="ramal-badge">3270</a> <a href="tel:26023267" class="ramal-badge">3267</a> <a href="tel:26023260" class="ramal-badge">3260</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Área Branca Fábrica 3</span><div class="ramal-numeros-container"><a href="tel:26023164" class="ramal-badge">3164</a> <a href="tel:26023273" class="ramal-badge">3273</a></div></div>
-    <div class="ramal-secao">MANUTENÇÃO &amp; APOIO</div>
+        <div class="ramal-secao"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">build</span></span><span>MANUTENÇÃO &amp; APOIO</span><span class="ramal-qtd"></span></div>
     <div class="ramal-item"><span class="ramal-nome">Manutenção (Central/Injeção)</span><div class="ramal-numeros-container"><a href="tel:26023426" class="ramal-badge">3426</a> <a href="tel:26023363" class="ramal-badge">3363</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Mnt Elétrica / Mecânica</span><div class="ramal-numeros-container"><a href="tel:26023364" class="ramal-badge">3364</a> <a href="tel:26023365" class="ramal-badge">3365</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Utilidades / Osmose / Moinho</span><div class="ramal-numeros-container"><a href="tel:26023427" class="ramal-badge">3427</a> <a href="tel:26023529" class="ramal-badge">3529</a> <a href="tel:26023433" class="ramal-badge">3433</a><a href="tel:26023506" class="ramal-badge">3506</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Preparo / Ferramentaria</span><div class="ramal-numeros-container"><a href="tel:26023421" class="ramal-badge">3421</a> <a href="tel:26023165" class="ramal-badge">3165</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Almoxarifado / Calibração</span><div class="ramal-numeros-container"><a href="tel:26023210" class="ramal-badge">3210</a> <a href="tel:26023186" class="ramal-badge">3186</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Expedição 2 / Quarentena</span><div class="ramal-numeros-container"><a href="tel:26023438" class="ramal-badge">3438</a> <a href="tel:26023342" class="ramal-badge">3342</a></div></div>
-    <div class="ramal-secao">CONTATOS NOMINAIS &amp; OUTROS</div>
+        <div class="ramal-secao"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">contacts</span></span><span>CONTATOS NOMINAIS &amp; OUTROS</span><span class="ramal-qtd"></span></div>
     <div class="ramal-item"><span class="ramal-nome">Guido Gerente / Davis</span><div class="ramal-numeros-container"><a href="tel:26023361" class="ramal-badge">3361</a> <a href="tel:26023478" class="ramal-badge">3478</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Idael / Leandro ou Hélio</span><div class="ramal-numeros-container"><a href="tel:26023165" class="ramal-badge">3165</a> <a href="tel:26023241" class="ramal-badge">3241</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Alexandre / Alexandre Senna</span><div class="ramal-numeros-container"><a href="tel:26023423" class="ramal-badge">3423</a> <a href="tel:26023525" class="ramal-badge">3525</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Doraci / Universal</span><div class="ramal-numeros-container"><a href="tel:26023155" class="ramal-badge">3155</a> <a href="tel:26023261" class="ramal-badge">3261</a></div></div>
     <div class="ramal-item"><span class="ramal-nome">Empilhadeira (Ramal/Celular)</span><div class="ramal-numeros-container"><a href="tel:26023406" class="ramal-badge">3406</a> <a href="tel:982294329" class="ramal-badge">98229-4329</a></div></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+        <div id="ramaisVazio" class="pg-vazio ct-oculto">Nenhum ramal encontrado.</div>
+    </div>
 </div>
 
 <div id="privacyCard" class="bottom-modal" role="dialog" aria-label="Política de Privacidade" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">Política de Privacidade</h2>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;">Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.</p>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Dados armazenados no dispositivo:</b> nome, matrícula, turma, ano, setor, anotações, férias, preferências e progresso em cartilhas são salvos exclusivamente no seu navegador (localStorage). Nada disso é enviado para servidores nossos ou de terceiros.</p>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Serviços de terceiros:</b> utilizamos apenas o Google Fonts para tipografia. Nenhum dado pessoal ou de uso é enviado a terceiros.</p>
-    <p style="font-size:0.9em;line-height:1.6;opacity:0.85;"><b>Seus direitos (LGPD):</b> você pode exportar todos os seus dados locais via "Exportar Backup (JSON)" em Configurações e apagá-los limpando os dados do navegador.</p>
-    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:15px;border-radius:18px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">ENTENDI</button>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Transparência</div>
+        <h2 class="pg-h1">Política de Privacidade</h2>
+        <p class="pg-lead">Como o Braun OnLine trata as suas informações.</p>
+        <div class="pg-card"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">info</span></span><div><h3>Finalidade</h3><p>Este aplicativo (Braun OnLine) é uma ferramenta de uso pessoal e informativo para gestão de escalas e calendários.</p></div></div>
+        <div class="pg-card"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">smartphone</span></span><div><h3>Dados armazenados no dispositivo</h3><p>Nome, matrícula, turma, ano, setor, anotações, férias, preferências e progresso em cartilhas são salvos exclusivamente no seu navegador (localStorage). Nada disso é enviado para servidores nossos ou de terceiros.</p></div></div>
+        <div class="pg-card"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">hub</span></span><div><h3>Serviços de terceiros</h3><p>Utilizamos apenas o Google Fonts para tipografia. Nenhum dado pessoal ou de uso é enviado a terceiros.</p></div></div>
+        <div class="pg-card"><span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">verified_user</span></span><div><h3>Seus direitos (LGPD)</h3><p>Você pode exportar todos os seus dados locais via &quot;Exportar Backup (JSON)&quot; em Configurações e apagá-los limpando os dados do navegador.</p></div></div>
+        <button data-action="close-modals" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">check</span>Entendi</button>
+    </div>
 </div>
 
 <div id="meuPerfilCard" class="bottom-modal" role="dialog" aria-label="Meu Perfil" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Meu Perfil</h2>
-    <div style="display:flex;flex-direction:column;gap:15px;">
-        <div><label for="nomePerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Nome Completo</label><input type="text" id="nomePerfil" placeholder="Digite seu nome completo" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
-        <div><label for="matriculaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Matrícula</label><input type="text" id="matriculaPerfil" placeholder="Digite sua matrícula" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
-        <div>
-            <label for="turmaPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Turma / Escala</label>
-            <select id="turmaPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Colaborador</div>
+        <h2 class="pg-h1">Meu Perfil</h2>
+        <p class="pg-lead">Seus dados ficam salvos somente neste aparelho e personalizam a escala e a saudação do app.</p>
+        <div class="pg-form">
+            <div><label class="pg-label" for="nomePerfil"><span class="material-symbols-outlined" aria-hidden="true">badge</span>Nome completo</label><input type="text" id="nomePerfil" class="pg-input" placeholder="Digite seu nome completo"></div>
+            <div><label class="pg-label" for="matriculaPerfil"><span class="material-symbols-outlined" aria-hidden="true">pin</span>Matrícula</label><input type="text" id="matriculaPerfil" class="pg-input" placeholder="Digite sua matrícula"></div>
+            <div>
+                <label class="pg-label" for="turmaPerfil"><span class="material-symbols-outlined" aria-hidden="true">groups</span>Turma / Escala</label>
+                <select id="turmaPerfil" class="pg-input">
                 <optgroup label="ECOFLAC">
                     <option value="A">Turma A (Manhã - ECOFLAC)</option>
                     <option value="B">Turma B (Manhã - ECOFLAC)</option>
@@ -1050,18 +1114,19 @@
                     <option value="1x1C">1x1 Noite - Equipe A</option>
                     <option value="1x1D">1x1 Noite - Equipe B</option>
                 </optgroup>
-            </select>
-        </div>
-        <div>
-            <label for="anoPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Ano</label>
-            <select id="anoPerfil" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;">
+                </select>
+            </div>
+            <div>
+                <label class="pg-label" for="anoPerfil"><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>Ano</label>
+                <select id="anoPerfil" class="pg-input">
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
             </select>
+            </div>
+            <div><label class="pg-label" for="setorPerfil"><span class="material-symbols-outlined" aria-hidden="true">factory</span>Setor</label><input type="text" id="setorPerfil" class="pg-input" placeholder="Digite seu setor..."></div>
         </div>
-        <div><label for="setorPerfil" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">Setor</label><input type="text" id="setorPerfil" placeholder="Digite seu setor..." style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-size:1em;"></div>
+        <button data-action="save-perfil-fechar" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">check</span>Salvar e fechar</button>
     </div>
-    <button data-action="save-perfil-fechar" class="btn-modal-salvar">SALVAR E FECHAR</button>
 </div>
 
 <div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">

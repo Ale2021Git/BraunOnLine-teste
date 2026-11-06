@@ -670,6 +670,34 @@ function closeHamburger() {
   const mb = document.getElementById('menuButton'); if (mb) mb.setAttribute('aria-expanded', 'false'); if (mb) mb.focus();
 }
 function openRamais() { focusModal('ramaisCard'); }
+function normalizarBusca(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+function prepararRamais() {
+  const card = document.getElementById('ramaisCard'); if (!card) return;
+  const secoes = card.querySelectorAll('.ramal-secao');
+  function contar() {
+    secoes.forEach(function (sec) {
+      let n = 0, el = sec.nextElementSibling;
+      while (el && !el.classList.contains('ramal-secao')) {
+        if (el.classList.contains('ramal-item') && el.style.display !== 'none') n++;
+        el = el.nextElementSibling;
+      }
+      const q = sec.querySelector('.ramal-qtd'); if (q) q.textContent = n;
+      sec.style.display = n ? '' : 'none';
+    });
+  }
+  const inp = document.getElementById('ramaisBusca');
+  if (inp) inp.addEventListener('input', function () {
+    const t = normalizarBusca(inp.value.trim());
+    let total = 0;
+    card.querySelectorAll('.ramal-item').forEach(function (it) {
+      const ok = !t || normalizarBusca(it.textContent).indexOf(t) > -1;
+      it.style.display = ok ? '' : 'none'; if (ok) total++;
+    });
+    contar();
+    const v = document.getElementById('ramaisVazio'); if (v) v.classList.toggle('ct-oculto', total > 0);
+  });
+  contar();
+}
 function openPrivacy() { focusModal('privacyCard'); }
 function openMeuPerfil() {
   closeHamburger();
@@ -1809,6 +1837,7 @@ function iniciarApp() {
   appIniciado = true;
   safeRun('prepararModais', prepararModais);
   safeRun('bindCartilhas', bindCartilhas);
+  safeRun('prepararRamais', prepararRamais);
   safeRun('boasVindas', boasVindas);
   safeRun('bindAll', bindAll);
   safeRun('startClock', startClock);
