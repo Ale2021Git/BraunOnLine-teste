@@ -1439,6 +1439,7 @@ const novidadesData = [
   { id:'nov5', titulo:'🧯 Nova Cartilha: Prevenção de Incêndios', descricao:'Aprenda sobre classes de incêndio e método PASS.', data:'2026-07-05', cartilhaId:'incendio' },
   { id:'nov1', titulo:'📘 Nova Cartilha: Compliance', descricao:'Ética, Código de Conduta, LGPD e Canal de Denúncia.', data:'2026-07-04', cartilhaId:'compliance' }
 ];
+const NOV_ICO = { nov23:'how_to_vote', nov22:'beach_access', nov20:'wb_sunny', nov19:'inventory_2', nov18:'menu_book', nov17:'cloud_sync', nov5:'local_fire_department', nov1:'menu_book' };
 let novidadesLidas = getJSON('braun_novidades_lidas', []);
 
 function openNovidades() { closeAllModals(); renderNovidades(); focusModal('novidadesCard'); }
@@ -1451,8 +1452,10 @@ function renderNovidades() {
     card.className = 'novidade-card' + (lida ? ' lida' : '');
     const b = !lida ? '<span class="badge-novo">NOVO</span>' : '';
     let lh = '';
-    if (nov.cartilhaId) lh = '<span class="link-cartilha" data-cart="' + nov.cartilhaId + '">Abrir cartilha &rarr;</span>';
-    card.innerHTML = '<div class="novidade-titulo">' + nov.titulo + ' ' + b + '</div><div class="novidade-desc">' + nov.descricao + '</div>' + lh + '<span class="novidade-data">' + formatarData(nov.data) + '</span>';
+    if (nov.cartilhaId) lh = '<span class="link-cartilha" data-cart="' + nov.cartilhaId + '">Abrir cartilha <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">arrow_forward</span></span>';
+    const ico = NOV_ICO[nov.id] || (nov.cartilhaId ? 'menu_book' : 'notifications');
+    const titulo = String(nov.titulo).replace(/^[^\p{L}\p{N}]+/u, '');
+    card.innerHTML = '<span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">' + ico + '</span></span><div class="nov-body"><div class="novidade-titulo">' + titulo + ' ' + b + '</div><div class="novidade-desc">' + nov.descricao + '</div>' + lh + '<span class="novidade-data">' + formatarData(nov.data) + '</span></div>';
     card.addEventListener('click', function (e) {
       const l = e.target.closest('.link-cartilha');
       if (l) { e.stopPropagation(); abrirCartilhaPorId(l.dataset.cart); return; }
@@ -1691,6 +1694,7 @@ const conquistas = {
   expert_braun: { id:'expert_braun', titulo:'Expert Braun', descricao:'Completou todas as 10 cartilhas', icone:'&#127942;' },
   quiz_master: { id:'quiz_master', titulo:'Quiz Master', descricao:'Acertou 10 perguntas de quiz', icone:'&#127919;' }
 };
+const CONQ_ICO = { primeiro_passo:'flag', leitor_dedicado:'auto_stories', expert_braun:'workspace_premium', quiz_master:'target' };
 function getConquistas() { return getJSON('braun_conquistas', []); }
 function salvarConquista(id) {
   const l = getConquistas();
@@ -1700,22 +1704,26 @@ function mostrarConquistaDesbloqueada(id) {
   const c = conquistas[id]; if (!c) return;
   const t = document.createElement('div');
   t.style.cssText = 'position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7030A0,#00A97A);color:white;padding:16px 24px;border-radius:20px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.3);z-index:3000;display:flex;align-items:center;gap:12px;animation:bounceIn 0.6s cubic-bezier(0.68,-0.55,0.27,1.55);max-width:90%;';
-  t.innerHTML = '<span style="font-size:2em;">' + c.icone + '</span><div><div style="font-size:0.75em;opacity:0.85;">CONQUISTA DESBLOQUEADA</div><div style="font-size:1.1em;">' + c.titulo + '</div></div>';
+  t.innerHTML = '<span class="pg-ico sm" style="background:rgba(255,255,255,0.22);"><span class="material-symbols-outlined" aria-hidden="true">' + (CONQ_ICO[id] || 'military_tech') + '</span></span><div><div style="font-size:0.75em;opacity:0.85;">CONQUISTA DESBLOQUEADA</div><div style="font-size:1.1em;">' + c.titulo + '</div></div>';
   document.body.appendChild(t);
   setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(function () { t.remove(); }, 400); }, 3500);
 }
 function openConquistas() {
   closeHamburger();
-  const l = getConquistas();
+  const l = getConquistas(), todas = Object.values(conquistas);
+  const n = todas.filter(function (co) { return l.indexOf(co.id) > -1; }).length;
+  const pct = Math.round((n / todas.length) * 100);
+  document.getElementById('conqResumo').innerHTML =
+    '<div class="ct-stats dois"><div class="ct-stat"><b>' + n + '/' + todas.length + '</b><span>Desbloqueadas</span></div><div class="ct-stat"><b>' + pct + '%</b><span>Progresso</span></div></div>' +
+    '<div class="ct-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="Progresso de conquistas"><i style="width:' + pct + '%"></i></div>';
   const c = document.getElementById('listaConquistas');
-  c.innerHTML = '';
-  Object.values(conquistas).forEach(function (co) {
+  c.innerHTML = todas.map(function (co) {
     const d = l.indexOf(co.id) > -1;
-    const card = document.createElement('div');
-    card.style.cssText = 'background:var(--bg);border-radius:16px;padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;opacity:' + (d?'1':'0.45') + ';';
-    card.innerHTML = '<div style="font-size:2.2em;">' + co.icone + '</div><div><div style="font-weight:800;font-size:1.05em;">' + co.titulo + '</div><div style="font-size:0.85em;opacity:0.7;">' + co.descricao + '</div>' + (d?'<div style="font-size:0.75em;color:var(--primary);font-weight:700;margin-top:4px;">&#10003; Desbloqueada</div>':'<div style="font-size:0.75em;opacity:0.5;margin-top:4px;">Bloqueada</div>') + '</div>';
-    c.appendChild(card);
-  });
+    return '<div class="pg-card' + (d ? '' : ' bloqueada') + '" style="align-items:center;">' +
+      '<span class="pg-ico ' + (d ? 'roxo' : 'cinza') + '"><span class="material-symbols-outlined" aria-hidden="true">' + (CONQ_ICO[co.id] || 'military_tech') + '</span></span>' +
+      '<div><h3>' + co.titulo + '</h3><p>' + co.descricao + '</p>' +
+      '<span class="conq-status"><span class="material-symbols-outlined" aria-hidden="true">' + (d ? 'check_circle' : 'lock') + '</span>' + (d ? 'Desbloqueada' : 'Bloqueada') + '</span></div></div>';
+  }).join('');
   focusModal('conquistasCard');
 }
 

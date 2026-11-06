@@ -687,6 +687,34 @@
         cursor: pointer; flex-shrink: 0;
     }
 
+    /* ===== ETAPA 2 — Novidades, Colaborador do Mês, Meus Pedidos, Conquistas ===== */
+    .pg-secao.ic { justify-content: flex-start; gap: 10px; }
+    .pg-ico.big { width: 72px; height: 72px; border-radius: 20px; }
+    .pg-ico.big .material-symbols-outlined { font-size: 40px; }
+    .pg-ico.roxo { background: var(--accent); }
+    .pg-ico.cinza { background: var(--border); color: var(--text); opacity: 0.6; }
+    .pg-btn.texto { background: transparent; color: var(--accent-txt); width: auto; padding: 8px 0; margin-top: 0; justify-content: flex-start; }
+    .ct-stats.dois { grid-template-columns: repeat(2, 1fr); }
+    .novidades-timeline { gap: 10px; margin-top: 12px; }
+    .novidade-card { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; }
+    .novidade-card .nov-body { flex: 1; min-width: 0; }
+    .novidade-card .novidade-titulo { font-weight: 800; font-size: 1rem; flex-wrap: wrap; line-height: 1.3; }
+    .novidade-card .novidade-desc { font-size: 0.88rem; opacity: 0.75; margin-top: 4px; line-height: 1.5; }
+    .novidade-card .novidade-data { font-size: 0.72rem; font-weight: 700; opacity: 0.55; margin-top: 8px; display: block; }
+    .novidade-card .badge-novo { background: var(--accent); color: #fff; font-size: 0.6rem; letter-spacing: 0.08em; margin-left: 0; }
+    .novidade-card .link-cartilha { color: var(--accent-txt); font-size: 0.9rem; }
+    .conq-status { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 0.75rem; font-weight: 800; color: var(--accent-txt); }
+    .conq-status .material-symbols-outlined { font-size: 16px; }
+    .pg-card.bloqueada .conq-status { color: inherit; opacity: 0.55; }
+    .voto-dados { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; }
+    .voto-dados span { display: block; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-txt); }
+    .voto-dados strong { display: block; font-size: 1.05rem; margin-top: 2px; }
+    .pedido-info { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; font-size: 0.9rem; line-height: 1.9; margin-bottom: 6px; }
+    .pedido-info strong { color: var(--accent-txt); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 900; }
+    .pedido-item-row { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 10px 12px; margin-bottom: 8px; }
+    .pedido-item-nome { font-weight: 800; font-size: 0.95rem; }
+    .pedido-item-row input { border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 6px; font-size: 0.9rem; }
+    .pedido-botoes { gap: 10px; margin-top: 20px; align-items: stretch; }
     @media (max-width: 480px) {
         body { box-shadow: none; }
     }
@@ -919,13 +947,13 @@
 </button>
 
 <div id="novidadesCard" class="bottom-modal" role="dialog" aria-label="Novidades" aria-modal="true">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h2 style="font-weight:800;color:var(--primary);margin:0;">&#128276; Novidades</h2>
-        <button data-action="marcar-novidades" style="background:none;border:none;color:var(--primary);font-weight:700;font-size:0.8em;cursor:pointer;">Marcar todas como lidas</button>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Atualizações</div>
+        <h2 class="pg-h1">Novidades</h2>
+        <p class="pg-lead">Fique por dentro das últimas atualizações e conteúdos.</p>
+        <button data-action="marcar-novidades" class="pg-btn texto"><span class="material-symbols-outlined" aria-hidden="true">done_all</span>Marcar todas como lidas</button>
+        <div id="novidadesLista" class="novidades-timeline"></div>
     </div>
-    <div class="cartilha-sub">Fique por dentro das últimas atualizações e conteúdos.</div>
-    <div id="novidadesLista" class="novidades-timeline"></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
 </div>
 
 <div id="cartilhasCard" class="bottom-modal" role="dialog" aria-label="Cartilhas" aria-modal="true">
@@ -1130,61 +1158,49 @@
 </div>
 
 <div id="colaboradorDoMesCard" class="bottom-modal" role="dialog" aria-label="Colaborador do Mês" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏆 Colaborador do Mês</h2>
-
-    <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-        <div style="font-size:0.7em;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Seus dados (votante)</div>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.9em;">
-            <div><span style="opacity:0.6;">Turma:</span> <strong id="votacaoTurma">---</strong></div>
-            <div><span style="opacity:0.6;">Matrícula:</span> <strong id="votacaoMatricula">---</strong></div>
-        </div>
-    </div>
-
-    <div id="votoFormBloco">
-        <div style="background:var(--bg);border-radius:18px;padding:15px;margin-bottom:15px;border:1px solid var(--border);">
-       <label for="votoNome" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:8px;">EM QUEM VOCÊ VOTA</label>
-            <input type="text" id="votoNome" placeholder="Digite o nome do colega" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--card);color:var(--text);font-weight:800;font-size:1em;">
-        </div>
-
-        <div style="background:rgba(112,48,160,0.08);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:15px;">
-            <div style="font-size:0.75em;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔒 Privacidade</div>
-            <div style="font-size:0.82em;line-height:1.5;opacity:0.85;">
-                Seu voto fica registrado com a sua <strong>matrícula</strong> apenas para <strong>evitar votos duplicados</strong>. Só o RH tem acesso aos votos individuais — nenhum colega vê em quem você votou.
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Reconhecimento</div>
+        <h2 class="pg-h1">Colaborador do Mês</h2>
+        <p class="pg-lead">Vote no colega que mais se destacou este mês.</p>
+        <div class="pg-secao"><span>Seus dados (votante)</span></div>
+        <div class="pg-card" style="align-items:center;">
+            <span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">badge</span></span>
+            <div class="voto-dados">
+                <div><span>Turma</span><strong id="votacaoTurma">---</strong></div>
+                <div><span>Matrícula</span><strong id="votacaoMatricula">---</strong></div>
             </div>
         </div>
-
-        <button data-action="votar" style="background:linear-gradient(135deg, #FFD700, #EBC13D);color:#1A1A1A;border:none;padding:18px;border-radius:18px;font-weight:800;width:100%;font-size:1.1em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(235,193,61,0.3);cursor:pointer;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">how_to_vote</span> VOTAR AGORA
-        </button>
-    </div>
-
-    <div id="votoAgradecimento" style="display:none;text-align:center;padding:24px 10px;">
-        <div style="font-size:3.5em;margin-bottom:12px;">🎉</div>
-        <div style="font-weight:900;color:var(--primary);font-size:1.3em;margin-bottom:8px;">Obrigado pelo seu voto!</div>
-        <div style="font-size:0.9em;opacity:0.75;line-height:1.5;margin-bottom:20px;">
-            O formulário foi aberto em outra aba.<br>
-            <strong>Não esqueça de enviar sua resposta lá para confirmar o voto.</strong>
+        <div id="votoFormBloco">
+            <div class="pg-secao"><span>Seu voto</span></div>
+            <label class="pg-label" for="votoNome"><span class="material-symbols-outlined" aria-hidden="true">how_to_vote</span>Em quem você vota</label>
+            <input type="text" id="votoNome" class="pg-input" placeholder="Digite o nome do colega">
+            <div class="ct-alerta">
+                <b style="display:flex;align-items:center;gap:6px;color:var(--accent-txt);"><span class="material-symbols-outlined" aria-hidden="true">lock</span>Privacidade</b>
+                <span style="display:block;margin-top:6px;font-size:0.88rem;line-height:1.5;opacity:0.85;">Seu voto fica registrado com a sua <strong>matrícula</strong> apenas para <strong>evitar votos duplicados</strong>. Só o RH tem acesso aos votos individuais — nenhum colega vê em quem você votou.</span>
+            </div>
+            <button data-action="votar" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">how_to_vote</span>Votar agora</button>
         </div>
-        <button data-action="votar-novamente" style="background:var(--bg);color:var(--text);border:2px solid var(--border);padding:14px 20px;border-radius:18px;font-weight:800;font-size:0.9em;cursor:pointer;">
-            Voltar
-        </button>
+        <div id="votoAgradecimento" style="display:none;text-align:center;padding:24px 10px;">
+            <div class="pg-ico big" style="margin:0 auto 14px;"><span class="material-symbols-outlined" aria-hidden="true">celebration</span></div>
+            <h3 style="margin:0 0 8px;font-size:1.3rem;font-weight:900;color:var(--primary);">Obrigado pelo seu voto!</h3>
+            <p style="margin:0 0 6px;font-size:0.92rem;line-height:1.55;opacity:0.8;">O formulário foi aberto em outra aba.<br><strong>Não esqueça de enviar sua resposta lá para confirmar o voto.</strong></p>
+            <button data-action="votar-novamente" class="pg-btn secundario">Voltar</button>
+        </div>
     </div>
-
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
 </div>
 
 <div id="meusPedidosCard" class="bottom-modal" role="dialog" aria-label="Meus Pedidos" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:15px;">&#128230; Meus Pedidos</h2>
-
-    <div class="pedido-info">
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Solicitações</div>
+        <h2 class="pg-h1">Meus Pedidos</h2>
+        <p class="pg-lead">Preencha a <strong>quantidade</strong> e o <strong>tamanho</strong> dos itens que precisa. Só os itens com quantidade serão enviados.</p>
+        <div class="pedido-info">
         <div><strong>Nome:</strong> <span id="pedidoNome">---</span></div>
         <div><strong>Matrícula:</strong> <span id="pedidoMatricula">---</span></div>
         <div><strong>Turma:</strong> <span id="pedidoTurma">---</span> &middot; <strong>Ano:</strong> <span id="pedidoAno">---</span></div>
     </div>
 
-    <p class="pedido-instrucao">Preencha a <strong>quantidade</strong> e o <strong>tamanho</strong> dos itens que precisa. Só os itens com quantidade serão enviados.</p>
-
-    <div class="pedido-secao">&#128085; UNIFORMES</div>
+    <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">checkroom</span></span><span>Uniformes</span></div>
 
     <div class="pedido-item-row" data-item="Camisa" data-secao="uniformes">
         <span class="pedido-item-nome">Camisa</span>
@@ -1212,7 +1228,7 @@
         <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Meias">
     </div>
 
-    <div class="pedido-secao">&#129509; EQUIPAMENTOS DE PROTEÇÃO</div>
+    <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">health_and_safety</span></span><span>Equipamentos de proteção</span></div>
 
     <div class="pedido-item-row" data-item="Botina" data-secao="epis">
         <span class="pedido-item-nome">Botina</span>
@@ -1235,7 +1251,7 @@
         <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Protetor Auricular">
     </div>
 
-    <div class="pedido-secao">&#128230; OUTRO ITEM</div>
+    <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">add_box</span></span><span>Outro item</span></div>
 
     <div class="pedido-item-row pedido-item-livre" data-secao="outros">
         <input type="text" maxlength="40" placeholder="Nome do item" class="pedido-nome-livre" aria-label="Nome do outro item">
@@ -1243,19 +1259,16 @@
         <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho do outro item">
     </div>
 
-    <div style="margin-top:20px;">
-        <label for="pedidoObs" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">OBSERVAÇÕES</label>
-        <textarea id="pedidoObs" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="3" style="width:100%;box-sizing:border-box;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;outline:none;"></textarea>
+    <div style="margin-top:22px;">
+        <label class="pg-label" for="pedidoObs"><span class="material-symbols-outlined" aria-hidden="true">notes</span>Observações</label>
+        <textarea id="pedidoObs" class="pg-input" placeholder="Escreva aqui alguma observação sobre o pedido..." rows="3"></textarea>
     </div>
 
     <div class="pedido-botoes">
-        <button data-action="limpar-pedido" class="btn-pedido-limpar" aria-label="Limpar todos os campos">Limpar</button>
-        <button data-action="enviar-pedido" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:18px;font-weight:800;flex:1;font-size:1.05em;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,169,122,0.3);cursor:pointer;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">send</span> ENVIAR POR E-MAIL
-        </button>
+        <button data-action="limpar-pedido" class="pg-btn secundario" style="width:auto;margin-top:0;" aria-label="Limpar todos os campos"><span class="material-symbols-outlined" aria-hidden="true">backspace</span>Limpar</button>
+        <button data-action="enviar-pedido" class="pg-btn primario" style="flex:1;margin-top:0;"><span class="material-symbols-outlined" aria-hidden="true">send</span>Enviar por e-mail</button>
     </div>
-
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+    </div>
 </div>
 
 <div id="pesquisaCard" class="bottom-modal" role="dialog" aria-label="Pesquisar escala" aria-modal="true">
@@ -1284,9 +1297,13 @@
 </div>
 
 <div id="conquistasCard" class="bottom-modal" role="dialog" aria-label="Conquistas" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;">&#127885; Minhas Conquistas</h2>
-    <div id="listaConquistas" style="display:flex;flex-direction:column;gap:12px;margin-top:15px;"></div>
-    <button data-action="close-modals" class="btn-modal-fechar">FECHAR</button>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Progresso</div>
+        <h2 class="pg-h1">Minhas Conquistas</h2>
+        <p class="pg-lead">Selos ganhos ao usar o app, ler cartilhas e acertar o quiz.</p>
+        <div id="conqResumo"></div>
+        <div id="listaConquistas"></div>
+    </div>
 </div>
 
 <script src="app.js" defer></script>
