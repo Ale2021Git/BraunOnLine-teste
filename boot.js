@@ -37,7 +37,7 @@
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.11.06d';
+  var APP_VERSION = '2026.11.07a';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;

@@ -634,6 +634,8 @@ function openCard(iso) {
   const ww = String(getWeekNumberCached(dtSel)).padStart(2, '0');
   let ds = dtSel.getDay(); ds = ds === 0 ? 7 : ds;
   document.getElementById('lote-display').innerText = yy + ww + ds;
+  const sem = document.getElementById('card-dia-semana');
+  if (sem) { const dn = diaDaSemanaPorExtenso(dtSel); sem.textContent = dn.charAt(0).toUpperCase() + dn.slice(1) + ' · lote sugerido e anotação deste dia.'; }
   focusModal('infoCard');
 }
 function copyLote() {
@@ -1438,6 +1440,7 @@ function bindCartilhas() {
    21) NOVIDADES
    ============================================================ */
 const novidadesData = [
+  { id:'nov24', titulo:'🎨 Novo visual em todo o app', descricao:'As telas do menu ganharam um novo padrão, com títulos, cartões e ícones iguais em todo o app, e o botão Voltar fica no topo de cada tela. As Cartilhas agora têm biblioteca por temas e quiz por etapas, com 101 perguntas, e os Ramais Úteis ganharam busca.', data:'2026-11-07', cartilhaId:null },
   { id:'nov23', titulo:'🗳️ Votação do Colaborador do Mês melhorada', descricao:'Agora o formulário de votação é preenchido automaticamente com seus dados. Digite apenas o nome do colega que você quer votar.', data:'2026-10-02', cartilhaId:null },
   { id:'nov22', titulo:'🏖️ Sugestão inteligente de férias!', descricao:'Agora o app te ajuda a escolher a MELHOR data para suas férias. Você escolhe o mês e a quantidade de dias, e ele mostra as datas que rendem mais dias em casa respeitando sua escala. Acesse: Configurações → Programar Férias.', data:'2026-10-01', cartilhaId:'comousar' },
   { id:'nov20', titulo:'🌞 Saudação Minimalista funcionando', descricao:'Agora o toggle "Saudação Minimalista" realmente funciona. Mostra apenas "Bom dia / Boa tarde / Boa noite".', data:'2026-10-01', cartilhaId:null },
@@ -1447,7 +1450,7 @@ const novidadesData = [
   { id:'nov5', titulo:'🧯 Nova Cartilha: Prevenção de Incêndios', descricao:'Aprenda sobre classes de incêndio e método PASS.', data:'2026-07-05', cartilhaId:'incendio' },
   { id:'nov1', titulo:'📘 Nova Cartilha: Compliance', descricao:'Ética, Código de Conduta, LGPD e Canal de Denúncia.', data:'2026-07-04', cartilhaId:'compliance' }
 ];
-const NOV_ICO = { nov23:'how_to_vote', nov22:'beach_access', nov20:'wb_sunny', nov19:'inventory_2', nov18:'menu_book', nov17:'cloud_sync', nov5:'local_fire_department', nov1:'menu_book' };
+const NOV_ICO = { nov24:'palette', nov23:'how_to_vote', nov22:'beach_access', nov20:'wb_sunny', nov19:'inventory_2', nov18:'menu_book', nov17:'cloud_sync', nov5:'local_fire_department', nov1:'menu_book' };
 let novidadesLidas = getJSON('braun_novidades_lidas', []);
 
 function openNovidades() { closeAllModals(); renderNovidades(); focusModal('novidadesCard'); }
