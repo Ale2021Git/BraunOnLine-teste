@@ -715,6 +715,43 @@
     .pedido-item-nome { font-weight: 800; font-size: 0.95rem; }
     .pedido-item-row input { border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 6px; font-size: 0.9rem; }
     .pedido-botoes { gap: 10px; margin-top: 20px; align-items: stretch; }
+    /* ===== ETAPA 3 — Pesquisar Escala, Estatísticas, Programar Férias ===== */
+    .ct-stat.roxo b { color: var(--accent-txt); }
+    .ct-stat.verde b { color: var(--primary); }
+    .stat-legenda { font-size: 0.8rem; font-weight: 700; opacity: 0.7; margin: -6px 0 6px; }
+    .stat-feriados { flex-direction: column; align-items: stretch; gap: 0; padding: 4px 14px; margin-top: 4px; }
+    .stat-fer { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .stat-fer:last-child { border-bottom: none; }
+    .stat-fer-data { font-weight: 900; color: var(--accent-txt); min-width: 44px; }
+    .stat-fer-nome { flex: 1; min-width: 0; font-weight: 600; }
+    .chip { padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+    .chip.roxo { background: var(--accent); color: #fff; }
+    .chip.verde { background: var(--primary); color: #fff; }
+    .pesq-linha { display: flex; gap: 10px; align-items: center; }
+    .pesq-linha .pg-input { flex: 1; min-width: 60px; }
+    .pesq-result { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 20px 16px; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; }
+    .pesq-result #resultadoTexto { font-weight: 800; font-size: 1.15rem; color: var(--text); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .pesq-result #resultadoDetalhe { font-size: 0.85rem; opacity: 0.7; }
+    .pg-ico.big .icone-folga, .pg-ico.big .icone-trabalho, .pg-ico.big .icone-ferias { font-size: 40px; }
+    .pg-btn.btn-ouvir { padding: 14px 18px; border-radius: 16px; flex: none; margin-top: 12px; }
+    .btn-ouvir.parar { background: var(--accent); }
+    .sugestao-ferias-item { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+    .sugestao-ferias-item.destaque { border-color: var(--accent); }
+    .sugestao-ferias-item:active { transform: scale(0.985); }
+    .sug-melhor { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-txt); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+    .sug-melhor .material-symbols-outlined { font-size: 16px; }
+    .sug-topo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .sug-datas { font-weight: 800; font-size: 1rem; }
+    .sug-chip { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; }
+    .sug-chip.ganho { background: var(--primary); color: #fff; }
+    .sug-chip.neutro { background: var(--border); color: var(--text); }
+    .sug-info { font-size: 0.85rem; opacity: 0.8; margin-top: 8px; }
+    .sug-retorno { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--accent-txt); font-weight: 700; }
+    .sug-retorno .material-symbols-outlined { font-size: 18px; }
+    .pg-btn.perigo { background: transparent; color: var(--accent-txt); border: 2px solid var(--accent); }
+    .ferias-duracao { display: flex; gap: 10px; align-items: stretch; margin-top: 10px; }
+    .ferias-duracao .pg-input { flex: 1; text-align: center; }
+    .ferias-duracao .pg-btn { width: auto; margin-top: 0; padding: 0 22px; }
     @media (max-width: 480px) {
         body { box-shadow: none; }
     }
@@ -1018,42 +1055,36 @@
 </div>
 
 <div id="feriasCard" class="bottom-modal" role="dialog" aria-label="Programar férias" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">🏖️ Programar Férias</h2>
-    <div style="display:flex;flex-direction:column;gap:15px;">
-        <div>
-            <label for="feriasInicio" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE INÍCIO</label>
-            <input type="date" id="feriasInicio" class="input-date" style="width:100%;box-sizing:border-box;">
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Planejamento</div>
+        <h2 class="pg-h1">Programar Férias</h2>
+        <p class="pg-lead">Informe o período das suas férias ou deixe o app sugerir as melhores datas para a sua escala.</p>
+        <div class="pg-secao"><span>Período</span></div>
+        <div class="pg-form">
+            <div><label class="pg-label" for="feriasInicio"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>Data de início</label><input type="date" id="feriasInicio" class="input-date pg-input"></div>
+            <div><label class="pg-label" for="feriasFim"><span class="material-symbols-outlined" aria-hidden="true">flight_land</span>Data de término</label><input type="date" id="feriasFim" class="input-date pg-input"></div>
         </div>
-        <div>
-            <label for="feriasFim" style="font-weight:800;font-size:0.8em;color:var(--primary);display:block;margin-bottom:5px;">DATA DE TÉRMINO</label>
-            <input type="date" id="feriasFim" class="input-date" style="width:100%;box-sizing:border-box;">
+        <button data-action="save-ferias" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">check</span>Salvar período</button>
+        <button data-action="confirm-clear-ferias" class="pg-btn perigo"><span class="material-symbols-outlined" aria-hidden="true">delete</span>Limpar férias</button>
+        <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">lightbulb</span></span><span>Qual a melhor data?</span></div>
+        <p class="pg-lead" style="font-size:0.88rem;">Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.</p>
+        <label class="pg-label" for="feriasMes"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>Mês</label>
+        <select id="feriasMes" class="pg-input"></select>
+        <div class="ferias-duracao">
+            <input type="number" id="feriasDuracao" class="pg-input" min="5" max="60" value="30" aria-label="Quantidade de dias">
+            <button data-action="sugerir-ferias" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>Sugerir</button>
         </div>
-        <button data-action="save-ferias" class="btn-modal-salvar">SALVAR PERÍODO</button>
-        <button data-action="confirm-clear-ferias" style="background:#ffefef;color:#ff6b6b;border:1px solid #ff6b6b;padding:12px;border-radius:18px;font-weight:800;width:100%;cursor:pointer;">LIMPAR FÉRIAS</button>
+        <div id="sugestoesFerias" style="margin-top:14px;"></div>
     </div>
-
-    <div style="margin-top:25px;padding-top:20px;border-top:2px solid var(--border);">
-        <div style="font-weight:900;color:var(--primary);font-size:1.05em;margin-bottom:6px;">💡 Qual a melhor data?</div>
-        <p style="font-size:0.82em;opacity:0.75;margin:0 0 14px 0;line-height:1.5;">
-            Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.
-        </p>
-        <div style="margin-bottom:10px;">
-            <select id="feriasMes" style="width:100%;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;font-size:0.95em;"></select>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:stretch;">
-            <input type="number" id="feriasDuracao" min="5" max="60" value="30" style="flex:1;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;font-family:inherit;text-align:center;font-size:1em;">
-            <button data-action="sugerir-ferias" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;font-size:0.9em;">Sugerir</button>
-        </div>
-        <div id="sugestoesFerias"></div>
-    </div>
-
-    <button data-action="close-modals" style="background:var(--border);color:var(--text);border:none;padding:15px;border-radius:22px;font-weight:800;width:100%;margin-top:20px;cursor:pointer;">VOLTAR</button>
 </div>
 
 <div id="statsCard" class="bottom-modal" role="dialog" aria-label="Estatísticas" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">Estatísticas Detalhadas</h2>
-    <div id="stats-content"></div>
-    <button data-action="close-modals" style="background:var(--primary);color:white;border:none;padding:18px;border-radius:22px;font-weight:800;width:100%;margin-top:25px;font-size:1.1em;cursor:pointer;">VOLTAR</button>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Escala</div>
+        <h2 class="pg-h1">Estatísticas</h2>
+        <p class="pg-lead" id="statsLead">Resumo do ano para a sua escala.</p>
+        <div id="stats-content"></div>
+    </div>
 </div>
 
 <div id="ramaisCard" class="bottom-modal" role="dialog" aria-label="Ramais úteis" aria-modal="true">
@@ -1272,27 +1303,30 @@
 </div>
 
 <div id="pesquisaCard" class="bottom-modal" role="dialog" aria-label="Pesquisar escala" aria-modal="true">
-    <h2 style="font-weight:800;color:var(--primary);margin-top:0;margin-bottom:20px;">&#128269; Pesquisar data</h2>
-    <div style="display:flex;flex-direction:column;gap:14px;">
-        <div style="width:100%;"><input type="date" id="pesquisaData" class="input-date" style="width:100%;box-sizing:border-box;"></div>
-        <div style="display:flex;gap:10px;align-items:center;width:100%;">
-            <input type="text" id="pesquisaDataTexto" placeholder="dd/mm/aaaa ou fale a data" style="flex:1;min-width:60px;padding:14px;border-radius:18px;border:2.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;font-size:0.9em;">
-            <button data-action="mic" class="btn-mic" aria-label="Pesquisar por voz"><span class="material-symbols-outlined">mic</span></button>
-            <button data-action="pesquisar" style="background:var(--primary);color:white;border:none;padding:0 22px;border-radius:18px;font-weight:800;height:54px;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0;">
-                <span class="material-symbols-outlined" style="font-size:20px;">search</span> Buscar
-            </button>
+    <div class="pg-wrap">
+        <div class="pg-eyebrow">Consulta</div>
+        <h2 class="pg-h1">Pesquisar Escala</h2>
+        <p class="pg-lead">Escolha a data no calendário, digite (dd/mm/aaaa) ou fale. A consulta vale para a sua turma e região.</p>
+        <div class="pg-form">
+            <div><label class="pg-label" for="pesquisaData"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>Data</label><input type="date" id="pesquisaData" class="input-date pg-input"></div>
+            <div>
+                <label class="pg-label" for="pesquisaDataTexto"><span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>Digitar ou falar a data</label>
+                <div class="pesq-linha">
+                    <input type="text" id="pesquisaDataTexto" class="pg-input" placeholder="dd/mm/aaaa ou fale a data">
+                    <button data-action="mic" class="btn-mic" aria-label="Pesquisar por voz"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="resultadoPesquisa" style="background:var(--bg);border-radius:16px;padding:15px;border:1px solid var(--border);min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;margin-top:15px;">
-        <div id="resultadoTexto" style="font-weight:800;font-size:1.2em;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:8px;">Nenhuma pesquisa realizada.</div>
-        <div id="resultadoDetalhe" style="font-size:0.85em;opacity:0.7;"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:15px;">
-        <button data-action="toggle-voz" id="btnOuvirResultado" class="btn-ouvir">
-            <span class="material-symbols-outlined" id="btnOuvirIcon">volume_up</span>
+        <button data-action="pesquisar" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+        <div class="pg-secao"><span>Resultado</span></div>
+        <div id="resultadoPesquisa" class="pesq-result" aria-live="polite">
+            <div id="resultadoTexto">Nenhuma pesquisa realizada.</div>
+            <div id="resultadoDetalhe"></div>
+        </div>
+        <button data-action="toggle-voz" id="btnOuvirResultado" class="pg-btn primario btn-ouvir">
+            <span class="material-symbols-outlined" id="btnOuvirIcon" aria-hidden="true">volume_up</span>
             <span id="btnOuvirTexto">Ouvir resposta</span>
         </button>
-        <button data-action="fechar-pesquisa" style="background:var(--border);color:var(--text);border:none;padding:12px 16px;border-radius:18px;font-weight:800;cursor:pointer;flex:1;">Fechar</button>
     </div>
 </div>
 

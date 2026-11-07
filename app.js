@@ -171,6 +171,7 @@ function focusModal(modalId) {
   if (first) setTimeout(function () { first.focus(); }, 50);
 }
 function closeAllModals() {
+  if (typeof pararVoz === 'function') pararVoz();
   document.getElementById('overlay').style.display = 'none';
   document.querySelectorAll('.bottom-modal').forEach(function (el) { el.classList.remove('show'); });
   document.removeEventListener('keydown', trapFocus);
@@ -739,10 +740,12 @@ function openFerias() {
 }
 function openStats() {
   const ano = parseInt(currentAno), turma = currentTurma;
+  const lead = document.getElementById('statsLead');
+  if (lead) { const tf = formatarTurmaParaVoz(turma); lead.textContent = 'Ano ' + ano + ' · ' + (currentRegion === '1x1' ? 'Escala ' + tf : nomeRegiao(currentRegion) + ' · Turmas ' + tf); }
   const ck = ano + '_' + turma + '_' + currentRegion;
   if (cachedStats[ck]) { document.getElementById('stats-content').innerHTML = cachedStats[ck]; document.getElementById('configCard').classList.remove('show'); focusModal('statsCard'); return; }
   const feriados = getFeriados(ano);
-  let dt = 0, df = 0, ft = 0, ff = 0, lfh = '';
+  let dt = 0, df = 0, ft = 0, ff = 0; const lista = [];
   for (let m = 0; m < 12; m++) {
     for (let d = 1; d <= new Date(ano, m + 1, 0).getDate(); d++) {
       const dTeste = new Date(ano, m, d);
@@ -751,11 +754,20 @@ function openStats() {
       if (res) dt++; else df++;
       if (feriados[isoS]) {
         if (res) ft++; else ff++;
-        lfh += '<div>' + feriados[isoS] + ' (' + (res ? 'TRABALHA' : 'FOLGA') + ')</div>';
+        lista.push({ data: String(d).padStart(2, '0') + '/' + String(m + 1).padStart(2, '0'), nome: feriados[isoS], trab: res });
       }
     }
   }
-  const html = '<div class="stat-grid"><div class="stat-card-big purple"><div class="stat-val-big purple">' + dt + '</div><div class="stat-lab-big">Dias Trabalhados</div></div><div class="stat-card-big teal"><div class="stat-val-big teal">' + df + '</div><div class="stat-lab-big">Dias de Folga</div></div></div><div style="background:var(--bg);border-radius:15px;padding:15px;border:1px solid var(--border);margin-top:10px;"><div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;"><span>Feriados trabalhados</span><span style="color:var(--accent);">' + ft + '</span></div><div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;"><span>Feriados de folga</span><span style="color:var(--verde);">' + ff + '</span></div>' + (lfh ? '<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:0.85em;">' + lfh + '</div>' : '') + '</div>';
+  const pct = Math.round((dt / (dt + df)) * 100);
+  const html =
+    '<div class="ct-stats dois"><div class="ct-stat roxo"><b>' + dt + '</b><span>Dias trabalhados</span></div><div class="ct-stat verde"><b>' + df + '</b><span>Dias de folga</span></div></div>' +
+    '<div class="ct-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="Proporção de dias trabalhados"><i style="width:' + pct + '%;background:var(--accent)"></i></div>' +
+    '<div class="stat-legenda">' + pct + '% do ano trabalhando · ' + (100 - pct) + '% de folga</div>' +
+    '<div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">event</span></span><span>Feriados</span></div>' +
+    '<div class="ct-stats dois"><div class="ct-stat roxo"><b>' + ft + '</b><span>Trabalhados</span></div><div class="ct-stat verde"><b>' + ff + '</b><span>De folga</span></div></div>' +
+    (lista.length ? '<div class="pg-card stat-feriados">' + lista.map(function (f) {
+      return '<div class="stat-fer"><span class="stat-fer-data">' + f.data + '</span><span class="stat-fer-nome">' + f.nome + '</span><span class="chip ' + (f.trab ? 'roxo' : 'verde') + '">' + (f.trab ? 'Trabalha' : 'Folga') + '</span></div>';
+    }).join('') + '</div>' : '');
   cachedStats[ck] = html;
   document.getElementById('stats-content').innerHTML = html;
   document.getElementById('configCard').classList.remove('show');
@@ -968,7 +980,7 @@ function renderSugestoesFerias(sug, duracao) {
     return;
   }
   const nomeDia = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-  let html = '<div style="font-size:0.82em;opacity:0.7;margin-bottom:10px;">Toque numa opção para preencher as datas:</div>';
+  let html = '<p class="pg-lead" style="margin:4px 0 12px;font-size:0.88rem;">Toque numa opção para preencher as datas:</p>';
   sug.forEach(function (s, i) {
     const iniF = s.S.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
     const fimF = s.E.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
@@ -979,29 +991,24 @@ function renderSugestoesFerias(sug, duracao) {
     }
     const retornoF = retorno.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
     const retornoDia = nomeDia[retorno.getDay()];
-    const b = s.ganho > 0
-      ? '<span style="background:var(--verde);color:white;padding:3px 10px;border-radius:20px;font-size:0.75em;font-weight:800;">+' + s.ganho + ' dia' + (s.ganho > 1 ? 's' : '') + '</span>'
-      : '<span style="background:var(--border);color:var(--text);padding:3px 10px;border-radius:20px;font-size:0.75em;font-weight:800;opacity:0.6;">sem ganho</span>';
-    const est = i === 0 ? ' ⭐' : '';
-    html += '<div data-sugestao-ini="' + s.S.toISOString().split('T')[0] + '" data-sugestao-fim="' + s.E.toISOString().split('T')[0] + '" class="sugestao-ferias-item" style="background:var(--bg);border:1.5px solid ' + (i === 0 ? 'var(--primary)' : 'var(--border)') + ';border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:0.2s;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
-      '<div style="font-weight:800;font-size:0.95em;">' + iniF + ' → ' + fimF + est + '</div>' +
-      b +
-      '</div>' +
-      '<div style="font-size:0.8em;opacity:0.75;margin-top:6px;">Você ficará <strong>' + s.homeDays + ' dias em casa</strong> consecutivos.</div>' +
-      '<div style="font-size:0.82em;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;color:var(--accent);font-weight:700;">' +
-      '<span class="material-symbols-outlined" style="font-size:16px;">work</span>' +
-      'Retorno: <strong>' + retornoF + '</strong> (' + retornoDia + ')</div>' +
+    const chip = s.ganho > 0 ? '<span class="sug-chip ganho">+' + s.ganho + ' dia' + (s.ganho > 1 ? 's' : '') + '</span>' : '<span class="sug-chip neutro">sem ganho</span>';
+    const melhor = i === 0 ? '<span class="sug-melhor"><span class="material-symbols-outlined" aria-hidden="true">star</span>Melhor opção</span>' : '';
+    html += '<div data-sugestao-ini="' + s.S.toISOString().split('T')[0] + '" data-sugestao-fim="' + s.E.toISOString().split('T')[0] + '" class="sugestao-ferias-item' + (i === 0 ? ' destaque' : '') + '" role="button" tabindex="0">' + melhor +
+      '<div class="sug-topo"><div class="sug-datas">' + iniF + ' → ' + fimF + '</div>' + chip + '</div>' +
+      '<div class="sug-info">Você ficará <strong>' + s.homeDays + ' dias em casa</strong> consecutivos.</div>' +
+      '<div class="sug-retorno"><span class="material-symbols-outlined" aria-hidden="true">work</span>Retorno: <strong>' + retornoF + '</strong> (' + retornoDia + ')</div>' +
       '</div>';
   });
   container.innerHTML = html;
   container.querySelectorAll('.sugestao-ferias-item').forEach(function (el) {
-    el.addEventListener('click', function () {
+    const aplicar = function () {
       document.getElementById('feriasInicio').value = el.dataset.sugestaoIni;
       document.getElementById('feriasFim').value = el.dataset.sugestaoFim;
-      toast('Datas preenchidas! Toque em SALVAR PERÍODO.', 'sucesso', 2500);
+      toast('Datas preenchidas! Toque em Salvar período.', 'sucesso', 2500);
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    };
+    el.addEventListener('click', aplicar);
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); aplicar(); } });
   });
 }
 
@@ -1255,6 +1262,7 @@ function minutosLeitura(c) {
   return Math.max(1, Math.round(t.split(/\s+/).filter(Boolean).length / 150));
 }
 function nomeGrupo(id) { const g = CART_GRUPOS.filter(function (x) { return x.id === id; })[0]; return g ? g.nome : ''; }
+function icoStatus(nome, anim, cor) { return '<span class="pg-ico big" style="background:' + cor + '"><span class="material-symbols-outlined ' + anim + '" aria-hidden="true">' + nome + '</span></span>'; }
 function icoCt(nome) { return '<span class="material-symbols-outlined" aria-hidden="true">' + nome + '</span>'; }
 
 function renderCartilhas(manterScroll) {
@@ -1499,6 +1507,7 @@ function openPesquisa() {
   document.getElementById('pesquisaData').value = h.toISOString().split('T')[0];
   document.getElementById('pesquisaDataTexto').value = '';
   document.getElementById('resultadoTexto').innerHTML = 'Nenhuma pesquisa realizada.';
+  document.getElementById('resultadoTexto').style.color = '';
   document.getElementById('resultadoDetalhe').innerText = '';
   resultadoPesquisaAtual = null; atualizarBotaoOuvir();
 }
@@ -1530,18 +1539,18 @@ function pesquisarData() {
   if (ti) { do_ = parseDataTexto(ti); if (do_) { document.getElementById('pesquisaData').value = do_.getFullYear() + '-' + String(do_.getMonth()+1).padStart(2,'0') + '-' + String(do_.getDate()).padStart(2,'0'); } }
   else if (di) { const p = di.split('-'); do_ = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); }
   const rd = document.getElementById('resultadoTexto'), dd = document.getElementById('resultadoDetalhe');
-  if (!do_ || isNaN(do_.getTime())) { rd.innerHTML = '&#10060; Data inválida.'; dd.innerText = 'Use dd/mm/aaaa.'; resultadoPesquisaAtual = null; atualizarBotaoOuvir(); return; }
+  if (!do_ || isNaN(do_.getTime())) { rd.innerHTML = icoStatus('error', '', 'var(--accent)') + '<div>Data inválida.</div>'; dd.innerText = 'Use dd/mm/aaaa.'; resultadoPesquisaAtual = null; atualizarBotaoOuvir(); return; }
   const r = currentRegion, t = currentTurma;
   const trab = isTrabalhando(do_, r, t), fer = isFerias(do_);
   let st, cor, ih, det;
   const rn = nomeRegiao(r), tf = formatarTurmaParaVoz(t);
   if (r === '1x1') det = 'Região: Escala ' + tf; else det = 'Região: ' + rn + ' · Turmas ' + tf;
-  if (fer) { st = 'EM FÉRIAS'; cor = 'var(--ferias)'; ih = '<span class="icone-ferias">&#9992;&#65039;</span>'; }
+  if (fer) { st = 'EM FÉRIAS'; cor = 'var(--ferias)'; ih = icoStatus('flight', 'icone-ferias', cor); }
   else if (trab) {
     if (r === '1x1') st = isTurnoNoite1x1(t) ? 'TRABALHANDO (NOITE)' : 'TRABALHANDO (MANHÃ)'; else st = 'TRABALHANDO';
     cor = r === '1x1' && isTurnoNoite1x1(t) ? 'var(--roxo-1x1)' : 'var(--accent)';
-    ih = '<span class="icone-trabalho">&#9881;&#65039;</span>';
-  } else { st = 'DE FOLGA'; cor = 'var(--primary)'; ih = '<span class="icone-folga">&#127754;</span>'; }
+    ih = icoStatus('settings', 'icone-trabalho', cor);
+  } else { st = 'DE FOLGA'; cor = 'var(--primary)'; ih = icoStatus('beach_access', 'icone-folga', cor); }
   rd.style.color = cor;
   rd.innerHTML = ih + '<div><strong>' + diaDaSemanaPorExtenso(do_) + ', ' + do_.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + '</strong></div><div style="font-size:1.1em;">' + st + '</div>';
   dd.innerText = det;
