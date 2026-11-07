@@ -554,7 +554,7 @@ function gerarCalendario() {
     container.dataset.mes = m; container.dataset.ano = ano;
     container.setAttribute('role', 'group'); container.setAttribute('aria-label', nomeM + ' de ' + ano);
     let cT = 0, cF = 0, cFer = 0, cFe = 0;
-    let hF = '<div class="mes-face mes-front"><div class="mes-resumo">%%RESUMO%%</div><div class="grid"><div class="dia-label">Sem</div>' + lang.days.map(function (s) { return '<div class="dia-label">' + s + '</div>'; }).join('');
+    let hF = '<div class="mes-face mes-front"><div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;"><span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">' + nomeM + '</span><span style="color:var(--primary);font-weight:800;font-size:1.1em;">' + ano + '</span></div><div class="mes-resumo">%%RESUMO%%</div><div class="grid"><div class="dia-label">Sem</div>' + lang.days.map(function (s) { return '<div class="dia-label">' + s + '</div>'; }).join('');
     let hB = '<div class="mes-face mes-back"><div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;"><span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">' + nomeM + '</span><span style="font-weight:800;font-size:1.1em;">' + ano + '</span></div><div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>';
     let hasEv = false;
     const dataRetorno = getDataRetorno();
