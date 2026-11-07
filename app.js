@@ -522,11 +522,25 @@ function atualizarBannerAvisos() {
    14) CALENDÁRIO
    ============================================================ */
 let calendarioGeracao = 0;
+function legendaCalendario() {
+  const t = currentTurma; let trabCls, folgaCls, trabTxt = 'Trabalho';
+  if (currentRegion === 'BR') { trabCls = t === 'AC' ? 'AMARELO' : 'VERDE'; folgaCls = t === 'AC' ? 'VERDE' : 'AMARELO'; }
+  else if (currentRegion === '1x1') { const n = isTurnoNoite1x1(t); trabCls = n ? 'ROXO' : 'LARANJA'; folgaCls = 'VERDE'; trabTxt = n ? 'Trabalho (noite)' : 'Trabalho (manhã)'; }
+  else { trabCls = t === 'EG' ? 'AZUL' : 'VERDE'; folgaCls = t === 'EG' ? 'VERDE' : 'AZUL'; }
+  return '<div class="mes-legenda" aria-hidden="true">' +
+    '<span><i class="leg-sw ' + trabCls + ' TRABALHO"></i>' + trabTxt + '</span>' +
+    '<span><i class="leg-sw ' + folgaCls + '"></i>Folga</span>' +
+    '<span><i class="leg-sw hoje-sw"></i>Hoje</span>' +
+    '<span><i class="leg-sw ferias-sw"></i>Férias</span>' +
+    '<span><b class="leg-fer">15</b>Feriado</span>' +
+    '<span><i class="leg-nota"></i>Anotação</span></div>';
+}
 function gerarCalendario() {
   const box = document.getElementById('calendario-box');
   box.innerHTML = '';
   const mg = ++calendarioGeracao;
   let cm = 0; const total = 12; const ano = anoAtualVisivel;
+  const leg = legendaCalendario();
   function next() {
     if (mg !== calendarioGeracao) return;
     if (cm >= total) { setTimeout(function () { if (mg !== calendarioGeracao) return; scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 100); return; }
@@ -538,7 +552,9 @@ function gerarCalendario() {
     const container = document.createElement('div');
     container.className = 'mes-container';
     container.dataset.mes = m; container.dataset.ano = ano;
-    let hF = '<div class="mes-face mes-front"><div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;"><span style="color:var(--primary);font-weight:800;text-transform:capitalize;font-size:1.1em;">' + nomeM + '</span><span style="color:var(--primary);font-weight:800;font-size:1.1em;">' + ano + '</span></div><div class="grid"><div class="dia-label">W</div>' + lang.days.map(function (s) { return '<div class="dia-label">' + s + '</div>'; }).join('');
+    container.setAttribute('role', 'group'); container.setAttribute('aria-label', nomeM + ' de ' + ano);
+    let cT = 0, cF = 0, cFer = 0, cFe = 0;
+    let hF = '<div class="mes-face mes-front"><div class="mes-resumo">%%RESUMO%%</div><div class="grid"><div class="dia-label">Sem</div>' + lang.days.map(function (s) { return '<div class="dia-label">' + s + '</div>'; }).join('');
     let hB = '<div class="mes-face mes-back"><div style="display:flex;justify-content:space-between;align-items:center;margin:5px 10px 0 10px;"><span style="font-weight:800;text-transform:capitalize;font-size:1.1em;">' + nomeM + '</span><span style="font-weight:800;font-size:1.1em;">' + ano + '</span></div><div style="font-weight:800;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:5px;margin-bottom:10px;">Eventos do mês</div>';
     let hasEv = false;
     const dataRetorno = getDataRetorno();
@@ -569,9 +585,12 @@ function gerarCalendario() {
         cls += (mnt.isEG ? 'AZUL ' : 'VERDE ') + (mnt.trab ? 'TRABALHO ' : 'FOLGA ');
         sh = mnt.trab ? 'trabalhando' : 'de folga';
       }
+      const trabDia = cls.indexOf('TRABALHO') > -1;
+      if (trabDia) cT++; else cF++;
+      if (f) { cFer++; cls += 'FERIADO '; }
       if (hojeStr === at.toDateString()) cls += 'hoje ';
       if (nt) cls += 'HAS_NOTE ';
-      if (isFerias(at)) { cls += 'FERIAS '; sh = 'em férias'; }
+      if (isFerias(at)) { cls += 'FERIAS '; sh = 'em férias'; cFe++; }
       const isRetorno = (retornoStr && at.toDateString() === retornoStr);
       if (isRetorno) { cls += 'RETORNO '; sh = 'primeiro dia de retorno ao trabalho'; }
       if (f || nt || isRetorno) {
@@ -589,7 +608,10 @@ function gerarCalendario() {
       hF += '<div class="' + cls.trim() + '" data-iso="' + isoF + '" role="button" tabindex="0" aria-label="' + escapeHtml(al) + '">' + d + '</div>';
       col++;
     }
-    hF += '</div></div>';
+    const chips = '<span class="mes-chip t"><b>' + cT + '</b> trabalho</span><span class="mes-chip f"><b>' + cF + '</b> folga</span>' +
+      (cFer ? '<span class="mes-chip h"><b>' + cFer + '</b> feriado' + (cFer > 1 ? 's' : '') + '</span>' : '') +
+      (cFe ? '<span class="mes-chip v"><b>' + cFe + '</b> férias</span>' : '');
+    hF = hF.replace('%%RESUMO%%', chips) + '</div>' + leg + '</div>';
     hB += (hasEv ? '' : '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>') + '</div>';
     if (mg !== calendarioGeracao) return;
     container.innerHTML = '<div class="mes-inner">' + hF + hB + '</div>';
