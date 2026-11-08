@@ -752,32 +752,6 @@
     .ferias-duracao { display: flex; gap: 10px; align-items: stretch; margin-top: 10px; }
     .ferias-duracao .pg-input { flex: 1; text-align: center; }
     .ferias-duracao .pg-btn { width: auto; margin-top: 0; padding: 0 22px; }
-    /* ===== Informações do dia ===== */
-    .lote-box { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 60px 16px 16px; margin-bottom: 4px; text-align: center; position: relative; }
-    .lote-value { color: var(--primary); }
-    .lote-copy { width: 40px; height: 40px; border-radius: 12px; background: var(--primary); color: #fff; right: 10px; display: flex; align-items: center; justify-content: center; padding: 0; }
-    textarea.pg-input { resize: vertical; font-weight: 600; line-height: 1.5; }
-    /* ===== CALENDÁRIO v2 — resumo do mês, legenda, fim de semana e feriado ===== */
-    .mes-nav-title { text-transform: none; }
-    .mes-container { min-height: 440px; }
-    .mes-resumo { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 6px 0 6px; }
-    .mes-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; background: var(--bg); border: 1.5px solid var(--border); color: var(--text); }
-    .mes-chip b { font-weight: 900; font-size: 0.95rem; }
-    .mes-chip.t b { color: var(--accent-txt); }
-    .mes-chip.f b { color: var(--primary); }
-    .mes-chip.h b, .mes-chip.v b { color: var(--accent-txt); }
-    .grid { gap: 8px 7px; padding-top: 10px; }
-    .grid .dia-label:nth-child(7), .grid .dia-label:nth-child(8) { color: var(--accent-txt); opacity: 1; }
-    .FERIADO { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-    .mes-legenda { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--text); opacity: 0.85; }
-    .mes-legenda > span { display: inline-flex; align-items: center; gap: 5px; }
-    .leg-sw { width: 15px; height: 15px; border-radius: 5px; border: 2px solid transparent; display: inline-block; flex-shrink: 0; }
-    .leg-sw.hoje-sw { background: var(--accent); border-color: #fff; box-shadow: 0 0 0 1.5px var(--accent); }
-    .leg-sw.ferias-sw { border: 2px dashed var(--ferias); background: transparent; }
-    .leg-nota { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 1.5px solid #fff; box-shadow: 0 0 0 1px var(--border); display: inline-block; flex-shrink: 0; }
-    .leg-fer { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 2px; font-weight: 900; }
-    @keyframes mesIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-    .mes-container { animation: mesIn 0.35s ease both; }
     @media (max-width: 480px) {
         body { box-shadow: none; }
     }
@@ -1035,20 +1009,15 @@
 </div>
 
 <div id="infoCard" class="bottom-modal" role="dialog" aria-label="Informações do dia" aria-modal="true">
-    <div class="pg-wrap">
-        <div class="pg-eyebrow">Dia selecionado</div>
-        <h2 class="pg-h1" id="card-data"></h2>
-        <p class="pg-lead" id="card-dia-semana">Lote sugerido e anotação deste dia.</p>
-        <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span></span><span>Lote sugerido (YYWWD)</span></div>
-        <div class="lote-box">
-            <div id="lote-display" class="lote-value">------</div>
-            <button class="material-symbols-outlined lote-copy" data-action="copy-lote" aria-label="Copiar lote">content_copy</button>
-        </div>
-        <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">edit_note</span></span><span>Anotação</span></div>
-        <label for="noteInput" class="sr-only">Anotação</label>
-        <textarea id="noteInput" class="pg-input" placeholder="Sua anotação..." rows="5"></textarea>
-        <button data-action="save-nota" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">check</span>Salvar</button>
+    <div id="card-data" style="font-weight:800;color:var(--primary);font-size:1.3em;margin-bottom:10px;"></div>
+    <div class="lote-box">
+        <span class="lote-label">Lote Sugerido (YYWWD)</span>
+        <div id="lote-display" class="lote-value">------</div>
+        <button class="material-symbols-outlined lote-copy" data-action="copy-lote" aria-label="Copiar lote">content_copy</button>
     </div>
+    <label for="noteInput" class="sr-only">Anotação</label>
+    <textarea id="noteInput" placeholder="Sua anotação..." rows="5" style="width:100%;border-radius:20px;padding:18px;box-sizing:border-box;border:2.5px solid var(--border);font-family:inherit;background:var(--bg);color:var(--text);outline:none;"></textarea>
+    <button data-action="save-nota" class="btn-modal-salvar">SALVAR</button>
 </div>
 
 <div id="configCard" class="bottom-modal" role="dialog" aria-label="Configurações" aria-modal="true">
