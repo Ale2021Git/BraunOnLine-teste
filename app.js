@@ -1076,6 +1076,11 @@ function irParaHoje() {
   } else { scrollParaMes(mesAtualVisivel, anoAtualVisivel); }
   atualizarTituloMes();
 }
+function atualizarOffsetCalendario() {
+  const sb = document.querySelector('.sticky-header-block'); if (!sb) return;
+  const top = parseFloat(getComputedStyle(sb).top) || 0;
+  document.documentElement.style.setProperty('--cal-offset', Math.round(top + sb.offsetHeight + 25) + 'px');
+}
 function scrollParaMes(mes, ano) {
   let c = document.querySelector('.mes-container[data-mes="' + mes + '"][data-ano="' + ano + '"]');
   if (!c) {
@@ -1084,17 +1089,13 @@ function scrollParaMes(mes, ano) {
     setTimeout(function () {
       c = document.querySelector('.mes-container[data-mes="' + mes + '"][data-ano="' + ano + '"]');
       if (c) {
-        const h = document.querySelector('header'), sb = document.querySelector('.sticky-header-block');
-        const tO = (h ? h.offsetHeight : 0) + (sb ? sb.offsetHeight : 0) + 20;
-        const r = c.getBoundingClientRect();
-        window.scrollTo({ top: Math.max(0, window.scrollY + r.top - tO), behavior: 'smooth' });
+        atualizarOffsetCalendario();
+        c.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 200); return;
   }
-  const h = document.querySelector('header'), sb = document.querySelector('.sticky-header-block');
-  const tO = (h ? h.offsetHeight : 0) + (sb ? sb.offsetHeight : 0) + 20;
-  const r = c.getBoundingClientRect();
-  window.scrollTo({ top: Math.max(0, window.scrollY + r.top - tO), behavior: 'smooth' });
+  atualizarOffsetCalendario();
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function scrollToToday() {
   const h = new Date(); mesAtualVisivel = h.getMonth(); anoAtualVisivel = h.getFullYear();
@@ -1880,6 +1881,12 @@ function iniciarApp() {
   safeRun('prepararModais', prepararModais);
   safeRun('bindCartilhas', bindCartilhas);
   safeRun('prepararRamais', prepararRamais);
+  safeRun('offsetCalendario', function () {
+    atualizarOffsetCalendario();
+    window.addEventListener('resize', atualizarOffsetCalendario);
+    const sb = document.querySelector('.sticky-header-block');
+    if (sb && window.ResizeObserver) new ResizeObserver(atualizarOffsetCalendario).observe(sb);
+  });
   safeRun('boasVindas', boasVindas);
   safeRun('bindAll', bindAll);
   safeRun('startClock', startClock);

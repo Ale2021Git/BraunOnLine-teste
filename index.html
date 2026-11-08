@@ -776,7 +776,10 @@
     .leg-sw.ferias-sw { border: 2px dashed var(--ferias); background: transparent; }
     .leg-nota { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 1.5px solid #fff; box-shadow: 0 0 0 1px var(--border); display: inline-block; flex-shrink: 0; }
     .leg-fer { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 2px; font-weight: 900; }
-    @keyframes mesIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    /* Alinhamento do cartão do mês logo abaixo do relógio (offset medido em tempo real) */
+    html { scroll-snap-type: y proximity; }
+    .mes-container { scroll-margin-top: var(--cal-offset, 315px); scroll-snap-align: start; }
+    @keyframes mesIn { from { opacity: 0; } to { opacity: 1; } }
     .mes-container { animation: mesIn 0.35s ease both; }
     @media (max-width: 480px) {
         body { box-shadow: none; }
@@ -1269,20 +1272,25 @@
         <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Camisa">
         <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Camisa">
     </div>
-    <div class="pedido-item-row" data-item="Calça" data-secao="uniformes">
-        <span class="pedido-item-nome">Calça</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça">
+    <div class="pedido-item-row" data-item="Calça Branca" data-secao="uniformes">
+        <span class="pedido-item-nome">Calça Branca</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça Branca">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça Branca">
+    </div>
+    <div class="pedido-item-row" data-item="Calça Cinza" data-secao="uniformes">
+        <span class="pedido-item-nome">Calça Cinza</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Calça Cinza">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Calça Cinza">
     </div>
     <div class="pedido-item-row" data-item="Jaleco" data-secao="uniformes">
         <span class="pedido-item-nome">Jaleco</span>
         <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Jaleco">
         <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Jaleco">
     </div>
-    <div class="pedido-item-row" data-item="Boné / Touca" data-secao="uniformes">
-        <span class="pedido-item-nome">Boné / Touca</span>
-        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Boné ou Touca">
-        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Boné ou Touca">
+    <div class="pedido-item-row" data-item="Touca" data-secao="uniformes">
+        <span class="pedido-item-nome">Touca</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Qtd" class="pedido-qtd" aria-label="Quantidade de Touca">
+        <input type="text" maxlength="4" placeholder="Tam" class="pedido-tam" aria-label="Tamanho de Touca">
     </div>
     <div class="pedido-item-row" data-item="Meias" data-secao="uniformes">
         <span class="pedido-item-nome">Meias</span>
