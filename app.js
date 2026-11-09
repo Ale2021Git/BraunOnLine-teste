@@ -6,7 +6,7 @@
 /* ============================================================
    0) CONFIGURAÇÕES EDITÁVEIS
    ============================================================ */
-const EMAIL_PEDIDOS = 'braun.online.app@gmail.com';
+const EMAIL_PEDIDOS = 'rubens.santos@bbraun.com';
 
 /* ============================================================
    1) CONSTANTES DE CONFIGURAÇÃO
@@ -1029,11 +1029,29 @@ function sugerirFerias() {
   }
   renderSugestoesFerias(top, duracao);
 }
+function rolarParaSugestoes() {
+  const modal = document.getElementById('feriasCard'), alvo = document.getElementById('sugestoesFerias');
+  if (!modal || !alvo) return;
+  const ativo = document.activeElement;
+  if (ativo && ativo !== document.body && ativo.blur) ativo.blur();   // fecha o teclado do campo de dias
+  const posicionar = function (suave) {
+    const barra = modal.querySelector('.modal-bar');
+    const desejado = modal.getBoundingClientRect().top + (barra ? barra.offsetHeight : 60) + 12;
+    const delta = alvo.getBoundingClientRect().top - desejado;
+    if (Math.abs(delta) < 4) return;
+    if (suave && modal.scrollTo) modal.scrollTo({ top: Math.max(0, modal.scrollTop + delta), behavior: 'smooth' });
+    else modal.scrollTop = Math.max(0, modal.scrollTop + delta);
+  };
+  posicionar(true);
+  // o teclado e o layout podem mudar logo após o toque: confere de novo e corrige sem animação
+  setTimeout(function () { posicionar(false); }, 300);
+  setTimeout(function () { posicionar(false); }, 700);
+}
 function renderSugestoesFerias(sug, duracao) {
   const container = document.getElementById('sugestoesFerias');
   if (!sug.length) {
     container.innerHTML = '<p style="font-size:0.85em;opacity:0.6;text-align:center;">Sem sugestões para esse mês.</p>';
-    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    rolarParaSugestoes();
     return;
   }
   const nomeDia = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
@@ -1067,7 +1085,7 @@ function renderSugestoesFerias(sug, duracao) {
     el.addEventListener('click', aplicar);
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); aplicar(); } });
   });
-  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  rolarParaSugestoes();
 }
 
 /* ============================================================
