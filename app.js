@@ -158,7 +158,9 @@ function focusModal(modalId) {
   if (drawer && drawer.classList.contains('open')) closeHamburger();
   lastFocusedElement = document.activeElement;
   overlay.style.display = 'block';
+  modal.scrollTop = 0;
   modal.classList.add('show');
+  requestAnimationFrame(function () { modal.scrollTop = 0; });
   const main = document.getElementById('main-content');
   const header = document.querySelector('header');
   if (main) main.setAttribute('aria-hidden', 'true');
@@ -342,6 +344,14 @@ document.addEventListener('visibilitychange', function () {
   if (document.visibilityState === 'hidden') { if (clockInterval) clearInterval(clockInterval); }
   else { startClock(); tick(); }
 });
+function modoFeriados() { return getStorageValue('braun_minimal_greeting') === 'true'; }
+function aplicarModoFeriados() {
+  const on = modoFeriados();
+  document.documentElement.classList.toggle('modo-feriados', on);
+  const sub = document.querySelector('[data-action="open-stats"] .drawer-item-sub');
+  if (sub) sub.textContent = on ? 'Feriados do ano' : 'Dias trabalhados e folgas';
+}
+function feriadoDeHoje(now) { return getFeriados(now.getFullYear())[String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')] || ''; }
 function tick() {
   const now = new Date();
   const bc = document.getElementById('big-clock');
@@ -354,7 +364,9 @@ function tick() {
       if (h >= 5 && h < 12) s = 'BOM DIA';
       else if (h >= 12 && h < 18) s = 'BOA TARDE';
       else s = 'BOA NOITE';
-      msg.innerText = s; msg.style.color = 'var(--primary)';
+      const fh = feriadoDeHoje(now);
+      if (fh) { msg.innerText = 'FERIADO · ' + fh; msg.style.color = 'var(--accent)'; }
+      else { msg.innerText = s; msg.style.color = 'var(--primary)'; }
     } else if (isFerias(now)) {
       msg.innerText = 'EM FÉRIAS \u2708\uFE0F'; msg.style.color = '#7030A0';
     } else {
@@ -523,6 +535,13 @@ function atualizarBannerAvisos() {
    ============================================================ */
 let calendarioGeracao = 0;
 function legendaCalendario() {
+  if (modoFeriados()) {
+    return '<div class="mes-legenda" aria-hidden="true">' +
+      '<span><i class="leg-sw hoje-sw"></i>Hoje</span>' +
+      '<span><i class="leg-sw leg-fer-sw"></i>Feriado</span>' +
+      '<span><i class="leg-sw ferias-sw"></i>Férias</span>' +
+      '<span><i class="leg-nota"></i>Anotação</span></div>';
+  }
   const t = currentTurma; let trabCls, folgaCls, trabTxt = 'Trabalho';
   if (currentRegion === 'BR') { trabCls = t === 'AC' ? 'AMARELO' : 'VERDE'; folgaCls = t === 'AC' ? 'VERDE' : 'AMARELO'; }
   else if (currentRegion === '1x1') { const n = isTurnoNoite1x1(t); trabCls = n ? 'ROXO' : 'LARANJA'; folgaCls = 'VERDE'; trabTxt = n ? 'Trabalho (noite)' : 'Trabalho (manhã)'; }
@@ -541,6 +560,7 @@ function gerarCalendario() {
   const mg = ++calendarioGeracao;
   let cm = 0; const total = 12; const ano = anoAtualVisivel;
   const leg = legendaCalendario();
+  const modo = modoFeriados();
   function next() {
     if (mg !== calendarioGeracao) return;
     if (cm >= total) { setTimeout(function () { if (mg !== calendarioGeracao) return; scrollParaMes(mesAtualVisivel, anoAtualVisivel); }, 100); return; }
@@ -587,11 +607,12 @@ function gerarCalendario() {
       }
       const trabDia = cls.indexOf('TRABALHO') > -1;
       if (trabDia) cT++; else cF++;
+      if (modo) { cls = 'dia NEUTRO '; sh = ''; }
       if (f) { cFer++; cls += 'FERIADO '; }
       if (hojeStr === at.toDateString()) cls += 'hoje ';
       if (nt) cls += 'HAS_NOTE ';
       if (isFerias(at)) { cls += 'FERIAS '; sh = 'em férias'; cFe++; }
-      const isRetorno = (retornoStr && at.toDateString() === retornoStr);
+      const isRetorno = (!modo && retornoStr && at.toDateString() === retornoStr);
       if (isRetorno) { cls += 'RETORNO '; sh = 'primeiro dia de retorno ao trabalho'; }
       if (f || nt || isRetorno) {
         hasEv = true;
@@ -604,12 +625,12 @@ function gerarCalendario() {
         evLine += '</div>';
         hB += evLine;
       }
-      const al = d + ' de ' + nomeM + ' de ' + ano + ', ' + sh + (f ? ', feriado: ' + f : '') + (nt ? ', com anotação' : '') + '. Toque para ver detalhes.';
+      const al = d + ' de ' + nomeM + ' de ' + ano + (sh ? ', ' + sh : '') + (f ? ', feriado: ' + f : '') + (nt ? ', com anotação' : '') + '. Toque para ver detalhes.';
       hF += '<div class="' + cls.trim() + '" data-iso="' + isoF + '" role="button" tabindex="0" aria-label="' + escapeHtml(al) + '">' + d + '</div>';
       col++;
     }
-    const chips = '<span class="mes-chip t"><b>' + cT + '</b> trabalho</span><span class="mes-chip f"><b>' + cF + '</b> folga</span>' +
-      (cFer ? '<span class="mes-chip h"><b>' + cFer + '</b> feriado' + (cFer > 1 ? 's' : '') + '</span>' : '') +
+    const chips = (modo ? '' : '<span class="mes-chip t"><b>' + cT + '</b> trabalho</span><span class="mes-chip f"><b>' + cF + '</b> folga</span>') +
+      (cFer ? '<span class="mes-chip h"><b>' + cFer + '</b> feriado' + (cFer > 1 ? 's' : '') + '</span>' : (modo ? '<span class="mes-chip"><b>0</b> feriados</span>' : '')) +
       (cFe ? '<span class="mes-chip v"><b>' + cFe + '</b> férias</span>' : '');
     hF = hF.replace('%%RESUMO%%', chips) + '</div>' + leg + '</div>';
     hB += (hasEv ? '' : '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>') + '</div>';
@@ -765,8 +786,10 @@ function openFerias() {
 function openStats() {
   const ano = parseInt(currentAno), turma = currentTurma;
   const lead = document.getElementById('statsLead');
-  if (lead) { const tf = formatarTurmaParaVoz(turma); lead.textContent = 'Ano ' + ano + ' · ' + (currentRegion === '1x1' ? 'Escala ' + tf : nomeRegiao(currentRegion) + ' · Turmas ' + tf); }
-  const ck = ano + '_' + turma + '_' + currentRegion;
+  if (lead && modoFeriados()) lead.textContent = 'Feriados de ' + ano;
+  else if (lead) { const tf = formatarTurmaParaVoz(turma); lead.textContent = 'Ano ' + ano + ' · ' + (currentRegion === '1x1' ? 'Escala ' + tf : nomeRegiao(currentRegion) + ' · Turmas ' + tf); }
+  const modoF = modoFeriados();
+  const ck = ano + '_' + turma + '_' + currentRegion + (modoF ? '_f' : '');
   if (cachedStats[ck]) { document.getElementById('stats-content').innerHTML = cachedStats[ck]; document.getElementById('configCard').classList.remove('show'); focusModal('statsCard'); return; }
   const feriados = getFeriados(ano);
   let dt = 0, df = 0, ft = 0, ff = 0; const lista = [];
@@ -778,12 +801,12 @@ function openStats() {
       if (res) dt++; else df++;
       if (feriados[isoS]) {
         if (res) ft++; else ff++;
-        lista.push({ data: String(d).padStart(2, '0') + '/' + String(m + 1).padStart(2, '0'), nome: feriados[isoS], trab: res });
+        lista.push({ data: String(d).padStart(2, '0') + '/' + String(m + 1).padStart(2, '0'), nome: feriados[isoS], trab: res, dow: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][dTeste.getDay()], dt: dTeste });
       }
     }
   }
   const pct = Math.round((dt / (dt + df)) * 100);
-  const html =
+  const htmlNormal =
     '<div class="ct-stats dois"><div class="ct-stat roxo"><b>' + dt + '</b><span>Dias trabalhados</span></div><div class="ct-stat verde"><b>' + df + '</b><span>Dias de folga</span></div></div>' +
     '<div class="ct-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="Proporção de dias trabalhados"><i style="width:' + pct + '%;background:var(--accent)"></i></div>' +
     '<div class="stat-legenda">' + pct + '% do ano trabalhando · ' + (100 - pct) + '% de folga</div>' +
@@ -792,6 +815,15 @@ function openStats() {
     (lista.length ? '<div class="pg-card stat-feriados">' + lista.map(function (f) {
       return '<div class="stat-fer"><span class="stat-fer-data">' + f.data + '</span><span class="stat-fer-nome">' + f.nome + '</span><span class="chip ' + (f.trab ? 'roxo' : 'verde') + '">' + (f.trab ? 'Trabalha' : 'Folga') + '</span></div>';
     }).join('') + '</div>' : '');
+  const hojeS = new Date(); hojeS.setHours(0, 0, 0, 0);
+  const prox = lista.filter(function (f) { return f.dt >= hojeS; })[0];
+  const htmlFer =
+    '<div class="ct-stats dois"><div class="ct-stat roxo"><b>' + lista.length + '</b><span>Feriados no ano</span></div><div class="ct-stat verde"><b>' + (prox ? prox.data : '—') + '</b><span>Próximo feriado</span></div></div>' +
+    '<div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">event</span></span><span>Feriados de ' + ano + '</span></div>' +
+    (lista.length ? '<div class="pg-card stat-feriados">' + lista.map(function (f) {
+      return '<div class="stat-fer"><span class="stat-fer-data">' + f.data + '</span><span class="stat-fer-nome">' + f.nome + '</span><span class="chip roxo">' + f.dow + '</span></div>';
+    }).join('') + '</div>' : '');
+  const html = modoF ? htmlFer : htmlNormal;
   cachedStats[ck] = html;
   document.getElementById('stats-content').innerHTML = html;
   document.getElementById('configCard').classList.remove('show');
@@ -1001,6 +1033,7 @@ function renderSugestoesFerias(sug, duracao) {
   const container = document.getElementById('sugestoesFerias');
   if (!sug.length) {
     container.innerHTML = '<p style="font-size:0.85em;opacity:0.6;text-align:center;">Sem sugestões para esse mês.</p>';
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
   const nomeDia = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
@@ -1034,6 +1067,7 @@ function renderSugestoesFerias(sug, duracao) {
     el.addEventListener('click', aplicar);
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); aplicar(); } });
   });
+  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* ============================================================
@@ -1045,7 +1079,7 @@ function atualizarThemeColor() {
   meta.setAttribute('content', document.documentElement.classList.contains('dark-mode') ? '#121212' : '#00A97A');
 }
 function toggleDarkMode() { document.documentElement.classList.toggle('dark-mode'); setStorageValue('braun_dark_mode', document.documentElement.classList.contains('dark-mode')); atualizarThemeColor(); }
-function toggleMinimalGreeting() { setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked ? 'true' : 'false'); tick(); }
+function toggleMinimalGreeting() { setStorageValue('braun_minimal_greeting', document.getElementById('minimalGreetingToggle').checked ? 'true' : 'false'); aplicarModoFeriados(); gerarCalendario(); tick(); }
 function toggleVoiceResponse() { setStorageValue('braun_voice_response', document.getElementById('voiceResponseToggle').checked ? 'true' : 'false'); }
 function atualizarTituloMes() {
   const dt = new Date(anoAtualVisivel, mesAtualVisivel, 1);
@@ -1571,7 +1605,15 @@ function pesquisarData() {
   let st, cor, ih, det;
   const rn = nomeRegiao(r), tf = formatarTurmaParaVoz(t);
   if (r === '1x1') det = 'Região: Escala ' + tf; else det = 'Região: ' + rn + ' · Turmas ' + tf;
-  if (fer) { st = 'EM FÉRIAS'; cor = 'var(--ferias)'; ih = icoStatus('flight', 'icone-ferias', cor); }
+  const modoP = modoFeriados();
+  const fnomeP = getFeriados(do_.getFullYear())[String(do_.getMonth() + 1).padStart(2, '0') + '-' + String(do_.getDate()).padStart(2, '0')] || '';
+  if (modoP) {
+    if (fer) { st = 'EM FÉRIAS'; cor = 'var(--ferias)'; ih = icoStatus('flight', 'icone-ferias', cor); }
+    else if (fnomeP) { st = 'FERIADO'; cor = 'var(--accent)'; ih = icoStatus('celebration', 'icone-folga', cor); }
+    else { st = 'SEM FERIADO'; cor = 'var(--primary)'; ih = icoStatus('event', '', cor); }
+    det = fnomeP;
+  }
+  else if (fer) { st = 'EM FÉRIAS'; cor = 'var(--ferias)'; ih = icoStatus('flight', 'icone-ferias', cor); }
   else if (trab) {
     if (r === '1x1') st = isTurnoNoite1x1(t) ? 'TRABALHANDO (NOITE)' : 'TRABALHANDO (MANHÃ)'; else st = 'TRABALHANDO';
     cor = r === '1x1' && isTurnoNoite1x1(t) ? 'var(--roxo-1x1)' : 'var(--accent)';
@@ -1580,7 +1622,7 @@ function pesquisarData() {
   rd.style.color = cor;
   rd.innerHTML = ih + '<div><strong>' + diaDaSemanaPorExtenso(do_) + ', ' + do_.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + '</strong></div><div style="font-size:1.1em;">' + st + '</div>';
   dd.innerText = det;
-  resultadoPesquisaAtual = { data: do_, status: st, detalhes: det, ferias: fer, trabalhando: trab };
+  resultadoPesquisaAtual = { data: do_, status: st, detalhes: det, ferias: fer, trabalhando: trab, modo: modoP, feriado: fnomeP };
   atualizarBotaoOuvir();
   if (getStorageValue('braun_voice_response') !== 'false') lerResultado();
 }
@@ -1666,6 +1708,7 @@ function textoNaturalResultado(r) {
   const d = r.data, dia = d.getDate();
   const mes = d.toLocaleDateString('pt-BR', { month: 'long' });
   const cab = diaDaSemanaPorExtenso(d) + ', ' + (dia === 1 ? 'primeiro' : dia) + ' de ' + mes + ' de ' + d.getFullYear() + '.';
+  if (r.modo) return cab + ' ' + (r.ferias ? 'Nesse dia, você está de férias.' : r.feriado ? 'Nesse dia é feriado: ' + r.feriado + '.' : 'Nesse dia não há feriado.');
   let sit;
   if (r.ferias) sit = 'Nesse dia, você está de férias.';
   else if (r.trabalhando) sit = /NOITE/.test(r.status) ? 'Nesse dia, você trabalha, no turno da noite.' : /MANH/.test(r.status) ? 'Nesse dia, você trabalha, no turno da manhã.' : 'Nesse dia, você trabalha.';
@@ -1878,6 +1921,7 @@ var appIniciado = false;
 function iniciarApp() {
   if (appIniciado) return;
   appIniciado = true;
+  aplicarModoFeriados();
   safeRun('prepararModais', prepararModais);
   safeRun('bindCartilhas', bindCartilhas);
   safeRun('prepararRamais', prepararRamais);

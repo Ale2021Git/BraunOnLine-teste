@@ -18,6 +18,9 @@
     }
   } catch (e) {}
 
+  // 1a) Modo minimalista (só feriados) já no 1º quadro, sem piscar
+  try { if (localStorage.getItem('braun_minimal_greeting') === 'true') document.documentElement.classList.add('modo-feriados'); } catch (e) {}
+
   // 1b) Boas-vindas já no 1º quadro: com nome no perfil, ou na 1ª visita.
   //     A classe faz o CSS exibir a tela antes do app.js carregar; o app.js preenche textos e fecha.
   try {
@@ -37,7 +40,7 @@
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.11.08b';
+  var APP_VERSION = '2026.11.08c';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;

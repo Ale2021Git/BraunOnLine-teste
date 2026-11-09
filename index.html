@@ -781,6 +781,14 @@
     .mes-container { scroll-margin-top: var(--cal-offset, 315px); scroll-snap-align: start; }
     @keyframes mesIn { from { opacity: 0; } to { opacity: 1; } }
     .mes-container { animation: mesIn 0.35s ease both; }
+    /* ===== MODO MINIMALISTA (só feriados): oculta trabalho/folga ===== */
+    html.modo-feriados #turmaBadge, html.modo-feriados .tab-bar, html.modo-feriados #legenda-1x1,
+    html.modo-feriados .pg-acao[data-action="export-ics"], html.modo-feriados #feriasSugestaoBloco { display: none !important; }
+    html.modo-feriados body { padding-bottom: 24px; }
+    .dia.NEUTRO { background: var(--bg) !important; color: var(--text) !important; border-color: var(--border) !important; }
+    .dia.NEUTRO.FERIADO { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; text-decoration: none; }
+    .leg-sw.leg-fer-sw { background: var(--accent); border-color: var(--accent); }
+    #sugestoesFerias { scroll-margin-top: 84px; }
     @media (max-width: 480px) {
         body { box-shadow: none; }
     }
@@ -1062,7 +1070,7 @@
         <div class="pg-secao"><span>Geral</span></div>
         <div class="pg-linha">
             <span class="pg-ico"><span class="material-symbols-outlined" aria-hidden="true">visibility_off</span></span>
-            <span class="pg-linha-txt"><b>Saudação minimalista</b><small>Não exibe trabalho/folga ao entrar.</small></span>
+            <span class="pg-linha-txt"><b>Saudação minimalista</b><small>Mostra só os feriados e oculta trabalho e folga em todo o app.</small></span>
             <label class="switch"><input type="checkbox" id="minimalGreetingToggle" aria-label="Saudação minimalista"><span class="slider" aria-hidden="true"></span></label>
         </div>
         <div class="pg-linha">
@@ -1100,6 +1108,7 @@
         </div>
         <button data-action="save-ferias" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">check</span>Salvar período</button>
         <button data-action="confirm-clear-ferias" class="pg-btn perigo"><span class="material-symbols-outlined" aria-hidden="true">delete</span>Limpar férias</button>
+        <div id="feriasSugestaoBloco">
         <div class="pg-secao ic"><span class="pg-ico sm"><span class="material-symbols-outlined" aria-hidden="true">lightbulb</span></span><span>Qual a melhor data?</span></div>
         <p class="pg-lead" style="font-size:0.88rem;">Escolha o mês e quantos dias você tem. O app mostra as datas que rendem <strong>mais dias em casa</strong> respeitando sua escala.</p>
         <label class="pg-label" for="feriasMes"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>Mês</label>
@@ -1109,6 +1118,7 @@
             <button data-action="sugerir-ferias" class="pg-btn primario"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>Sugerir</button>
         </div>
         <div id="sugestoesFerias" style="margin-top:14px;"></div>
+        </div>
     </div>
 </div>
 
