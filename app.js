@@ -6,7 +6,7 @@
 /* ============================================================
    0) CONFIGURAÇÕES EDITÁVEIS
    ============================================================ */
-const EMAIL_PEDIDOS = 'rubens.santos@bbraun.com';
+const EMAILS_PEDIDOS = ['rubens.santos@bbraun.com', 'rafael3.silva@bbraun.com'];   // destinatários (campo Para)
 
 /* ============================================================
    1) CONSTANTES DE CONFIGURAÇÃO
@@ -948,7 +948,7 @@ function enviarPedidoEmail() {
   if (L3.length) c += 'OUTROS ITENS:\n' + L3.join('\n') + '\n\n';
   if (obs) c += 'OBSERVAÇÕES:\n' + obs + '\n';
   const a = 'Pedido de Materiais - ' + (nome || 'Colaborador') + (matr ? ' (' + matr + ')' : '');
-  window.location.href = 'mailto:' + EMAIL_PEDIDOS + '?subject=' + encodeURIComponent(a) + '&body=' + encodeURIComponent(c);
+  window.location.href = 'mailto:' + EMAILS_PEDIDOS.join(',') + '?subject=' + encodeURIComponent(a) + '&body=' + encodeURIComponent(c);
   toast('Abrindo seu e-mail...', 'info');
 }
 
