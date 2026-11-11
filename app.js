@@ -135,7 +135,7 @@ function trapFocus(e) {
   const first = focusable[0], last = focusable[focusable.length - 1];
   const isTab = e.key === 'Tab' || e.keyCode === 9;
   if (!isTab) return;
-  if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+  if (e.shiftKey) { if (document.activeElement === first || document.activeElement === activeModalElement) { e.preventDefault(); last.focus(); } }
   else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
 }
 function prepararModais() {
@@ -168,11 +168,10 @@ function focusModal(modalId) {
   if (activeModalElement) document.removeEventListener('keydown', trapFocus);
   activeModalElement = modal;
   document.addEventListener('keydown', trapFocus);
-  const focaveis = Array.prototype.slice.call(modal.querySelectorAll(FOCUSABLE));
-  const first = focaveis.filter(function (el) { return !el.classList.contains('modal-x'); })[0] || focaveis[0];
-  // preventScroll: na Privacidade o único item focável (além do Voltar) é o botão "Entendi", no fim da tela;
-  // sem isso o navegador rola até ele e a aba abre no meio, com o cabeçalho escondido.
-  if (first) setTimeout(function () { first.focus({ preventScroll: true }); modal.scrollTop = 0; }, 50);
+  // O foco inicial vai para a própria aba (e não para o primeiro campo): assim o teclado do celular
+  // só aparece quando a pessoa toca em um campo. A aba continua anunciada (role=dialog) e o Tab segue normal.
+  modal.setAttribute('tabindex', '-1');
+  setTimeout(function () { modal.focus({ preventScroll: true }); modal.scrollTop = 0; }, 50);
 }
 function closeAllModals() {
   if (typeof pararVoz === 'function') pararVoz();
@@ -929,8 +928,7 @@ function voltarAoVoto() {
   const vn = document.getElementById('votoNome');
   if (bloco) bloco.style.display = 'block';
   if (agrad) agrad.style.display = 'none';
-  if (vn) vn.value = '';
-  setTimeout(function () { if (vn) vn.focus(); }, 100);
+  if (vn) vn.value = '';   // sem focar o campo: o teclado só abre quando a pessoa toca nele
 }
 function limparPedido() {
   const card = document.getElementById('meusPedidosCard'); if (!card) return;
