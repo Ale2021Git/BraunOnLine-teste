@@ -786,8 +786,17 @@
     html.modo-feriados .pg-acao[data-action="export-ics"], html.modo-feriados #feriasSugestaoBloco { display: none !important; }
     html.modo-feriados body { padding-bottom: 24px; }
     .dia.NEUTRO { background: var(--bg) !important; color: var(--text) !important; border-color: var(--border) !important; }
+    .dia.NEUTRO.UTIL:not(.FERIADO):not(.hoje) { background: rgba(0,169,122,0.10) !important; border-color: rgba(0,169,122,0.30) !important; color: var(--text) !important; }
+    .dia.NEUTRO.FDS:not(.FERIADO):not(.hoje) { background: rgba(112,48,160,0.10) !important; border-color: rgba(112,48,160,0.30) !important; color: var(--accent-txt) !important; }
+    html.dark-mode .dia.NEUTRO.UTIL:not(.FERIADO):not(.hoje) { background: rgba(0,196,141,0.14) !important; border-color: rgba(0,196,141,0.38) !important; }
+    html.dark-mode .dia.NEUTRO.FDS:not(.FERIADO):not(.hoje) { background: rgba(112,48,160,0.30) !important; border-color: rgba(168,120,215,0.55) !important; }
+    .dia.NEUTRO.hoje:not(.FERIADO) { background: var(--primary) !important; color: #fff !important; border-color: #fff !important; }
+    html.modo-feriados .leg-sw.hoje-sw { background: var(--primary); box-shadow: 0 0 0 1.5px var(--primary); }
+    .mes-chip.prox { border-color: var(--accent); }
+    .mes-chip.prox b { color: var(--accent-txt); }
     .dia.NEUTRO.FERIADO { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; text-decoration: none; }
     .leg-sw.leg-fer-sw { background: var(--accent); border-color: var(--accent); }
+    .leg-sw.leg-fds-sw { background: rgba(112,48,160,0.14); border-color: rgba(112,48,160,0.45); }
     #sugestoesFerias { scroll-margin-top: 84px; }
     @media (max-width: 480px) {
         body { box-shadow: none; }

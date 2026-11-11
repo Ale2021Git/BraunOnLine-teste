@@ -170,7 +170,9 @@ function focusModal(modalId) {
   document.addEventListener('keydown', trapFocus);
   const focaveis = Array.prototype.slice.call(modal.querySelectorAll(FOCUSABLE));
   const first = focaveis.filter(function (el) { return !el.classList.contains('modal-x'); })[0] || focaveis[0];
-  if (first) setTimeout(function () { first.focus(); }, 50);
+  // preventScroll: na Privacidade o único item focável (além do Voltar) é o botão "Entendi", no fim da tela;
+  // sem isso o navegador rola até ele e a aba abre no meio, com o cabeçalho escondido.
+  if (first) setTimeout(function () { first.focus({ preventScroll: true }); modal.scrollTop = 0; }, 50);
 }
 function closeAllModals() {
   if (typeof pararVoz === 'function') pararVoz();
@@ -534,11 +536,21 @@ function atualizarBannerAvisos() {
    14) CALENDÁRIO
    ============================================================ */
 let calendarioGeracao = 0;
+function proximoFeriado() {
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  for (let i = 1; i <= 400; i++) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + i);
+    const f = getFeriados(d.getFullYear())[String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')];
+    if (f) return { data: d, nome: f, dias: i };
+  }
+  return null;
+}
 function legendaCalendario() {
   if (modoFeriados()) {
     return '<div class="mes-legenda" aria-hidden="true">' +
       '<span><i class="leg-sw hoje-sw"></i>Hoje</span>' +
       '<span><i class="leg-sw leg-fer-sw"></i>Feriado</span>' +
+      '<span><i class="leg-sw leg-fds-sw"></i>Fim de semana</span>' +
       '<span><i class="leg-sw ferias-sw"></i>Férias</span>' +
       '<span><i class="leg-nota"></i>Anotação</span></div>';
   }
@@ -607,7 +619,7 @@ function gerarCalendario() {
       }
       const trabDia = cls.indexOf('TRABALHO') > -1;
       if (trabDia) cT++; else cF++;
-      if (modo) { cls = 'dia NEUTRO '; sh = ''; }
+      if (modo) { cls = 'dia NEUTRO ' + ((at.getDay() === 0 || at.getDay() === 6) ? 'FDS ' : 'UTIL '); sh = ''; }
       if (f) { cFer++; cls += 'FERIADO '; }
       if (hojeStr === at.toDateString()) cls += 'hoje ';
       if (nt) cls += 'HAS_NOTE ';
@@ -631,7 +643,14 @@ function gerarCalendario() {
     }
     const chips = (modo ? '' : '<span class="mes-chip t"><b>' + cT + '</b> trabalho</span><span class="mes-chip f"><b>' + cF + '</b> folga</span>') +
       (cFer ? '<span class="mes-chip h"><b>' + cFer + '</b> feriado' + (cFer > 1 ? 's' : '') + '</span>' : (modo ? '<span class="mes-chip"><b>0</b> feriados</span>' : '')) +
-      (cFe ? '<span class="mes-chip v"><b>' + cFe + '</b> férias</span>' : '');
+      (cFe ? '<span class="mes-chip v"><b>' + cFe + '</b> férias</span>' : '') +
+      (function () {
+        const hj = new Date();
+        if (!modo || ano !== hj.getFullYear() || m !== hj.getMonth()) return '';
+        const p = proximoFeriado(); if (!p) return '';
+        const dd = String(p.data.getDate()).padStart(2, '0') + '/' + String(p.data.getMonth() + 1).padStart(2, '0');
+        return '<span class="mes-chip prox" title="' + escapeHtml(p.nome) + '">Próximo feriado: <b>' + dd + '</b> · ' + (p.dias === 1 ? 'amanhã' : 'em ' + p.dias + ' dias') + '</span>';
+      })();
     hF = hF.replace('%%RESUMO%%', chips) + '</div>' + leg + '</div>';
     hB += (hasEv ? '' : '<div style="opacity:0.6;font-size:0.9em;">Sem registros.</div>') + '</div>';
     if (mg !== calendarioGeracao) return;
