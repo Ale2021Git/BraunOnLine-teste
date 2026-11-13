@@ -8,6 +8,16 @@
 (function () {
   'use strict';
 
+  // 0) Fontes do Google sem bloquear a 1ª pintura: a welcome screen aparece logo e as fontes entram depois
+  //    (os <link> têm media="print"; ao carregar, passam para media="all").
+  try {
+    Array.prototype.forEach.call(document.querySelectorAll('link[data-async-css]'), function (l) {
+      var ativar = function () { l.media = 'all'; };
+      l.addEventListener('load', ativar);
+      setTimeout(ativar, 4000);   // reserva: se o evento não vier, ativa assim mesmo
+    });
+  } catch (e) {}
+
   // 1) Dark mode sem FOUC — aplica em <html>, CSS usa html.dark-mode
   try {
     if (localStorage.getItem('braun_dark_mode') === 'true') {
@@ -40,7 +50,7 @@
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.11.11a';
+  var APP_VERSION = '2026.11.11c';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;
