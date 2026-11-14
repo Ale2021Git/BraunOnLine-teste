@@ -8,6 +8,40 @@
 (function () {
   'use strict';
 
+  // 0) Fontes do Google sem bloquear a 1ª pintura: a welcome screen aparece logo e as fontes entram depois
+  //    (os <link> têm media="print"; ao carregar, passam para media="all").
+  //    Quando as fontes estão prontas, marca <html class="fonts-ok"> e avisa o app (evento 'braun-fonts'):
+  //    até lá os ícones ficam invisíveis (sem o nome em inglês) e a welcome screen espera para contar o tempo.
+  var fontesProntas = false;
+  function marcarFontesProntas() {
+    if (fontesProntas) return;
+    fontesProntas = true;
+    document.documentElement.classList.add('fonts-ok');
+    try { window.dispatchEvent(new Event('braun-fonts')); } catch (e) {}
+  }
+  try {
+    var linksFonte = document.querySelectorAll('link[data-async-css]');
+    var pendentes = linksFonte.length;
+    var carregarFontes = function () {
+      if (document.fonts && document.fonts.load) {
+        Promise.all([
+          document.fonts.load("24px 'Material Symbols Outlined'"),
+          document.fonts.load("700 16px 'Inter'")
+        ]).then(marcarFontesProntas, marcarFontesProntas);
+      } else { marcarFontesProntas(); }
+    };
+    if (!pendentes) { carregarFontes(); }
+    Array.prototype.forEach.call(linksFonte, function (l) {
+      var contado = false;
+      var ativar = function () { l.media = 'all'; };
+      var concluir = function () { if (contado) return; contado = true; if (--pendentes <= 0) carregarFontes(); };
+      l.addEventListener('load', function () { ativar(); concluir(); });
+      l.addEventListener('error', concluir);
+      setTimeout(function () { ativar(); concluir(); }, 4000);   // reserva: se o evento não vier, segue assim mesmo
+    });
+  } catch (e) { marcarFontesProntas(); }
+  setTimeout(marcarFontesProntas, 5000);   // reserva final (rede muito lenta ou sem fontes em cache)
+
   // 1) Dark mode sem FOUC — aplica em <html>, CSS usa html.dark-mode
   try {
     if (localStorage.getItem('braun_dark_mode') === 'true') {
@@ -35,12 +69,12 @@
         document.documentElement.classList.remove('welcome-on');
         var w = document.getElementById('welcomeScreen');
         if (w) w.style.display = 'none';
-      }, nomePerfil ? 8000 : 20000);
+      }, nomePerfil ? 12000 : 20000);
     }
   } catch (e) {}
 
   // 2) Versão + sinal de update pendente
-  var APP_VERSION = '2026.11.11a';
+  var APP_VERSION = '2026.11.13a';
   window.APP_VERSION = APP_VERSION;
 
   var storedVersion = null;

@@ -1224,13 +1224,16 @@ function boasVindas() {
   if (meta) meta.setAttribute('content', '#00A97A');
   w.style.display = 'flex';
   if (temNome) {
-    w.classList.add('auto');
+    // O tempo só começa a contar quando as fontes/ícones estão prontos: assim o layout termina de montar
+    // antes de a welcome screen sair (4,2 s, um pouco mais que antes).
     welcomeIniciarTimer = function () {
       welcomeIniciarTimer = null;
       if (welcomeTimer) return;
-      welcomeTimer = setTimeout(goToGreeting, 3600);
+      w.classList.add('auto');
+      welcomeTimer = setTimeout(goToGreeting, 4200);
     };
-    welcomeIniciarTimer();
+    if (document.documentElement.classList.contains('fonts-ok')) welcomeIniciarTimer();
+    else window.addEventListener('braun-fonts', function () { if (welcomeIniciarTimer) welcomeIniciarTimer(); }, { once: true });
   }
 }
 
@@ -1958,6 +1961,7 @@ function iniciarApp() {
   appIniciado = true;
   aplicarModoFeriados();
   safeRun('prepararModais', prepararModais);
+  setTimeout(function () { document.documentElement.classList.add('fonts-ok'); }, 6000);   // reserva: nunca deixa os ícones escondidos
   safeRun('bindCartilhas', bindCartilhas);
   safeRun('prepararRamais', prepararRamais);
   safeRun('offsetCalendario', function () {
